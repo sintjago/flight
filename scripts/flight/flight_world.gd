@@ -57,7 +57,9 @@ var plane_vy := 0.0
 var plane_rot := 0.0
 var pipes: Array[Dictionary] = []
 var spawned := 0
-var difficulty := "medium"
+var difficulty := "easy"
+var difficulty_level := 2
+var selected_topic_groups: Array[String] = ["addition_subtraction", "multiplication_division", "fractions", "number_sense"]
 var current_question: Dictionary = {}
 var failure_reason := ""
 var failure_answer := ""
@@ -117,9 +119,10 @@ func _tuned(id: String, fallback: float) -> float:
 func load_tuning() -> void:
 	gravity = _tuned("gameplay.physics.gravity", 1500.0)
 	flap_speed = _tuned("gameplay.physics.flap_speed", 430.0)
-	var speed_offset := -45.0 if difficulty == "easy" else (30.0 if difficulty == "hard" else 0.0)
-	var gap_offset := 14.0 if difficulty == "easy" else (-14.0 if difficulty == "hard" else 0.0)
-	var spacing_offset := 120.0 if difficulty == "easy" else (60.0 if difficulty == "medium" else 0.0)
+	var intensity := float(difficulty_level) / 10.0
+	var speed_offset := lerpf(-55.0, 35.0, intensity)
+	var gap_offset := lerpf(18.0, -18.0, intensity)
+	var spacing_offset := lerpf(140.0, 0.0, intensity)
 	base_speed = _tuned("gameplay.course.scroll_speed", 230.0) + speed_offset
 	base_gap = _tuned("gameplay.course.gap_size", 180.0) + gap_offset
 	pipe_spacing = _tuned("gameplay.course.pipe_spacing", 420.0) + spacing_offset
@@ -154,10 +157,20 @@ func reset_ready() -> void:
 	queue_redraw()
 
 
-func set_difficulty(mode: String) -> void:
-	difficulty = mode if mode in MathQuestion.DIFFICULTIES else "medium"
+func set_difficulty(value: Variant) -> void:
+	difficulty_level = MathQuestion.difficulty_level_for(value)
+	difficulty = MathQuestion.band_for_level(difficulty_level)
 	load_tuning()
 	queue_redraw()
+
+
+func set_selected_topics(groups: Array) -> void:
+	selected_topic_groups.clear()
+	for group: Variant in groups:
+		if str(group) in MathQuestion.TOPIC_GROUPS and str(group) not in selected_topic_groups:
+			selected_topic_groups.append(str(group))
+	if selected_topic_groups.is_empty():
+		selected_topic_groups = MathQuestion.available_topic_groups(difficulty_level)
 
 
 ## Flap input. The first flap of a fresh run starts it.
@@ -202,7 +215,7 @@ func _spawn_gate(x: float) -> void:
 	var gap := current_gap(spawned)
 	var upper_y := rng.randf_range(235.0, 250.0)
 	var lower_y := upper_y + LANE_SEPARATION
-	var question: Dictionary = MathQuestion.generate(rng, difficulty)
+	var question: Dictionary = MathQuestion.generate(rng, difficulty_level, selected_topic_groups)
 	pipes.append({
 		"x": x,
 		"upper_y": upper_y,

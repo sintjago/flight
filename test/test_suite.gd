@@ -43,7 +43,7 @@ func _test_autoloads_and_schema() -> void:
 	tuning.call("reset_defaults")
 	_check(is_equal_approx(float(tuning.call("get_active_value", "gameplay.physics.gravity")), 1500.0), "default gravity")
 	_check(is_equal_approx(float(tuning.call("get_active_value", "gameplay.course.gap_size")), 180.0), "default answer gap size")
-	_check(get_tree().root.get_node("I18n").call("t", "over.restart") == "FLY AGAIN", "English strings resolve")
+	_check(get_tree().root.get_node("I18n").call("t", "over.restart") == "TRY AGAIN", "English strings resolve")
 	for setting: Dictionary in tuning.call("get_settings"):
 		_check(get_tree().root.get_node("I18n").call("t", str(setting.label_key)) != str(setting.label_key), "label for %s" % setting.id)
 
@@ -84,8 +84,13 @@ func _test_math_questions() -> void:
 			_check(I18n.t(str(question.hint_key)) != str(question.hint_key), "%s prompt has a translated learning hint" % topic)
 			_check(int(question.value_den) > 0, "%s answer has a valid denominator" % mode)
 			_validate_math_question(question, mode)
-		for topic: String in required_topics[mode]:
-			_check(seen_topics.has(topic), "%s curriculum includes %s" % [mode, topic])
+		for required_topic: String in required_topics[mode]:
+			_check(seen_topics.has(required_topic), "%s curriculum includes %s" % [mode, required_topic])
+	for level in range(0, 11):
+		for group: String in MathQuestion.available_topic_groups(level):
+			var filtered: Dictionary = MathQuestion.generate(rng, level, [group])
+			_check(str(filtered.topic_group) == group, "level %d question follows the selected %s checkbox" % [level, group])
+			_check(int(filtered.difficulty_level) == level, "question records the exact selected slider value")
 
 
 func _validate_math_question(question: Dictionary, mode: String) -> void:
@@ -241,7 +246,7 @@ func _test_simulation() -> void:
 	var initial_question: Dictionary = world.get("current_question")
 	var initial_gates: Array = world.get("pipes")
 	var initial_gate: Dictionary = initial_gates[0]
-	_check(str(initial_question.expression).contains("= ?"), "a new run creates an active equation")
+	_check(str(initial_question.expression).contains("?"), "a new run creates an active math prompt")
 	_check(initial_gate.has("upper_answer") and initial_gate.has("lower_answer"), "every obstacle shows two answers")
 	world.set("plane_y", 240.0)
 	_set_pipes(world, [_make_gate(FlightWorld.PLANE_X + 120.0, 240.0, 190.0, "upper")])
@@ -347,10 +352,18 @@ func _test_runtime_scene() -> void:
 	await get_tree().process_frame
 	_check(bool((main.get("_title_screen") as Control).visible), "title screen shows on boot")
 	_check(main.get("_state") == "title", "game boots into the title state")
-	var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
-	_check(difficulty_buttons.has("easy") and difficulty_buttons.has("medium") and difficulty_buttons.has("hard"), "title offers Easy, Medium, and Hard")
-	main.call("_select_difficulty", "hard")
-	_check(main.get("_selected_difficulty") == "hard", "selected math difficulty is remembered")
+	var slider: HSlider = main.get("_difficulty_slider")
+	_check(slider != null and slider.min_value == 0.0 and slider.max_value == 10.0 and slider.step == 1.0, "title offers the requested 0–10 difficulty slider")
+	var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
+	_check(topic_checkboxes.size() == MathQuestion.TOPIC_GROUPS.size(), "title shows checkboxes for math content categories")
+	slider.value = 7.0
+	_check(int(main.get("_selected_level")) == 7 and str(main.get("_selected_difficulty")) == "hard", "slider selects an exact high-school difficulty level")
+	var algebra_checkbox: CheckBox = topic_checkboxes["algebra"]
+	_check(not algebra_checkbox.disabled, "high-school topics unlock at the Hard band")
+	main.call("_on_topic_toggled", true, "algebra")
+	algebra_checkbox.set_pressed_no_signal(true)
+	var selected_groups: Array = main.call("_selected_topic_groups")
+	_check("algebra" in selected_groups and "fractions" in selected_groups, "multiple math topics can be selected together")
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
@@ -359,11 +372,13 @@ func _test_runtime_scene() -> void:
 	_check(main.get("_state") == "playing", "a tap on the title starts flying")
 	_check(not bool((main.get("_title_screen") as Control).visible), "title hides once flying")
 	_check((main.get("_world") as Node2D).get("state") == "playing", "world is running after the first tap")
-	_check((main.get("_world") as Node2D).get("difficulty") == "hard", "selected difficulty reaches the flight world")
+	_check((main.get("_world") as Node2D).get("difficulty") == "hard", "selected difficulty band reaches the flight world")
+	_check(int((main.get("_world") as Node2D).get("difficulty_level")) == 7, "exact slider value reaches the flight world")
+	_check("algebra" in (main.get("_world") as Node2D).get("selected_topic_groups"), "selected content reaches the question generator")
 	_check(bool((main.get("_question_bar") as Control).visible), "equation bar appears during flight")
 	_check(str((main.get("_question_label") as Label).text).contains("?"), "equation bar shows the active question")
 	_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "equation bar shows a learning hint")
-	_check(str((main.get("_question_difficulty_label") as Label).text).begins_with("HARD · "), "question bar identifies the selected level and topic")
+	_check(str((main.get("_question_difficulty_label") as Label).text).begins_with("LEVEL 7/10 · HARD · "), "question bar identifies the exact level and topic")
 	main.call("_set_paused", true)
 	_check(get_tree().paused and main.get("_state") == "paused", "pause freezes the tree")
 	main.call("_set_paused", false)
@@ -372,10 +387,28 @@ func _test_runtime_scene() -> void:
 	world.set("plane_y", FlightWorld.GROUND_Y)
 	world.call("step", 1.0 / 60.0)
 	_check(main.get("_state") == "over", "crash moves the game to the over state")
-	main.set("_over_unlock_ms", 0)
-	main.call("_unhandled_input", click)
+	await get_tree().create_timer(0.8).timeout
+	_check(bool((main.get("_over_screen") as Control).visible), "crash screen presents the recovery choices")
+	_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "crash screen has Try Again, Lower Difficulty, and Home actions")
+	(main.get("_over_easier_button") as Button).emit_signal("pressed")
 	await get_tree().process_frame
-	_check(main.get("_state") == "playing" and int(world.get("score")) == 0, "one tap restarts a fresh run")
+	_check(main.get("_state") == "playing" and int(main.get("_selected_level")) == 6 and int(world.get("score")) == 0, "Lower Difficulty decreases one step and starts a fresh run")
+	world.set("plane_y", FlightWorld.GROUND_Y)
+	world.call("step", 1.0 / 60.0)
+	await get_tree().create_timer(0.8).timeout
+	(main.get("_over_home_button") as Button).emit_signal("pressed")
+	await get_tree().process_frame
+	_check(main.get("_state") == "title" and bool((main.get("_title_screen") as Control).visible), "Home returns to content selection")
+	_check(bool(algebra_checkbox.button_pressed), "Home preserves checked content for later selection")
+	slider.value = 0.0
+	main.call("_begin_from_title")
+	world.set("plane_y", FlightWorld.GROUND_Y)
+	world.call("step", 1.0 / 60.0)
+	await get_tree().create_timer(0.8).timeout
+	_check((main.get("_over_easier_button") as Button).disabled, "Lower Difficulty is disabled at level zero")
+	(main.get("_over_again_button") as Button).emit_signal("pressed")
+	await get_tree().process_frame
+	_check(main.get("_state") == "playing" and int(main.get("_selected_level")) == 0, "Try Again restarts at the same slider level")
 	get_tree().paused = false
 	main.queue_free()
 	await get_tree().process_frame

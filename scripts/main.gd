@@ -31,10 +31,18 @@ var _title_card: PanelContainer
 var _title_prompt: Label
 var _title_best: Label
 var _difficulty_description: Label
-var _difficulty_buttons: Dictionary = {}
-var _difficulty_group: ButtonGroup
+var _difficulty_slider: HSlider
+var _difficulty_value_label: Label
+var _topic_checkboxes: Dictionary = {}
+var _topic_selection: Dictionary = {
+	"addition_subtraction": true,
+	"multiplication_division": true,
+	"fractions": true,
+	"number_sense": true,
+}
 var _start_button: Button
-var _selected_difficulty := "medium"
+var _selected_level := 2
+var _selected_difficulty := "easy"
 var _over_screen: Control
 var _over_card: PanelContainer
 var _over_title_label: Label
@@ -43,6 +51,9 @@ var _over_best: Label
 var _over_feedback: Label
 var _over_stamp: Label
 var _over_note: Label
+var _over_again_button: Button
+var _over_easier_button: Button
+var _over_home_button: Button
 var _pause_screen: Control
 var _sound_button: Button
 var _over_unlock_ms := 0
@@ -260,77 +271,137 @@ func _build_question_bar() -> void:
 
 func _build_title() -> void:
 	_title_screen = _full_rect_control("TitleScreen")
-	_title_card = _make_card(Vector2(820, 470), 265.0)
-	_title_card.rotation_degrees = -1.2
+	_title_card = _make_card(Vector2(1080, 620), 360.0)
 	_title_screen.add_child(_title_card)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 4)
+	box.add_theme_constant_override("separation", 2)
 	_title_card.add_child(box)
-	var title := _make_label(I18n.t("game.title").to_upper(), 76, GRAPHITE, true)
+	var title := _make_label(I18n.t("game.title").to_upper(), 64, GRAPHITE, true)
 	title.add_theme_color_override("font_shadow_color", Color(BLUE_PENCIL, 0.55))
 	title.add_theme_constant_override("shadow_offset_x", 4)
 	title.add_theme_constant_override("shadow_offset_y", 4)
 	box.add_child(title)
-	box.add_child(_make_label(I18n.t("title.tagline"), 24, Color(GRAPHITE, 0.85)))
-	box.add_child(_make_label(I18n.t("title.howto"), 18, Color(GRAPHITE, 0.72)))
+	box.add_child(_make_label(I18n.t("title.tagline"), 22, Color(GRAPHITE, 0.85)))
+	box.add_child(_make_label(I18n.t("title.howto"), 16, Color(GRAPHITE, 0.72)))
 	box.add_child(_make_label(I18n.t("title.choose_difficulty"), 18, BLUE_PENCIL.darkened(0.15), true))
-	_difficulty_group = ButtonGroup.new()
-	_difficulty_group.allow_unpress = false
-	var choices := HBoxContainer.new()
-	choices.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	choices.alignment = BoxContainer.ALIGNMENT_CENTER
-	choices.add_theme_constant_override("separation", 14)
-	box.add_child(choices)
-	for mode: String in MathQuestion.DIFFICULTIES:
-		var button := _make_button(I18n.t("difficulty." + mode).to_upper(), 22, CARD)
-		button.custom_minimum_size = Vector2(180, 52)
-		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		button.toggle_mode = true
-		button.button_group = _difficulty_group
-		button.set_pressed_no_signal(mode == _selected_difficulty)
-		button.pressed.connect(_select_difficulty.bind(mode))
-		_difficulty_buttons[mode] = button
-		choices.add_child(button)
+	_difficulty_value_label = _make_label("", 21, GRAPHITE, true)
+	box.add_child(_difficulty_value_label)
+	var slider_row := HBoxContainer.new()
+	slider_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slider_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	slider_row.add_theme_constant_override("separation", 14)
+	box.add_child(slider_row)
+	slider_row.add_child(_make_label(I18n.t("title.slider_easy"), 15, BLUE_PENCIL.darkened(0.2), true))
+	_difficulty_slider = HSlider.new()
+	_difficulty_slider.name = "DifficultySlider"
+	_difficulty_slider.min_value = 0.0
+	_difficulty_slider.max_value = 10.0
+	_difficulty_slider.step = 1.0
+	_difficulty_slider.value = _selected_level
+	_difficulty_slider.custom_minimum_size = Vector2(650, 36)
+	_difficulty_slider.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_difficulty_slider.focus_mode = Control.FOCUS_ALL
+	_difficulty_slider.value_changed.connect(_on_difficulty_slider_changed)
+	slider_row.add_child(_difficulty_slider)
+	slider_row.add_child(_make_label(I18n.t("title.slider_hard"), 15, BLUE_PENCIL.darkened(0.2), true))
 	_difficulty_description = _make_label("", 16, Color(GRAPHITE, 0.72))
 	box.add_child(_difficulty_description)
+	box.add_child(_make_label(I18n.t("title.choose_content"), 18, BLUE_PENCIL.darkened(0.15), true))
+	box.add_child(_make_label(I18n.t("title.topic_unlocks"), 13, Color(GRAPHITE, 0.72)))
+	var topic_grid := GridContainer.new()
+	topic_grid.name = "TopicCheckboxes"
+	topic_grid.columns = 3
+	topic_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	topic_grid.add_theme_constant_override("h_separation", 20)
+	topic_grid.add_theme_constant_override("v_separation", 0)
+	box.add_child(topic_grid)
+	for group: String in MathQuestion.TOPIC_GROUPS:
+		var checkbox := CheckBox.new()
+		checkbox.name = "Topic_" + group
+		checkbox.text = I18n.t("topic_filter." + group)
+		checkbox.custom_minimum_size = Vector2(310, 34)
+		checkbox.add_theme_font_size_override("font_size", 18)
+		checkbox.add_theme_color_override("font_color", GRAPHITE)
+		checkbox.add_theme_color_override("font_hover_color", GRAPHITE)
+		checkbox.add_theme_color_override("font_pressed_color", GRAPHITE)
+		checkbox.add_theme_color_override("font_focus_color", GRAPHITE)
+		checkbox.add_theme_color_override("font_disabled_color", Color(GRAPHITE, 0.72))
+		checkbox.focus_mode = Control.FOCUS_ALL
+		checkbox.set_pressed_no_signal(bool(_topic_selection.get(group, false)))
+		checkbox.toggled.connect(_on_topic_toggled.bind(group))
+		_topic_checkboxes[group] = checkbox
+		topic_grid.add_child(checkbox)
 	_start_button = _make_button(I18n.t("title.start"), 25, SAGE)
 	_start_button.custom_minimum_size = Vector2(260, 56)
 	_start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_start_button.pressed.connect(_begin_from_title)
 	box.add_child(_start_button)
-	_title_prompt = _make_label(I18n.t("title.prompt"), 16, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
+	_title_prompt = _make_label(I18n.t("title.prompt"), 14, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
 	box.add_child(_title_prompt)
 	_title_best = _make_label("", 20, Color(GRAPHITE, 0.8))
 	box.add_child(_title_best)
-	_select_difficulty(_selected_difficulty)
+	_set_difficulty_level(_selected_level)
 
 
-func _refresh_difficulty_buttons() -> void:
-	for mode: String in _difficulty_buttons:
-		var button: Button = _difficulty_buttons[mode]
-		var selected := mode == _selected_difficulty
-		var fill := SAGE if selected else Color(0.94, 0.92, 0.86)
-		for slot: String in ["normal", "hover", "pressed", "focus"]:
-			var style := StyleBoxFlat.new()
-			style.bg_color = fill.lightened(0.08) if slot == "hover" else fill.darkened(0.1) if slot == "pressed" else fill
-			style.border_color = BLUE_PENCIL if slot == "focus" or selected else GRAPHITE
-			style.set_border_width_all(4 if slot == "focus" or selected else 2)
-			style.set_corner_radius_all(12)
-			style.shadow_offset = Vector2(2, 3) if slot != "pressed" else Vector2(1, 1)
-			button.add_theme_stylebox_override(slot, style)
+func _on_difficulty_slider_changed(value: float) -> void:
+	_set_difficulty_level(roundi(value))
+
+
+func _set_difficulty_level(level: int) -> void:
+	_selected_level = clampi(level, 0, 10)
+	_selected_difficulty = MathQuestion.band_for_level(_selected_level)
+	if _difficulty_slider != null:
+		_difficulty_slider.set_value_no_signal(_selected_level)
+	if _difficulty_value_label != null:
+		_difficulty_value_label.text = I18n.t("title.level_value", {
+			"level": _selected_level,
+			"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
+		})
+	if _difficulty_description != null:
+		_difficulty_description.text = I18n.t("difficulty." + _selected_difficulty + ".description")
+	_refresh_topic_checkboxes()
+	_update_title_best()
 
 
 func _select_difficulty(mode: String) -> void:
-	if mode not in MathQuestion.DIFFICULTIES:
-		return
-	_selected_difficulty = mode
-	_difficulty_description.text = I18n.t("difficulty." + mode + ".description")
-	for key: String in _difficulty_buttons:
-		(_difficulty_buttons[key] as Button).set_pressed_no_signal(key == mode)
-	_refresh_difficulty_buttons()
-	_update_title_best()
+	_set_difficulty_level(MathQuestion.difficulty_level_for(mode))
+
+
+func _refresh_topic_checkboxes() -> void:
+	var available := MathQuestion.available_topic_groups(_selected_level)
+	var has_active_selection := false
+	for group: String in available:
+		has_active_selection = has_active_selection or bool(_topic_selection.get(group, false))
+	if not has_active_selection and not available.is_empty():
+		for group: String in available:
+			_topic_selection[group] = true
+	for group: String in _topic_checkboxes:
+		var checkbox: CheckBox = _topic_checkboxes[group]
+		checkbox.disabled = group not in available
+		checkbox.set_pressed_no_signal(bool(_topic_selection.get(group, false)))
+		var locked_key := "title.topic_locked_easy" if group in MathQuestion.EASY_TOPIC_GROUPS else ("title.topic_locked_medium" if group in MathQuestion.MEDIUM_TOPIC_GROUPS else "title.topic_locked_hard")
+		checkbox.tooltip_text = "" if group in available else I18n.t(locked_key)
+
+
+func _on_topic_toggled(checked: bool, group: String) -> void:
+	_topic_selection[group] = checked
+	var available := MathQuestion.available_topic_groups(_selected_level)
+	var has_active_selection := false
+	for candidate: String in available:
+		has_active_selection = has_active_selection or bool(_topic_selection.get(candidate, false))
+	if not has_active_selection and _topic_checkboxes.has(group):
+		_topic_selection[group] = true
+		(_topic_checkboxes[group] as CheckBox).set_pressed_no_signal(true)
+
+
+func _selected_topic_groups() -> Array[String]:
+	var selected: Array[String] = []
+	for group: String in MathQuestion.available_topic_groups(_selected_level):
+		if bool(_topic_selection.get(group, false)):
+			selected.append(group)
+	return selected
 
 
 func _update_title_best() -> void:
@@ -346,47 +417,55 @@ func _update_title_best() -> void:
 
 func _build_over() -> void:
 	_over_screen = _full_rect_control("GameOverScreen")
-	_over_card = _make_card(Vector2(600, 420), 320.0)
+	_over_card = _make_card(Vector2(900, 490), 350.0)
 	_over_screen.add_child(_over_card)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 3)
+	box.add_theme_constant_override("separation", 2)
 	_over_card.add_child(box)
-	_over_title_label = _make_label(I18n.t("over.title").to_upper(), 50, RED_PENCIL, true)
+	_over_title_label = _make_label(I18n.t("over.title").to_upper(), 44, RED_PENCIL, true)
 	box.add_child(_over_title_label)
-	box.add_child(_make_label(I18n.t("over.score"), 22, Color(GRAPHITE, 0.8)))
-	_over_score = _make_label("0", 96, GRAPHITE, true)
+	box.add_child(_make_label(I18n.t("over.score"), 20, Color(GRAPHITE, 0.8)))
+	_over_score = _make_label("0", 82, GRAPHITE, true)
 	box.add_child(_over_score)
 	_over_feedback = _make_label("", 22, RED_PENCIL)
 	_over_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_over_feedback)
-	_over_best = _make_label("", 24, Color(GRAPHITE, 0.85))
+	_over_best = _make_label("", 21, Color(GRAPHITE, 0.85))
 	box.add_child(_over_best)
-	_over_note = _make_label(I18n.t("over.practice"), 16, RED_PENCIL)
+	_over_note = _make_label(I18n.t("over.practice"), 14, RED_PENCIL)
 	box.add_child(_over_note)
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(0, 8)
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(spacer)
-	var again := _make_button(I18n.t("over.restart"), 30, SAGE)
+	var actions := HBoxContainer.new()
+	actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation", 12)
+	box.add_child(actions)
+	var again := _make_button(I18n.t("over.restart"), 22, SAGE)
 	again.name = "RestartButton"
-	again.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	again.custom_minimum_size = Vector2(220, 58)
 	again.pressed.connect(func() -> void: _restart())
-	box.add_child(again)
-	box.add_child(_make_label(I18n.t("over.hint"), 16, Color(GRAPHITE, 0.6)))
+	actions.add_child(again)
+	_over_easier_button = _make_button(I18n.t("over.lower_retry"), 19, Color(0.98, 0.86, 0.5))
+	_over_easier_button.name = "LowerDifficultyButton"
+	_over_easier_button.custom_minimum_size = Vector2(280, 58)
+	_over_easier_button.pressed.connect(_lower_difficulty_and_restart)
+	actions.add_child(_over_easier_button)
+	_over_home_button = _make_button(I18n.t("over.home"), 22, Color(0.78, 0.86, 0.96))
+	_over_home_button.name = "HomeButton"
+	_over_home_button.custom_minimum_size = Vector2(190, 58)
+	_over_home_button.pressed.connect(_return_to_home)
+	actions.add_child(_over_home_button)
+	box.add_child(_make_label(I18n.t("over.choose_action"), 15, Color(GRAPHITE, 0.6)))
 	_over_stamp = _make_label(I18n.t("over.new_best"), 34, RED_PENCIL, true)
 	_over_stamp.rotation_degrees = 12.0
-	_over_stamp.position = Vector2(_over_card.position.x + 330, _over_card.position.y + 118)
+	_over_stamp.position = Vector2(_over_card.position.x + 480, _over_card.position.y + 135)
 	_over_stamp.size = Vector2(220, 50)
 	_over_stamp.pivot_offset = Vector2(110, 25)
 	_over_stamp.add_theme_color_override("font_outline_color", CARD)
 	_over_stamp.add_theme_constant_override("outline_size", 6)
 	_over_screen.add_child(_over_stamp)
 	_over_again_button = again
-
-
-var _over_again_button: Button
 
 
 func _build_pause() -> void:
@@ -441,6 +520,9 @@ func _best_score(difficulty: String = "") -> int:
 
 func _show_title() -> void:
 	_state = "title"
+	get_tree().paused = false
+	_world.call("set_difficulty", _selected_level)
+	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("reset_ready")
 	_title_screen.visible = true
 	_over_screen.visible = false
@@ -455,13 +537,15 @@ func _show_title() -> void:
 
 ## Starts a fresh run in the "ready" pose; the first flap launches it.
 func _start_new_run() -> void:
-	_world.call("set_difficulty", _selected_difficulty)
+	_world.call("set_difficulty", _selected_level)
+	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("reset_ready")
 	_title_screen.visible = false
 	_over_screen.visible = false
 	_pause_screen.visible = false
 	_question_bar.visible = true
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
+		"level": _selected_level,
 		"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
 		"topic": I18n.t("topic.ready").to_upper(),
 	})
@@ -496,6 +580,17 @@ func _restart() -> void:
 	_after_flap_start()
 
 
+func _lower_difficulty_and_restart() -> void:
+	if _selected_level <= 0:
+		return
+	_set_difficulty_level(_selected_level - 1)
+	_restart()
+
+
+func _return_to_home() -> void:
+	_show_title()
+
+
 func _restart_from_pause() -> void:
 	get_tree().paused = false
 	var audio := get_node_or_null("/root/AudioDirector")
@@ -525,8 +620,7 @@ func _flap_input() -> void:
 			if was_ready:
 				_after_flap_start()
 		"over":
-			if Time.get_ticks_msec() >= _over_unlock_ms:
-				_restart()
+			pass
 
 
 func _set_paused(paused: bool) -> void:
@@ -577,6 +671,7 @@ func _on_flapped() -> void:
 func _on_question_changed(question: Dictionary) -> void:
 	var expression := str(question.get("expression", "= ?"))
 	var difficulty := str(question.get("difficulty", "medium"))
+	var level := int(question.get("difficulty_level", _selected_level))
 	var topic := str(question.get("topic", "addition"))
 	_question_label.text = expression
 	var equation_size := 40
@@ -588,6 +683,7 @@ func _on_question_changed(question: Dictionary) -> void:
 		equation_size = 25
 	_question_label.add_theme_font_size_override("font_size", equation_size)
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
+		"level": level,
 		"difficulty": I18n.t("difficulty." + difficulty).to_upper(),
 		"topic": I18n.t("topic." + topic).to_upper(),
 	})
@@ -647,6 +743,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	}) if wrong_answer else ""
 	_over_stamp.visible = is_best
 	_over_note.visible = _last_run_practice
+	_over_easier_button.disabled = _selected_level == 0
 	await get_tree().create_timer(0.7).timeout
 	if _state != "over":
 		return

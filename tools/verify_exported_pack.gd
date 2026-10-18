@@ -19,10 +19,13 @@ func _run() -> void:
 		await process_frame
 		_check(bool((main.get("_title_screen") as Control).visible), "pack boots to title")
 		_check(not main.has_method("_open_tuning"), "release tuning entry point excluded")
-		_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
-		_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
-		var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
-		_check(difficulty_buttons.has("easy") and difficulty_buttons.has("medium") and difficulty_buttons.has("hard"), "pack includes all math levels")
+			_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
+			_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
+			var slider: HSlider = main.get("_difficulty_slider")
+			_check(slider != null and slider.min_value == 0.0 and slider.max_value == 10.0 and slider.step == 1.0, "pack includes the 0–10 difficulty slider")
+			var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
+			_check(topic_checkboxes.size() == 9, "pack includes all selectable math-topic checkboxes")
+			_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
 		for path: String in [
 			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
 			"res://assets/paperglide/pipe_body.png", "res://assets/paperglide/notebook.jpg",
