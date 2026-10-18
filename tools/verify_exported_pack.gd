@@ -36,7 +36,10 @@ func _run() -> void:
 		await process_frame
 		_check(main.get("_state") == "playing", "pack starts flying on tap")
 		_check(bool((main.get("_question_bar") as Control).visible), "pack shows the equation bar")
-		_check(str((main.get("_question_label") as Label).text).contains("= ?"), "pack generates a math equation")
+		_check(str((main.get("_question_label") as Label).text).contains("?"), "pack generates a math question")
+		_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "pack shows a learning hint")
+		var active_question: Dictionary = (main.get("_world") as Node2D).get("current_question")
+		_check(active_question.has("topic") and active_question.has("hint_key"), "pack question includes topic and teaching metadata")
 		var gates: Array = (main.get("_world") as Node2D).get("pipes")
 		_check(not gates.is_empty() and gates[0].has("upper_answer") and gates[0].has("lower_answer"), "pack includes two answer choices")
 		var audio := root.get_node("AudioDirector")

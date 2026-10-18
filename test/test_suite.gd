@@ -62,32 +62,119 @@ func _test_geometry() -> void:
 func _test_math_questions() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 918273
+	var required_topics: Dictionary = {
+		"easy": ["addition", "subtraction", "multiplication", "division", "fractions", "place_value", "number_patterns"],
+		"medium": ["addition", "subtraction", "multiplication", "division", "fractions", "decimals", "percentages", "ratios", "order_of_operations"],
+		"hard": ["integers", "fractions", "algebra", "quadratics", "exponents", "roots", "geometry", "trigonometry"],
+	}
 	for mode: String in MathQuestion.DIFFICULTIES:
-		var seen_operators: Dictionary = {}
-		for _i in 60:
+		var seen_topics: Dictionary = {}
+		for _i in 180:
 			var question: Dictionary = MathQuestion.generate(rng, mode)
+			var answers: Array[String] = [str(question.upper_answer), str(question.lower_answer)]
+			var topic := str(question.topic)
+			seen_topics[topic] = true
+			_check(str(question.difficulty) == mode, "%s prompt keeps its selected level" % mode)
+			_check(str(question.expression).contains("?"), "%s prompt shows a missing answer" % mode)
+			_check(answers[0] != answers[1], "%s gate has two different answers" % mode)
+			_check(answers.count(str(question.answer)) == 1, "%s gate has exactly one correct answer" % mode)
+			var correct_option := str(question.upper_answer) if question.correct_lane == "upper" else str(question.lower_answer)
+			_check(correct_option == str(question.answer), "%s correct lane matches the answer" % mode)
+			_check(I18n.t("topic." + topic) != "topic." + topic, "%s topic has a learner-facing label" % topic)
+			_check(I18n.t(str(question.hint_key)) != str(question.hint_key), "%s prompt has a translated learning hint" % topic)
+			_check(int(question.value_den) > 0, "%s answer has a valid denominator" % mode)
+			_validate_math_question(question, mode)
+		for topic: String in required_topics[mode]:
+			_check(seen_topics.has(topic), "%s curriculum includes %s" % [mode, topic])
+
+
+func _validate_math_question(question: Dictionary, mode: String) -> void:
+	var kind := str(question.kind)
+	var topic := str(question.topic)
+	var answer_text := str(question.answer)
+	match kind:
+		"integer_operation":
+			var a := int(question.a)
+			var b := int(question.b)
 			var expected := 0
 			match str(question.operator):
 				"+":
-					expected = int(question.a) + int(question.b)
+					expected = a + b
 				"-":
-					expected = int(question.a) - int(question.b)
+					expected = a - b
 				"×":
-					expected = int(question.a) * int(question.b)
+					expected = a * b
 				"÷":
-					_check(int(question.a) % int(question.b) == 0, "hard division is exact")
-					expected = int(int(question.a) / int(question.b))
-			seen_operators[str(question.operator)] = true
-			var answers: Array[int] = [int(question.upper_answer), int(question.lower_answer)]
-			_check(str(question.expression).contains("= ?"), "%s equation has a visible blank" % mode)
-			_check(int(question.answer) == expected, "%s equation answer is arithmetically correct" % mode)
-			_check(answers[0] != answers[1], "%s gate has two different answers" % mode)
-			_check(answers.count(int(question.answer)) == 1, "%s gate has exactly one correct answer" % mode)
-			_check(answers[0 if question.correct_lane == "upper" else 1] == int(question.answer), "%s correct lane matches the answer" % mode)
-		var required_operators := ["+", "-"] if mode == "easy" else (["+", "-", "×"] if mode == "medium" else ["+", "-", "×", "÷"])
-		for operator: String in required_operators:
-			_check(seen_operators.has(operator), "%s mode includes %s problems" % [mode, operator])
-
+					_check(b != 0 and a % b == 0, "%s division prompt is exact" % mode)
+					expected = int(a / b)
+			_check(answer_text == str(expected), "%s arithmetic answer is correct" % topic)
+			if mode == "easy" and topic in ["addition", "subtraction"]:
+				_check(a <= 100 and b <= 100 and expected >= 0 and expected <= 100, "Easy addition/subtraction stays within 100")
+			if mode == "easy" and topic == "multiplication":
+				_check(a <= 10 and b <= 10 and expected <= 100, "Easy multiplication stays within 10×10 and product 100")
+			if mode == "easy" and topic == "division":
+				_check(a <= 100 and b <= 10 and expected <= 10, "Easy division uses facts within 100")
+		"fraction_of":
+			var expected_fraction := int(question.numerator) * int(question.whole)
+			_check(expected_fraction % int(question.denominator) == 0, "Easy fraction-of prompts have whole-number results")
+			_check(answer_text == str(int(expected_fraction / int(question.denominator))), "fraction-of answer is correct")
+			_check(int(question.whole) <= 80 and int(question.denominator) in [2, 4], "Easy fractions use familiar halves and quarters")
+		"fraction_compare":
+			var left_num := int(question.left_num)
+			var left_den := int(question.left_den)
+			var right_num := int(question.right_num)
+			var right_den := int(question.right_den)
+			var choose_left := left_num * right_den > right_num * left_den
+			var expected_fraction := MathQuestion._format_fraction(left_num, left_den) if choose_left else MathQuestion._format_fraction(right_num, right_den)
+			_check(answer_text == expected_fraction, "fraction comparison selects the larger value")
+			_check(maxi(left_den, right_den) <= 4, "Easy fraction comparison uses small denominators")
+		"place_value":
+			_check(int(question.a) >= 10 and int(question.a) <= 99 and answer_text == str(int(int(question.a) / 10)), "place-value prompt identifies the tens digit")
+		"number_pattern":
+			_check(int(question.a) + 3 * int(question.b) == int(answer_text) and int(answer_text) <= 100, "Easy number pattern continues correctly within 100")
+		"fraction_operation":
+			var sign := 1 if str(question.operator) == "+" else -1
+			var numerator := int(question.left_num) * int(question.right_den) + sign * int(question.right_num) * int(question.left_den)
+			var denominator := int(question.left_den) * int(question.right_den)
+			_check(int(question.value_num) * denominator == numerator * int(question.value_den), "fraction operation is arithmetically correct")
+			_check(answer_text == MathQuestion._format_fraction(numerator, denominator), "fraction answer is shown in simplest form")
+		"decimal_operation":
+			var cents := int(question.a_cents) + int(question.b_cents) if str(question.operator) == "+" else int(question.a_cents) - int(question.b_cents)
+			_check(answer_text == MathQuestion._format_decimal_cents(cents), "decimal operation keeps place values aligned")
+		"percentage":
+			var result := int(question.amount) * int(question.percent)
+			_check(result % 100 == 0 and answer_text == str(int(result / 100)), "percentage-of-amount answer is exact")
+		"ratio":
+			_check(int(question.known) == int(question.a) * int(question.scale), "ratio known term uses the stated scale")
+			_check(answer_text == str(int(question.b) * int(question.scale)), "ratio answer preserves equivalence")
+		"order_operations":
+			var expected := int(question.a) + int(question.b) * int(question.c)
+			if int(question.form) == 1:
+				expected = (int(question.a) + int(question.b)) * int(question.c)
+			elif int(question.form) == 2:
+				expected = int(question.a) * int(question.b) - int(question.c)
+			_check(answer_text == str(expected), "medium order-of-operations answer is correct")
+		"linear_equation":
+			_check(int(question.coefficient) * int(question.solution) + int(question.intercept) == int(question.result), "linear equation balances")
+			_check(answer_text == str(int(question.solution)), "linear equation reveals the correct x")
+		"quadratic":
+			var root := int(answer_text)
+			_check(root * root - int(question.sum_roots) * root + int(question.product_roots) == 0, "quadratic answer is a root")
+			_check(root == mini(int(question.root_a), int(question.root_b)), "quadratic answer is the requested smaller root")
+		"exponent":
+			var power_result := int(pow(float(question.base), float(question.power))) + int(question.offset)
+			_check(answer_text == str(power_result), "exponent expression is correct")
+		"square_root":
+			_check(int(question.root) * int(question.root) == int(question.radicand), "square-root prompt uses a perfect square")
+			_check(answer_text == str(int(question.root) + int(question.offset)), "square-root answer is correct")
+		"pythagorean":
+			var c := int(answer_text)
+			_check(int(question.a) * int(question.a) + int(question.b) * int(question.b) == c * c, "right-triangle dimensions satisfy Pythagoras")
+			_check(c == int(question.hypotenuse), "geometry answer is the hypotenuse")
+		"trigonometry":
+			_check(answer_text in ["1/2", "sqrt(2)/2", "sqrt(3)/2", "1"], "trigonometry uses a standard exact-angle value")
+		_:
+			_check(false, "unrecognized generated question type: %s" % kind)
 
 func _make_world() -> Node2D:
 	var world: Node2D = FlightWorld.new()
@@ -97,7 +184,7 @@ func _make_world() -> Node2D:
 	_question_events = 0
 	world.connect("crashed", func(_total: int, _ground: bool) -> void: _crash_events += 1)
 	world.connect("scored", func(_total: int) -> void: _score_events += 1)
-	world.connect("question_changed", func(_expression: String, _difficulty: String) -> void: _question_events += 1)
+	world.connect("question_changed", func(_question: Dictionary) -> void: _question_events += 1)
 	return world
 
 
@@ -117,6 +204,8 @@ func _make_gate(x: float, upper_y: float, gap: float, correct_lane: String) -> D
 		"lower_y": upper_y + 250.0,
 		"gap": gap,
 		"expression": "6 × 7 = ?",
+		"topic": "multiplication",
+		"hint_key": "hint.multiplication",
 		"answer": answer,
 		"distractor": distractor,
 		"upper_answer": answer if correct_lane == "upper" else distractor,
@@ -192,11 +281,19 @@ func _test_simulation() -> void:
 	world = _make_world()
 	world.call("set_difficulty", "easy")
 	var easy_gap := float(world.get("base_gap"))
+	var easy_speed := float(world.get("base_speed"))
+	var easy_spacing := float(world.get("pipe_spacing"))
 	world.call("set_difficulty", "medium")
 	var medium_gap := float(world.get("base_gap"))
+	var medium_speed := float(world.get("base_speed"))
+	var medium_spacing := float(world.get("pipe_spacing"))
 	world.call("set_difficulty", "hard")
 	var hard_gap := float(world.get("base_gap"))
+	var hard_speed := float(world.get("base_speed"))
+	var hard_spacing := float(world.get("pipe_spacing"))
 	_check(easy_gap > medium_gap and medium_gap > hard_gap, "difficulty modes adjust answer-lane clearance")
+	_check(easy_speed < medium_speed and medium_speed < hard_speed, "math difficulty increases flight speed gradually")
+	_check(easy_spacing > medium_spacing and medium_spacing > hard_spacing, "Easy gives a child more time between answer gates")
 	_check(world.call("current_gap", 0) > world.call("current_gap", 12), "gaps tighten as the run goes on")
 	_check(world.call("current_gap", 500) >= float(world.get("base_gap")) * 0.84 - 0.01, "gap shrink has a floor")
 	world.queue_free()
@@ -264,7 +361,9 @@ func _test_runtime_scene() -> void:
 	_check((main.get("_world") as Node2D).get("state") == "playing", "world is running after the first tap")
 	_check((main.get("_world") as Node2D).get("difficulty") == "hard", "selected difficulty reaches the flight world")
 	_check(bool((main.get("_question_bar") as Control).visible), "equation bar appears during flight")
-	_check(str((main.get("_question_label") as Label).text).contains("= ?"), "equation bar shows the active equation")
+	_check(str((main.get("_question_label") as Label).text).contains("?"), "equation bar shows the active question")
+	_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "equation bar shows a learning hint")
+	_check(str((main.get("_question_difficulty_label") as Label).text).begins_with("HARD · "), "question bar identifies the selected level and topic")
 	main.call("_set_paused", true)
 	_check(get_tree().paused and main.get("_state") == "paused", "pause freezes the tree")
 	main.call("_set_paused", false)

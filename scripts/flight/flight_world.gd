@@ -5,7 +5,7 @@ extends Node2D
 signal flapped
 signal scored(total: int)
 signal crashed(total: int, hit_ground: bool)
-signal question_changed(expression: String, difficulty: String)
+signal question_changed(question: Dictionary)
 
 const VIEW_SIZE := Vector2(1280.0, 720.0)
 const GROUND_Y := 650.0
@@ -62,6 +62,7 @@ var current_question: Dictionary = {}
 var failure_reason := ""
 var failure_answer := ""
 var failure_question := ""
+var failure_hint_key := ""
 
 var gravity := 1500.0
 var flap_speed := 430.0
@@ -116,11 +117,12 @@ func _tuned(id: String, fallback: float) -> float:
 func load_tuning() -> void:
 	gravity = _tuned("gameplay.physics.gravity", 1500.0)
 	flap_speed = _tuned("gameplay.physics.flap_speed", 430.0)
-	var speed_offset := -10.0 if difficulty == "easy" else (10.0 if difficulty == "hard" else 0.0)
+	var speed_offset := -45.0 if difficulty == "easy" else (30.0 if difficulty == "hard" else 0.0)
 	var gap_offset := 14.0 if difficulty == "easy" else (-14.0 if difficulty == "hard" else 0.0)
+	var spacing_offset := 120.0 if difficulty == "easy" else (60.0 if difficulty == "medium" else 0.0)
 	base_speed = _tuned("gameplay.course.scroll_speed", 230.0) + speed_offset
 	base_gap = _tuned("gameplay.course.gap_size", 180.0) + gap_offset
-	pipe_spacing = _tuned("gameplay.course.pipe_spacing", 420.0)
+	pipe_spacing = _tuned("gameplay.course.pipe_spacing", 420.0) + spacing_offset
 	refresh_live_tuning()
 
 
@@ -138,6 +140,7 @@ func reset_ready() -> void:
 	failure_reason = ""
 	failure_answer = ""
 	failure_question = ""
+	failure_hint_key = ""
 	plane_y = READY_Y
 	plane_vy = 0.0
 	plane_rot = 0.0
@@ -182,6 +185,7 @@ func _start_run() -> void:
 	failure_reason = ""
 	failure_answer = ""
 	failure_question = ""
+	failure_hint_key = ""
 	_speed = base_speed
 	_spawn_gate(PLANE_X + FIRST_PIPE_DISTANCE)
 
@@ -207,13 +211,15 @@ func _spawn_gate(x: float) -> void:
 		"expression": question.expression,
 		"answer": question.answer,
 		"distractor": question.distractor,
+		"topic": question.topic,
+		"hint_key": question.hint_key,
 		"upper_answer": question.upper_answer,
 		"lower_answer": question.lower_answer,
 		"correct_lane": question.correct_lane,
 		"passed": false,
 	})
 	current_question = question.duplicate()
-	question_changed.emit(str(question.expression), difficulty)
+	question_changed.emit(current_question.duplicate(true))
 	spawned += 1
 
 
@@ -270,6 +276,7 @@ func _step_playing(delta: float) -> void:
 			if chosen_lane != str(gate.correct_lane):
 				failure_answer = str(gate.answer)
 				failure_question = str(gate.expression)
+				failure_hint_key = str(gate.hint_key)
 				_die(false, "wrong_answer")
 				return
 			score += 1
@@ -579,13 +586,18 @@ func _draw_pipe_arm(length: float) -> void:
 
 func _draw_answer_label(center_x: float, center_y: float, answer: Variant) -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	var plate := Rect2(center_x - 46.0, center_y - 21.0, 92.0, 42.0)
+	var plate := Rect2(center_x - 58.0, center_y - 21.0, 116.0, 42.0)
 	var shadow := Rect2(plate.position + Vector2(3.0, 3.0), plate.size)
+	var answer_text := str(answer)
+	var font_size := 28
+	if answer_text.length() > 4:
+		font_size = 24
+	if answer_text.length() > 6:
+		font_size = 20
 	draw_rect(shadow, Color(GRAPHITE, 0.18), true)
 	draw_rect(plate, PAPER, true)
 	draw_rect(plate, Color(BLUE_PENCIL, 0.95), false, 2.5)
-	draw_string(ThemeDB.fallback_font, Vector2(plate.position.x + 6.0, center_y + 10.0), str(answer), HORIZONTAL_ALIGNMENT_CENTER, plate.size.x - 12.0, 28, GRAPHITE)
-
+	draw_string(ThemeDB.fallback_font, Vector2(plate.position.x + 6.0, center_y + float(font_size) * 0.35), answer_text, HORIZONTAL_ALIGNMENT_CENTER, plate.size.x - 12.0, font_size, GRAPHITE)
 
 func _draw_ground() -> void:
 	var offset := -fposmod(_scroll, GROUND_PERIOD)

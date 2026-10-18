@@ -23,6 +23,7 @@ var _best_label: Label
 var _practice_label: Label
 var _question_bar: PanelContainer
 var _question_label: Label
+var _question_hint_label: Label
 var _question_difficulty_label: Label
 var _pause_button: Button
 var _title_screen: Control
@@ -234,12 +235,12 @@ func _build_hud() -> void:
 
 
 func _build_question_bar() -> void:
-	_question_bar = _make_card(Vector2(620, 112), 654.0)
+	_question_bar = _make_card(Vector2(760, 138), 646.0)
 	var panel_style := _card_style(BLUE_PENCIL)
 	panel_style.content_margin_left = 18
 	panel_style.content_margin_right = 18
-	panel_style.content_margin_top = 8
-	panel_style.content_margin_bottom = 8
+	panel_style.content_margin_top = 7
+	panel_style.content_margin_bottom = 7
 	panel_style.shadow_size = 2
 	_question_bar.add_theme_stylebox_override("panel", panel_style)
 	var box := VBoxContainer.new()
@@ -250,6 +251,8 @@ func _build_question_bar() -> void:
 	box.add_child(_question_difficulty_label)
 	_question_label = _make_label(I18n.t("hud.tap_to_launch"), 40, GRAPHITE, true)
 	box.add_child(_question_label)
+	_question_hint_label = _make_label(I18n.t("hud.question_wait"), 16, Color(GRAPHITE, 0.72))
+	box.add_child(_question_hint_label)
 	_question_bar.add_child(box)
 	_question_bar.visible = false
 	_hud.add_child(_question_bar)
@@ -458,8 +461,12 @@ func _start_new_run() -> void:
 	_over_screen.visible = false
 	_pause_screen.visible = false
 	_question_bar.visible = true
-	_question_difficulty_label.text = I18n.t("hud.question_mode", {"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper()})
+	_question_difficulty_label.text = I18n.t("hud.question_mode", {
+		"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
+		"topic": I18n.t("topic.ready").to_upper(),
+	})
 	_question_label.text = I18n.t("hud.tap_to_launch")
+	_question_hint_label.text = I18n.t("hud.question_wait")
 	_pause_button.visible = true
 	_score_label.visible = true
 	_score_label.text = "0"
@@ -567,11 +574,24 @@ func _on_flapped() -> void:
 		audio.call("play_cue", "player.action", randf_range(0.96, 1.06))
 
 
-func _on_question_changed(expression: String, difficulty: String) -> void:
+func _on_question_changed(question: Dictionary) -> void:
+	var expression := str(question.get("expression", "= ?"))
+	var difficulty := str(question.get("difficulty", "medium"))
+	var topic := str(question.get("topic", "addition"))
 	_question_label.text = expression
+	var equation_size := 40
+	if expression.length() > 22:
+		equation_size = 34
+	if expression.length() > 30:
+		equation_size = 29
+	if expression.length() > 40:
+		equation_size = 25
+	_question_label.add_theme_font_size_override("font_size", equation_size)
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
 		"difficulty": I18n.t("difficulty." + difficulty).to_upper(),
+		"topic": I18n.t("topic." + topic).to_upper(),
 	})
+	_question_hint_label.text = I18n.t(str(question.get("hint_key", "hint.addition")))
 
 
 func _on_scored(total: int) -> void:
@@ -618,9 +638,12 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 		"score": best,
 	})
 	_over_feedback.visible = wrong_answer
+	var hint_key := str(_world.get("failure_hint_key"))
+	var hint := I18n.t(hint_key) if not hint_key.is_empty() else ""
 	_over_feedback.text = I18n.t("over.wrong_answer", {
 		"answer": str(_world.get("failure_answer")),
 		"question": str(_world.get("failure_question")),
+		"hint": hint,
 	}) if wrong_answer else ""
 	_over_stamp.visible = is_best
 	_over_note.visible = _last_run_practice
