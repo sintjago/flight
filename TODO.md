@@ -10,11 +10,11 @@
 ## Topic teaching and feedback — complete
 - [x] “I want it to teach addition, substraction, multiplication, division, fractions and more.” Identify the active math topic, show a concise solving hint with each prompt, and include the answer plus hint when a wrong choice ends the run.
 
-## Continuous difficulty selection — open
-- [ ] Replace the three-button level selector with a clearly visible slider labeled from 0 to 10. Moving the slider changes both the math band (Easy / Medium / Hard) and flight challenge; display the selected value and band.
+## Continuous difficulty selection — complete
+- [x] Replace the three-button selector with a visible, labeled 0–10 slider. The selected value and Easy/Medium/Hard band are shown. Difficulty changes question band plus flight speed, lane clearance, and gate spacing.
 
-## Multi-topic content selection — open
-- [ ] Show visible checkboxes on the home screen so multiple math-content categories can be selected. Generated questions must come only from selected, level-appropriate content; indicate or prevent selecting topics not yet available at the chosen level, and keep at least one playable topic selected.
+## Multi-topic content selection — complete
+- [x] Show readable home-screen checkboxes for multiple math categories. Generated questions respect the selected, level-appropriate content. Topics unavailable at the chosen level are dimmed and labeled with their unlock level; at least one playable category stays selected.
 
-## Crash recovery choices — open
-- [ ] After a crash, show choices to try again, return to the homepage, or lower difficulty and retry. Lower Difficulty reduces the slider by one and starts another run; disable it at 0. Home returns to the selection screen without losing the current content choices.
+## Crash recovery choices — complete
+- [x] After a crash, show Try Again at the same settings, Lower Difficulty & Retry (decrease the slider by one and immediately start a fresh run), and Home. Disable the lower-difficulty action at level 0. Returning Home preserves the slider and topic selections.

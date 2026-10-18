@@ -15,10 +15,10 @@ func _run() -> void:
 	if packed != null:
 		var main := packed.instantiate()
 		root.add_child(main)
-		await process_frame
-		await process_frame
-		_check(bool((main.get("_title_screen") as Control).visible), "pack boots to title")
-		_check(not main.has_method("_open_tuning"), "release tuning entry point excluded")
+			await process_frame
+			await process_frame
+			_check(bool((main.get("_title_screen") as Control).visible), "pack boots to title")
+			_check(not main.has_method("_open_tuning"), "release tuning entry point excluded")
 			_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
 			_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
 			var slider: HSlider = main.get("_difficulty_slider")
@@ -26,7 +26,7 @@ func _run() -> void:
 			var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
 			_check(topic_checkboxes.size() == 9, "pack includes all selectable math-topic checkboxes")
 			_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
-		for path: String in [
+			for path: String in [
 			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
 			"res://assets/paperglide/pipe_body.png", "res://assets/paperglide/notebook.jpg",
 			"res://assets/paperglide/cloud0.png",

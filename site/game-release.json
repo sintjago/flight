@@ -3,7 +3,7 @@
   "engineVersion": "4.7.2.stable.official.ed1daf0bf",
   "inputs": {
     "objectFormat": "sha1",
-    "tree": "bcd1cc5d5b1ecd260321fd93422f79a8d66d6632",
+    "tree": "dd441649809c9a075291d1ff84e61beb43161bf3",
     "entries": [
       {
         "path": ".gitignore",
@@ -33,7 +33,7 @@
         "path": "TODO.md",
         "type": "file",
         "mode": "100644",
-        "object": "ef31f5f100649f1b6004eb3e93880d67cdf41464"
+        "object": "006c8aaa035327ef547884c414ee85b3bc51f187"
       },
       {
         "path": "assets.lock.json",
@@ -884,7 +884,7 @@
         "path": "tools/verify_exported_pack.gd",
         "type": "file",
         "mode": "100644",
-        "object": "684d5d31cb1cb91824da18f27cec1674ca3cb476"
+        "object": "89920760d232e3dceaede31767988fb965e4d13c"
       },
       {
         "path": "tools/verify_exported_pack.gd.uid",
@@ -907,7 +907,7 @@
     ]
   },
   "build": {
-    "snapshotId": "sha256:e137197978b887e8746d6a54eda0f4dd24e623065394cdbfe7166bac26dbfe37",
+    "snapshotId": "sha256:a159dced04cee8f1058c361b801d06a3d91f770aa06370feeb9d304d14eae0a2",
     "toolchain": {
       "engineVersion": "4.7.2.stable.official.ed1daf0bf",
       "engineDigest": "sha256:8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
@@ -920,7 +920,7 @@
     "profile": "release",
     "export": {
       "profile": "release",
-      "snapshotId": "sha256:e137197978b887e8746d6a54eda0f4dd24e623065394cdbfe7166bac26dbfe37",
+      "snapshotId": "sha256:a159dced04cee8f1058c361b801d06a3d91f770aa06370feeb9d304d14eae0a2",
       "files": {
         "THIRD_PARTY_NOTICES.txt": "sha256:c729a77bf07eb9745b2d89c3ce4ead3357438366f41743d2755ae35f98509cf9",
         "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
@@ -929,12 +929,12 @@
         "index.html": "sha256:864d76f95fcc5f3b98d4b3c9f580706734995501c1ff798ba89f42a26a496241",
         "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
         "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
-        "index.pck": "sha256:afb5df3559bf8d03b159dd1244c9489d78135776a631ef546e72bae6bd53a7a3",
+        "index.pck": "sha256:de7276a9867f3d98afc5c7301d891e72836dfd2a914240ccec8ba9cd53d92342",
         "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
         "index.wasm": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0",
         "open-source-licenses.html": "sha256:9215f5fdd50039a9b6f3d8f0271cbc21bbdf64b917fb118dd29c8a16b9974e00"
       },
-      "digest": "sha256:1e2ac6d6aca588f90275909b5ad9b2fe287ee3d48e4cf20fa5c6f956da12d78f"
+      "digest": "sha256:51a44bded15b5457fc0d0ce678de566a57c3ec93ad28841878f4e5c0fdbd3405"
     }
   },
   "artifacts": {
@@ -943,8 +943,8 @@
       "sha256": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0"
     },
     "pck": {
-      "path": "/manus-storage/game/sha256/afb5df3559bf8d03b159dd1244c9489d78135776a631ef546e72bae6bd53a7a3.pck",
-      "sha256": "sha256:afb5df3559bf8d03b159dd1244c9489d78135776a631ef546e72bae6bd53a7a3"
+      "path": "/manus-storage/game/sha256/de7276a9867f3d98afc5c7301d891e72836dfd2a914240ccec8ba9cd53d92342.pck",
+      "sha256": "sha256:de7276a9867f3d98afc5c7301d891e72836dfd2a914240ccec8ba9cd53d92342"
     }
   },
   "files": {
@@ -953,7 +953,7 @@
     "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
     "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
     "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-    "index.html": "sha256:ae75c882ee2705fcf7cd7e45d5c481c3b21b33dea53e9076d7c082289496600b",
+    "index.html": "sha256:af86050ce0cc7d69259593005508115e0d030d4010025d26da5ee8f762806496",
     "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
     "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
     "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
