@@ -551,8 +551,10 @@ func _draw_pipe_pair(gate: Dictionary) -> void:
 	_draw_pipe_edge(gate.x, upper_bottom, true, center_arm_length)
 	_draw_pipe_edge(gate.x, lower_top, false, center_arm_length)
 	_draw_pipe_edge(gate.x, lower_bottom, true, GROUND_Y - lower_bottom + 100.0)
-	_draw_answer_label(gate.x, upper_bottom + 17.0, gate.upper_answer)
-	_draw_answer_label(gate.x, lower_top - 17.0, gate.lower_answer)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var answer_label_x: float = float(gate.x) + 128.0
+	_draw_answer_label(answer_label_x, float(gate.upper_y), gate.upper_answer)
+	_draw_answer_label(answer_label_x, float(gate.lower_y), gate.lower_answer)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
@@ -575,11 +577,14 @@ func _draw_pipe_arm(length: float) -> void:
 		remaining -= segment
 
 
-func _draw_answer_label(x: float, center_y: float, answer: Variant) -> void:
-	var plate := Rect2(x - 44.0, center_y - 17.0, 88.0, 34.0)
-	draw_rect(plate, Color(0.99, 0.975, 0.93, 1.0), true)
-	draw_rect(plate, Color(GRAPHITE, 0.92), false, 2.2)
-	draw_string(ThemeDB.fallback_font, Vector2(plate.position.x, center_y + 9.0), str(answer), HORIZONTAL_ALIGNMENT_CENTER, plate.size.x, 26, GRAPHITE)
+func _draw_answer_label(center_x: float, center_y: float, answer: Variant) -> void:
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var plate := Rect2(center_x - 46.0, center_y - 21.0, 92.0, 42.0)
+	var shadow := Rect2(plate.position + Vector2(3.0, 3.0), plate.size)
+	draw_rect(shadow, Color(GRAPHITE, 0.18), true)
+	draw_rect(plate, PAPER, true)
+	draw_rect(plate, Color(BLUE_PENCIL, 0.95), false, 2.5)
+	draw_string(ThemeDB.fallback_font, Vector2(plate.position.x + 6.0, center_y + 10.0), str(answer), HORIZONTAL_ALIGNMENT_CENTER, plate.size.x - 12.0, 28, GRAPHITE)
 
 
 func _draw_ground() -> void:
