@@ -4,7 +4,7 @@
     {
       "kind": "scene",
       "path": "res://test/test_suite.tscn",
-      "expect": "[game-generic-tests] PASS:",
+      "expect": "[paper-glide-tests] PASS:",
       "profile": "source"
     },
     {

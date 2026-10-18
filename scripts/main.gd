@@ -3,6 +3,7 @@ extends Control
 
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const SfxBank = preload("res://scripts/flight/sfx_bank.gd")
+const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const TITLE_FONT: Font = preload("res://assets/template/fonts/display/generic_title.tres")
 
 const GRAPHITE := Color(0.16, 0.17, 0.2)
@@ -20,15 +21,25 @@ var _hud: Control
 var _score_label: Label
 var _best_label: Label
 var _practice_label: Label
+var _question_bar: PanelContainer
+var _question_label: Label
+var _question_difficulty_label: Label
 var _pause_button: Button
 var _title_screen: Control
 var _title_card: PanelContainer
 var _title_prompt: Label
 var _title_best: Label
+var _difficulty_description: Label
+var _difficulty_buttons: Dictionary = {}
+var _difficulty_group: ButtonGroup
+var _start_button: Button
+var _selected_difficulty := "medium"
 var _over_screen: Control
 var _over_card: PanelContainer
+var _over_title_label: Label
 var _over_score: Label
 var _over_best: Label
+var _over_feedback: Label
 var _over_stamp: Label
 var _over_note: Label
 var _pause_screen: Control
@@ -77,6 +88,7 @@ func _build_world() -> void:
 	_world.connect("flapped", _on_flapped)
 	_world.connect("scored", _on_scored)
 	_world.connect("crashed", _on_crashed)
+	_world.connect("question_changed", _on_question_changed)
 
 
 func _full_rect_control(node_name: String) -> Control:
@@ -189,6 +201,7 @@ func _build_hud() -> void:
 	_practice_label.offset_bottom = 180
 	_practice_label.visible = false
 	_hud.add_child(_practice_label)
+	_build_question_bar()
 	_pause_button = Button.new()
 	_pause_button.name = "PauseButton"
 	_pause_button.tooltip_text = I18n.t("hud.pause")
@@ -220,45 +233,131 @@ func _build_hud() -> void:
 	_hud.add_child(_pause_button)
 
 
+func _build_question_bar() -> void:
+	_question_bar = _make_card(Vector2(620, 112), 654.0)
+	var panel_style := _card_style(BLUE_PENCIL)
+	panel_style.content_margin_left = 18
+	panel_style.content_margin_right = 18
+	panel_style.content_margin_top = 8
+	panel_style.content_margin_bottom = 8
+	panel_style.shadow_size = 2
+	_question_bar.add_theme_stylebox_override("panel", panel_style)
+	var box := VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 0)
+	_question_difficulty_label = _make_label("", 16, BLUE_PENCIL.darkened(0.2), true)
+	box.add_child(_question_difficulty_label)
+	_question_label = _make_label(I18n.t("hud.tap_to_launch"), 40, GRAPHITE, true)
+	box.add_child(_question_label)
+	_question_bar.add_child(box)
+	_question_bar.visible = false
+	_hud.add_child(_question_bar)
+
+
 func _build_title() -> void:
 	_title_screen = _full_rect_control("TitleScreen")
-	_title_card = _make_card(Vector2(700, 270), 195.0)
-	_title_card.rotation_degrees = -1.6
+	_title_card = _make_card(Vector2(820, 470), 265.0)
+	_title_card.rotation_degrees = -1.2
 	_title_screen.add_child(_title_card)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 6)
+	box.add_theme_constant_override("separation", 4)
 	_title_card.add_child(box)
-	var title := _make_label(I18n.t("game.title").to_upper(), 82, GRAPHITE, true)
+	var title := _make_label(I18n.t("game.title").to_upper(), 76, GRAPHITE, true)
 	title.add_theme_color_override("font_shadow_color", Color(BLUE_PENCIL, 0.55))
 	title.add_theme_constant_override("shadow_offset_x", 4)
 	title.add_theme_constant_override("shadow_offset_y", 4)
 	box.add_child(title)
 	box.add_child(_make_label(I18n.t("title.tagline"), 24, Color(GRAPHITE, 0.85)))
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(0, 8)
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(spacer)
-	_title_prompt = _make_label(I18n.t("title.prompt"), 26, BLUE_PENCIL.darkened(0.15), true)
+	box.add_child(_make_label(I18n.t("title.howto"), 18, Color(GRAPHITE, 0.72)))
+	box.add_child(_make_label(I18n.t("title.choose_difficulty"), 18, BLUE_PENCIL.darkened(0.15), true))
+	_difficulty_group = ButtonGroup.new()
+	_difficulty_group.allow_unpress = false
+	var choices := HBoxContainer.new()
+	choices.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	choices.alignment = BoxContainer.ALIGNMENT_CENTER
+	choices.add_theme_constant_override("separation", 14)
+	box.add_child(choices)
+	for mode: String in MathQuestion.DIFFICULTIES:
+		var button := _make_button(I18n.t("difficulty." + mode).to_upper(), 22, CARD)
+		button.custom_minimum_size = Vector2(180, 52)
+		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		button.toggle_mode = true
+		button.button_group = _difficulty_group
+		button.set_pressed_no_signal(mode == _selected_difficulty)
+		button.pressed.connect(_select_difficulty.bind(mode))
+		_difficulty_buttons[mode] = button
+		choices.add_child(button)
+	_difficulty_description = _make_label("", 16, Color(GRAPHITE, 0.72))
+	box.add_child(_difficulty_description)
+	_start_button = _make_button(I18n.t("title.start"), 25, SAGE)
+	_start_button.custom_minimum_size = Vector2(260, 56)
+	_start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_start_button.pressed.connect(_begin_from_title)
+	box.add_child(_start_button)
+	_title_prompt = _make_label(I18n.t("title.prompt"), 16, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
 	box.add_child(_title_prompt)
-	_title_best = _make_label("", 22, Color(GRAPHITE, 0.8))
+	_title_best = _make_label("", 20, Color(GRAPHITE, 0.8))
 	box.add_child(_title_best)
+	_select_difficulty(_selected_difficulty)
+
+
+func _refresh_difficulty_buttons() -> void:
+	for mode: String in _difficulty_buttons:
+		var button: Button = _difficulty_buttons[mode]
+		var selected := mode == _selected_difficulty
+		var fill := SAGE if selected else Color(0.94, 0.92, 0.86)
+		for slot: String in ["normal", "hover", "pressed", "focus"]:
+			var style := StyleBoxFlat.new()
+			style.bg_color = fill.lightened(0.08) if slot == "hover" else fill.darkened(0.1) if slot == "pressed" else fill
+			style.border_color = BLUE_PENCIL if slot == "focus" or selected else GRAPHITE
+			style.set_border_width_all(4 if slot == "focus" or selected else 2)
+			style.set_corner_radius_all(12)
+			style.shadow_offset = Vector2(2, 3) if slot != "pressed" else Vector2(1, 1)
+			button.add_theme_stylebox_override(slot, style)
+
+
+func _select_difficulty(mode: String) -> void:
+	if mode not in MathQuestion.DIFFICULTIES:
+		return
+	_selected_difficulty = mode
+	_difficulty_description.text = I18n.t("difficulty." + mode + ".description")
+	for key: String in _difficulty_buttons:
+		(_difficulty_buttons[key] as Button).set_pressed_no_signal(key == mode)
+	_refresh_difficulty_buttons()
+	_update_title_best()
+
+
+func _update_title_best() -> void:
+	if _title_best == null:
+		return
+	var best := _best_score(_selected_difficulty)
+	_title_best.text = I18n.t("title.best", {
+		"difficulty": I18n.t("difficulty." + _selected_difficulty),
+		"score": best,
+	}) if best > 0 else ""
+	_title_best.visible = best > 0
 
 
 func _build_over() -> void:
 	_over_screen = _full_rect_control("GameOverScreen")
-	_over_card = _make_card(Vector2(540, 380), 310.0)
+	_over_card = _make_card(Vector2(600, 420), 320.0)
 	_over_screen.add_child(_over_card)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 4)
+	box.add_theme_constant_override("separation", 3)
 	_over_card.add_child(box)
-	box.add_child(_make_label(I18n.t("over.title").to_upper(), 50, RED_PENCIL, true))
+	_over_title_label = _make_label(I18n.t("over.title").to_upper(), 50, RED_PENCIL, true)
+	box.add_child(_over_title_label)
 	box.add_child(_make_label(I18n.t("over.score"), 22, Color(GRAPHITE, 0.8)))
 	_over_score = _make_label("0", 96, GRAPHITE, true)
 	box.add_child(_over_score)
+	_over_feedback = _make_label("", 22, RED_PENCIL)
+	_over_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_over_feedback)
 	_over_best = _make_label("", 24, Color(GRAPHITE, 0.85))
 	box.add_child(_over_best)
 	_over_note = _make_label(I18n.t("over.practice"), 16, RED_PENCIL)
@@ -330,9 +429,11 @@ func _save() -> Node:
 	return get_node_or_null("/root/SaveStore")
 
 
-func _best_score() -> int:
+func _best_score(difficulty: String = "") -> int:
 	var save := _save()
-	return int(save.call("get_best_score")) if save != null else 0
+	if save == null:
+		return 0
+	return int(save.call("get_best_score", difficulty)) if not difficulty.is_empty() else int(save.call("get_best_score"))
 
 
 func _show_title() -> void:
@@ -341,31 +442,45 @@ func _show_title() -> void:
 	_title_screen.visible = true
 	_over_screen.visible = false
 	_pause_screen.visible = false
+	_question_bar.visible = false
 	_pause_button.visible = false
 	_score_label.visible = false
 	_best_label.visible = false
 	_practice_label.visible = false
-	var best := _best_score()
-	_title_best.text = I18n.t("title.best", {"score": best}) if best > 0 else ""
-	_title_best.visible = best > 0
+	_update_title_best()
 
 
 ## Starts a fresh run in the "ready" pose; the first flap launches it.
 func _start_new_run() -> void:
+	_world.call("set_difficulty", _selected_difficulty)
 	_world.call("reset_ready")
 	_title_screen.visible = false
 	_over_screen.visible = false
 	_pause_screen.visible = false
+	_question_bar.visible = true
+	_question_difficulty_label.text = I18n.t("hud.question_mode", {"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper()})
+	_question_label.text = I18n.t("hud.tap_to_launch")
 	_pause_button.visible = true
 	_score_label.visible = true
 	_score_label.text = "0"
 	_score_label.scale = Vector2.ONE
 	_best_label.visible = true
-	var best := _best_score()
-	_best_label.text = I18n.t("hud.best", {"score": best})
+	var best := _best_score(_selected_difficulty)
+	_best_label.text = I18n.t("hud.best", {
+		"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
+		"score": best,
+	})
 	_best_label.visible = best > 0
 	_practice_label.visible = false
 	_state = "playing"
+
+
+func _begin_from_title() -> void:
+	if _state != "title":
+		return
+	_start_new_run()
+	_world.call("flap")
+	_after_flap_start()
 
 
 func _restart() -> void:
@@ -452,6 +567,13 @@ func _on_flapped() -> void:
 		audio.call("play_cue", "player.action", randf_range(0.96, 1.06))
 
 
+func _on_question_changed(expression: String, difficulty: String) -> void:
+	_question_label.text = expression
+	_question_difficulty_label.text = I18n.t("hud.question_mode", {
+		"difficulty": I18n.t("difficulty." + difficulty).to_upper(),
+	})
+
+
 func _on_scored(total: int) -> void:
 	_score_label.text = I18n.t("hud.score", {"score": total})
 	var audio := get_node_or_null("/root/AudioDirector")
@@ -478,17 +600,28 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	var save := _save()
 	var is_best := false
 	if save != null:
-		is_best = bool(save.call("record_run", total, ranked))
+		is_best = bool(save.call("record_run", total, ranked, _selected_difficulty))
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
 		audio.call("play_cue", "enemy.impact")
 	_pause_button.visible = false
+	_question_bar.visible = false
 	_score_label.visible = false
 	_best_label.visible = false
 	_practice_label.visible = false
+	var wrong_answer := str(_world.get("failure_reason")) == "wrong_answer"
+	_over_title_label.text = I18n.t("over.wrong_title" if wrong_answer else "over.title").to_upper()
 	_over_score.text = str(total)
-	var best := _best_score()
-	_over_best.text = I18n.t("over.best", {"score": best})
+	var best := _best_score(_selected_difficulty)
+	_over_best.text = I18n.t("over.best", {
+		"difficulty": I18n.t("difficulty." + _selected_difficulty),
+		"score": best,
+	})
+	_over_feedback.visible = wrong_answer
+	_over_feedback.text = I18n.t("over.wrong_answer", {
+		"answer": str(_world.get("failure_answer")),
+		"question": str(_world.get("failure_question")),
+	}) if wrong_answer else ""
 	_over_stamp.visible = is_best
 	_over_note.visible = _last_run_practice
 	await get_tree().create_timer(0.7).timeout

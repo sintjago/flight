@@ -1,10 +1,11 @@
 extends Node
-## Local persistence: best score and games played. One language (English).
+## Local persistence: best score per math difficulty plus the legacy overall best.
 
 const SAVE_PATH := "user://paper_glide_save.json"
 const TEMP_PATH := "user://paper_glide_save.tmp"
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 const MAX_SCORE := 999999
+const DIFFICULTIES := ["easy", "medium", "hard"]
 
 var _data: Dictionary = {}
 
@@ -14,7 +15,13 @@ func _ready() -> void:
 
 
 func _default_data() -> Dictionary:
-	return {"version": SAVE_VERSION, "locale": "en", "best_score": 0, "games_played": 0}
+	return {
+		"version": SAVE_VERSION,
+		"locale": "en",
+		"best_score": 0,
+		"best_scores": {"easy": 0, "medium": 0, "hard": 0},
+		"games_played": 0,
+	}
 
 
 func _load() -> void:
@@ -29,7 +36,20 @@ func _load() -> void:
 	if not parsed is Dictionary:
 		return
 	var candidate: Dictionary = parsed
-	_data.best_score = clampi(int(candidate.get("best_score", 0)), 0, MAX_SCORE)
+	var legacy_best := clampi(int(candidate.get("best_score", 0)), 0, MAX_SCORE)
+	var saved_scores: Variant = candidate.get("best_scores", {})
+	var has_mode_score := false
+	if saved_scores is Dictionary:
+		for mode: String in DIFFICULTIES:
+			var value := clampi(int(saved_scores.get(mode, 0)), 0, MAX_SCORE)
+			_data.best_scores[mode] = value
+			has_mode_score = has_mode_score or value > 0
+	if not has_mode_score and legacy_best > 0:
+		_data.best_scores.medium = legacy_best
+	var highest := legacy_best
+	for mode: String in DIFFICULTIES:
+		highest = maxi(highest, int(_data.best_scores[mode]))
+	_data.best_score = highest
 	_data.games_played = clampi(int(candidate.get("games_played", 0)), 0, 99999999)
 
 
@@ -55,20 +75,28 @@ func set_locale(_locale: String) -> void:
 	pass
 
 
-func get_best_score() -> int:
-	return int(_data.get("best_score", 0))
+func get_best_score(difficulty: String = "") -> int:
+	if difficulty.is_empty():
+		return int(_data.get("best_score", 0))
+	var scores: Dictionary = _data.get("best_scores", {})
+	return int(scores.get(difficulty, 0))
 
 
 func get_games_played() -> int:
 	return int(_data.get("games_played", 0))
 
 
-## Records a finished run. Returns true when it set a new best score.
-## Practice runs (tuned gameplay values) count as played but never set the best.
-func record_run(score: int, ranked: bool) -> bool:
+## Records a finished run. Practice runs count as played but never set any best score.
+func record_run(score: int, ranked: bool, difficulty: String = "medium") -> bool:
+	if difficulty not in DIFFICULTIES:
+		difficulty = "medium"
 	_data.games_played = clampi(get_games_played() + 1, 0, 99999999)
-	var is_best := ranked and score > get_best_score()
-	if is_best:
+	var scores: Dictionary = _data.get("best_scores", {"easy": 0, "medium": 0, "hard": 0})
+	var is_mode_best := ranked and score > int(scores.get(difficulty, 0))
+	if is_mode_best:
+		scores[difficulty] = clampi(score, 0, MAX_SCORE)
+	_data.best_scores = scores
+	if ranked and score > int(_data.get("best_score", 0)):
 		_data.best_score = clampi(score, 0, MAX_SCORE)
 	save()
-	return is_best
+	return is_mode_best

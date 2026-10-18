@@ -5,6 +5,7 @@ extends Node2D
 signal flapped
 signal scored(total: int)
 signal crashed(total: int, hit_ground: bool)
+signal question_changed(expression: String, difficulty: String)
 
 const VIEW_SIZE := Vector2(1280.0, 720.0)
 const GROUND_Y := 650.0
@@ -12,6 +13,7 @@ const PLANE_X := 340.0
 const PLANE_SIZE := Vector2(122.0, 56.5)
 const HIT_SCALE := 1.15
 const READY_Y := 390.0
+const LANE_SEPARATION := 250.0
 
 const PIPE_BODY_HALF := 59.0
 const PIPE_CAP_HALF := 71.0
@@ -45,6 +47,7 @@ const T_DOODLES: Array[Texture2D] = [
 	preload("res://assets/paperglide/doodle3.png"),
 	preload("res://assets/paperglide/doodle5.png"),
 ]
+const MathQuestion = preload("res://scripts/flight/math_question.gd")
 
 ## "ready" (waiting for the first tap), "playing" or "dead".
 var state := "ready"
@@ -54,11 +57,16 @@ var plane_vy := 0.0
 var plane_rot := 0.0
 var pipes: Array[Dictionary] = []
 var spawned := 0
+var difficulty := "medium"
+var current_question: Dictionary = {}
+var failure_reason := ""
+var failure_answer := ""
+var failure_question := ""
 
 var gravity := 1500.0
 var flap_speed := 430.0
 var base_speed := 230.0
-var base_gap := 230.0
+var base_gap := 180.0
 var pipe_spacing := 420.0
 var visual_scale := 1.0
 var reduced_motion := false
@@ -108,8 +116,10 @@ func _tuned(id: String, fallback: float) -> float:
 func load_tuning() -> void:
 	gravity = _tuned("gameplay.physics.gravity", 1500.0)
 	flap_speed = _tuned("gameplay.physics.flap_speed", 430.0)
-	base_speed = _tuned("gameplay.course.scroll_speed", 230.0)
-	base_gap = _tuned("gameplay.course.gap_size", 230.0)
+	var speed_offset := -10.0 if difficulty == "easy" else (10.0 if difficulty == "hard" else 0.0)
+	var gap_offset := 14.0 if difficulty == "easy" else (-14.0 if difficulty == "hard" else 0.0)
+	base_speed = _tuned("gameplay.course.scroll_speed", 230.0) + speed_offset
+	base_gap = _tuned("gameplay.course.gap_size", 180.0) + gap_offset
 	pipe_spacing = _tuned("gameplay.course.pipe_spacing", 420.0)
 	refresh_live_tuning()
 
@@ -124,6 +134,10 @@ func reset_ready() -> void:
 	state = "ready"
 	score = 0
 	spawned = 0
+	current_question.clear()
+	failure_reason = ""
+	failure_answer = ""
+	failure_question = ""
 	plane_y = READY_Y
 	plane_vy = 0.0
 	plane_rot = 0.0
@@ -133,6 +147,12 @@ func reset_ready() -> void:
 	_shake = 0.0
 	_flash = 0.0
 	_speed = 0.0
+	load_tuning()
+	queue_redraw()
+
+
+func set_difficulty(mode: String) -> void:
+	difficulty = mode if mode in MathQuestion.DIFFICULTIES else "medium"
 	load_tuning()
 	queue_redraw()
 
@@ -158,8 +178,12 @@ func _start_run() -> void:
 	score = 0
 	spawned = 0
 	pipes.clear()
+	current_question.clear()
+	failure_reason = ""
+	failure_answer = ""
+	failure_question = ""
 	_speed = base_speed
-	_spawn_pipe(PLANE_X + FIRST_PIPE_DISTANCE)
+	_spawn_gate(PLANE_X + FIRST_PIPE_DISTANCE)
 
 
 func current_speed() -> float:
@@ -167,19 +191,29 @@ func current_speed() -> float:
 
 
 func current_gap(index: int) -> float:
-	return maxf(base_gap - float(index) * 2.5, base_gap * 0.76)
+	return maxf(base_gap - float(index) * 1.2, base_gap * 0.84)
 
 
-func _spawn_pipe(x: float) -> void:
+func _spawn_gate(x: float) -> void:
 	var gap := current_gap(spawned)
-	var low := PIPE_MARGIN + gap * 0.5
-	var high := GROUND_Y - PIPE_MARGIN - gap * 0.5
-	var gap_y := 330.0
-	if not pipes.is_empty():
-		var previous: float = pipes.back().gap_y
-		gap_y = clampf(rng.randf_range(low, high), previous - 190.0, previous + 250.0)
-	gap_y = clampf(gap_y, low, high)
-	pipes.append({"x": x, "gap_y": gap_y, "gap": gap, "passed": false})
+	var upper_y := rng.randf_range(235.0, 250.0)
+	var lower_y := upper_y + LANE_SEPARATION
+	var question: Dictionary = MathQuestion.generate(rng, difficulty)
+	pipes.append({
+		"x": x,
+		"upper_y": upper_y,
+		"lower_y": lower_y,
+		"gap": gap,
+		"expression": question.expression,
+		"answer": question.answer,
+		"distractor": question.distractor,
+		"upper_answer": question.upper_answer,
+		"lower_answer": question.lower_answer,
+		"correct_lane": question.correct_lane,
+		"passed": false,
+	})
+	current_question = question.duplicate()
+	question_changed.emit(str(question.expression), difficulty)
 	spawned += 1
 
 
@@ -215,25 +249,32 @@ func _step_playing(delta: float) -> void:
 		plane_vy = maxf(plane_vy, 0.0)
 	plane_rot = lerpf(plane_rot, clampf(plane_vy / 620.0, -0.55, 1.0) * 0.8, minf(1.0, delta * 9.0))
 	_advance_background(delta, _speed)
-	for pipe: Dictionary in pipes:
-		pipe.x -= _speed * delta
-	while pipes.is_empty() or pipes.back().x < VIEW_SIZE.x + 120.0:
-		var last_x: float = pipes.back().x if not pipes.is_empty() else VIEW_SIZE.x
-		_spawn_pipe(last_x + pipe_spacing)
+	for gate: Dictionary in pipes:
+		gate.x -= _speed * delta
 	while not pipes.is_empty() and pipes[0].x < -120.0:
 		pipes.remove_at(0)
+	if pipes.is_empty() or bool(pipes.back().passed):
+		_spawn_gate(PLANE_X + pipe_spacing)
 	_update_trail(delta)
-	for pipe: Dictionary in pipes:
-		if not pipe.passed and pipe.x < PLANE_X - 24.0:
-			pipe.passed = true
+	if plane_hits_pipe():
+		_die(false, "collision")
+		return
+	if plane_y + 14.0 >= GROUND_Y:
+		plane_y = GROUND_Y - 14.0
+		_die(true, "ground")
+		return
+	for gate: Dictionary in pipes:
+		if not gate.passed and gate.x < PLANE_X - 24.0:
+			gate.passed = true
+			var chosen_lane := _lane_for_y(plane_y, gate)
+			if chosen_lane != str(gate.correct_lane):
+				failure_answer = str(gate.answer)
+				failure_question = str(gate.expression)
+				_die(false, "wrong_answer")
+				return
 			score += 1
 			_emit_score_ticks()
 			scored.emit(score)
-	if plane_hits_pipe():
-		_die(false)
-	elif plane_y + 14.0 >= GROUND_Y:
-		plane_y = GROUND_Y - 14.0
-		_die(true)
 
 
 func _step_dead(delta: float) -> void:
@@ -251,10 +292,11 @@ func _step_dead(delta: float) -> void:
 	_update_trail(delta)
 
 
-func _die(hit_ground: bool) -> void:
+func _die(hit_ground: bool, reason: String = "collision") -> void:
 	if state != "playing":
 		return
 	state = "dead"
+	failure_reason = reason
 	plane_vy = 0.0 if hit_ground else -260.0
 	_shake = 0.0 if reduced_motion else 9.0
 	_flash = 0.25 if reduced_motion else 0.6
@@ -284,15 +326,18 @@ func hit_circles() -> Array[Vector3]:
 	return out
 
 
-static func pipe_rects(pipe_x: float, gap_y: float, gap: float) -> Array[Rect2]:
-	var top_edge := gap_y - gap * 0.5
-	var bottom_edge := gap_y + gap * 0.5
+static func gate_rects(gate_x: float, upper_y: float, lower_y: float, gap: float) -> Array[Rect2]:
+	var upper_top := upper_y - gap * 0.5
+	var upper_bottom := upper_y + gap * 0.5
+	var lower_top := lower_y - gap * 0.5
+	var lower_bottom := lower_y + gap * 0.5
 	var inset := 3.0
+	var left := gate_x - PIPE_CAP_HALF + inset
+	var width := (PIPE_CAP_HALF - inset) * 2.0
 	return [
-		Rect2(pipe_x - PIPE_BODY_HALF + inset, -3000.0, (PIPE_BODY_HALF - inset) * 2.0, 3000.0 + top_edge - PIPE_CAP_HEIGHT),
-		Rect2(pipe_x - PIPE_CAP_HALF + inset, top_edge - PIPE_CAP_HEIGHT + inset, (PIPE_CAP_HALF - inset) * 2.0, PIPE_CAP_HEIGHT - inset),
-		Rect2(pipe_x - PIPE_CAP_HALF + inset, bottom_edge, (PIPE_CAP_HALF - inset) * 2.0, PIPE_CAP_HEIGHT - inset),
-		Rect2(pipe_x - PIPE_BODY_HALF + inset, bottom_edge + PIPE_CAP_HEIGHT, (PIPE_BODY_HALF - inset) * 2.0, 3000.0),
+		Rect2(left, -3000.0, width, 3000.0 + upper_top),
+		Rect2(left, upper_bottom, width, lower_top - upper_bottom),
+		Rect2(left, lower_bottom, width, 3000.0),
 	]
 
 
@@ -301,12 +346,21 @@ static func circle_hits_rect(center: Vector2, radius: float, rect: Rect2) -> boo
 	return center.distance_squared_to(nearest) < radius * radius
 
 
+func _lane_for_y(y: float, gate: Dictionary) -> String:
+	var clearance: float = maxf(float(gate.gap) * 0.5 - 16.0, 0.0)
+	if absf(y - float(gate.upper_y)) <= clearance:
+		return "upper"
+	if absf(y - float(gate.lower_y)) <= clearance:
+		return "lower"
+	return ""
+
+
 func plane_hits_pipe() -> bool:
 	var circles := hit_circles()
-	for pipe: Dictionary in pipes:
-		if absf(pipe.x - PLANE_X) > PIPE_CAP_HALF + 60.0:
+	for gate: Dictionary in pipes:
+		if gate.passed or absf(gate.x - PLANE_X) > PIPE_CAP_HALF + 60.0:
 			continue
-		for rect: Rect2 in pipe_rects(pipe.x, pipe.gap_y, pipe.gap):
+		for rect: Rect2 in gate_rects(gate.x, gate.upper_y, gate.lower_y, gate.gap):
 			for c: Vector3 in circles:
 				if circle_hits_rect(Vector2(c.x, c.y), c.z, rect):
 					return true
@@ -457,7 +511,8 @@ func _draw() -> void:
 	_draw_paper()
 	_draw_ambient()
 	for pipe: Dictionary in pipes:
-		_draw_pipe_pair(pipe)
+		if not pipe.passed:
+			_draw_pipe_pair(pipe)
 	_draw_ground()
 	_draw_trail()
 	_draw_particles()
@@ -486,25 +541,45 @@ func _draw_ambient() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-func _draw_pipe_pair(pipe: Dictionary) -> void:
-	var top_edge: float = pipe.gap_y - pipe.gap * 0.5
-	var bottom_edge: float = pipe.gap_y + pipe.gap * 0.5
-	draw_set_transform(Vector2(pipe.x, top_edge) + _boil, 0.0, Vector2.ONE)
-	_draw_pipe_arm()
-	draw_set_transform(Vector2(pipe.x, bottom_edge) + _boil, PI, Vector2.ONE)
-	_draw_pipe_arm()
+func _draw_pipe_pair(gate: Dictionary) -> void:
+	var upper_top: float = gate.upper_y - gate.gap * 0.5
+	var upper_bottom: float = gate.upper_y + gate.gap * 0.5
+	var lower_top: float = gate.lower_y - gate.gap * 0.5
+	var lower_bottom: float = gate.lower_y + gate.gap * 0.5
+	var center_arm_length := (lower_top - upper_bottom) * 0.5 + PIPE_CAP_HEIGHT * 0.667 + 8.0
+	_draw_pipe_edge(gate.x, upper_top, false, upper_top + 180.0)
+	_draw_pipe_edge(gate.x, upper_bottom, true, center_arm_length)
+	_draw_pipe_edge(gate.x, lower_top, false, center_arm_length)
+	_draw_pipe_edge(gate.x, lower_bottom, true, GROUND_Y - lower_bottom + 100.0)
+	_draw_answer_label(gate.x, upper_bottom + 17.0, gate.upper_answer)
+	_draw_answer_label(gate.x, lower_top - 17.0, gate.lower_answer)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-## Draws a pipe whose open end (the cap) sits on local y = 0 and whose body extends upward.
-func _draw_pipe_arm() -> void:
+func _draw_pipe_edge(x: float, edge_y: float, points_down: bool, length: float) -> void:
+	draw_set_transform(Vector2(x, edge_y) + _boil, PI if points_down else 0.0, Vector2.ONE)
+	_draw_pipe_arm(length)
+
+
+## Draws a pencil-textured pipe arm with its open end at local y = 0.
+func _draw_pipe_arm(length: float) -> void:
 	var cap_size := Vector2(T_PIPE_CAP.get_width(), T_PIPE_CAP.get_height()) * 0.667
 	draw_texture_rect(T_PIPE_CAP, Rect2(-cap_size.x * 0.5, -cap_size.y, cap_size.x, cap_size.y), false)
 	var tile_height := T_PIPE_BODY.get_height() * 0.667
 	var y := -cap_size.y + 5.0
-	for i in 4:
-		draw_texture_rect(T_PIPE_BODY, Rect2(-PIPE_BODY_WIDTH * 0.5, y - tile_height, PIPE_BODY_WIDTH, tile_height), false)
-		y -= tile_height - 1.0
+	var remaining := maxf(length - cap_size.y, 0.0)
+	while remaining > 0.0:
+		var segment := minf(tile_height, remaining)
+		draw_texture_rect(T_PIPE_BODY, Rect2(-PIPE_BODY_WIDTH * 0.5, y - segment, PIPE_BODY_WIDTH, segment), false)
+		y -= segment - 1.0
+		remaining -= segment
+
+
+func _draw_answer_label(x: float, center_y: float, answer: Variant) -> void:
+	var plate := Rect2(x - 44.0, center_y - 17.0, 88.0, 34.0)
+	draw_rect(plate, Color(0.99, 0.975, 0.93, 1.0), true)
+	draw_rect(plate, Color(GRAPHITE, 0.92), false, 2.2)
+	draw_string(ThemeDB.fallback_font, Vector2(plate.position.x, center_y + 9.0), str(answer), HORIZONTAL_ALIGNMENT_CENTER, plate.size.x, 26, GRAPHITE)
 
 
 func _draw_ground() -> void:

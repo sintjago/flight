@@ -20,6 +20,9 @@ func _run() -> void:
 		_check(bool((main.get("_title_screen") as Control).visible), "pack boots to title")
 		_check(not main.has_method("_open_tuning"), "release tuning entry point excluded")
 		_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
+		_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
+		var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
+		_check(difficulty_buttons.has("easy") and difficulty_buttons.has("medium") and difficulty_buttons.has("hard"), "pack includes all math levels")
 		for path: String in [
 			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
 			"res://assets/paperglide/pipe_body.png", "res://assets/paperglide/notebook.jpg",
@@ -32,6 +35,10 @@ func _run() -> void:
 		main.call("_unhandled_input", click)
 		await process_frame
 		_check(main.get("_state") == "playing", "pack starts flying on tap")
+		_check(bool((main.get("_question_bar") as Control).visible), "pack shows the equation bar")
+		_check(str((main.get("_question_label") as Label).text).contains("= ?"), "pack generates a math equation")
+		var gates: Array = (main.get("_world") as Node2D).get("pipes")
+		_check(not gates.is_empty() and gates[0].has("upper_answer") and gates[0].has("lower_answer"), "pack includes two answer choices")
 		var audio := root.get_node("AudioDirector")
 		_check(bool(audio.call("play_cue", "score.reward")) or true, "pack cues are callable")
 		audio.call("release_streams")
