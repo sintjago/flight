@@ -1,11 +1,9 @@
 extends Node
+## Single-language (English) catalog lookup with {token} interpolation.
 
 signal locale_changed(locale: String)
 
-const CATALOG_PATHS := {
-	"en": "res://localization/en.json",
-	"zh-CN": "res://localization/zh-CN.json",
-}
+const CATALOG_PATHS := {"en": "res://localization/en.json"}
 
 var _catalogs: Dictionary = {}
 var _locale := "en"
@@ -14,22 +12,14 @@ var _locale := "en"
 func _ready() -> void:
 	for locale: String in CATALOG_PATHS:
 		_catalogs[locale] = _load_catalog(str(CATALOG_PATHS[locale]))
-	# A saved player choice wins; otherwise follow the OS/browser language on first launch.
-	_locale = resolve_locale(SaveStore.get_locale(), OS.get_locale())
-	if not _catalogs.has(_locale):
-		_locale = "en"
 
 
-## Map an OS/browser locale ("zh_CN", "zh-Hans-TW", "en_US", ...) to a supported catalog.
-static func detect_locale(os_locale: String) -> String:
-	return "zh-CN" if os_locale.strip_edges().to_lower().begins_with("zh") else "en"
+static func detect_locale(_os_locale: String) -> String:
+	return "en"
 
 
-## `saved` is the persisted player choice, or "" when the player never picked a language.
-static func resolve_locale(saved: String, os_locale: String) -> String:
-	if saved in ["en", "zh-CN"]:
-		return saved
-	return detect_locale(os_locale)
+static func resolve_locale(_saved: String, _os_locale: String) -> String:
+	return "en"
 
 
 func _load_catalog(path: String) -> Dictionary:
@@ -46,9 +36,8 @@ func _load_catalog(path: String) -> Dictionary:
 
 
 func text(key: String, replacements: Dictionary = {}) -> String:
-	var active: Dictionary = _catalogs.get(_locale, {})
-	var fallback: Dictionary = _catalogs.get("en", {})
-	var result := str(active.get(key, fallback.get(key, key)))
+	var catalog: Dictionary = _catalogs.get("en", {})
+	var result := str(catalog.get(key, key))
 	for token: Variant in replacements:
 		result = result.replace("{%s}" % str(token), str(replacements[token]))
 	return result
@@ -62,20 +51,12 @@ func get_locale() -> String:
 	return _locale
 
 
-func set_locale(locale: String) -> void:
-	if not _catalogs.has(locale):
-		return
-	# An explicit choice is persisted even when it matches the auto-detected language.
-	if SaveStore.get_locale() != locale:
-		SaveStore.set_locale(locale)
-	if locale == _locale:
-		return
-	_locale = locale
-	locale_changed.emit(locale)
+func set_locale(_locale_code: String) -> void:
+	pass
 
 
 func toggle_locale() -> void:
-	set_locale("zh-CN" if _locale == "en" else "en")
+	pass
 
 
 func catalog_keys(locale: String) -> Array:

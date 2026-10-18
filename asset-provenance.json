@@ -1,33 +1,373 @@
 {
   "assets": {
+    "assets/paperglide/cloud0.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:5faea115fcf25616781a896d1714ac7413afe700d45a1148355b94e36248b79c",
+      "shipped": true,
+      "size": 255735,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/cloud1.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:988c755da8b9964b729becc649004c34aa2c6ceee94687fe784b528182e12231",
+      "shipped": true,
+      "size": 126217,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/cloud2.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:ce55dc25bac332e3c8ff754a298a97714a650e17df15b8e19fd4777cec06ba66",
+      "shipped": true,
+      "size": 109221,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/cloud3.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:b78da1c6d17293c17b047888244087205872f245989f6242e0a8d93ae0e911b6",
+      "shipped": true,
+      "size": 182789,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/doodle0.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:564195beb297a78907e9d180a364a91db6725d7d5babd82ef062935a942aa873",
+      "shipped": true,
+      "size": 42224,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/doodle1.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:3e38e247f51db1a3360b5e6b5bbfa616263629ae3512cd9cfa6d4c8d75b40e8a",
+      "shipped": true,
+      "size": 27083,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/doodle2.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:879e8142d6ee0050bd324dca2823fddcf11804bfee8ce2e5cf5a00a44d808b52",
+      "shipped": true,
+      "size": 34712,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/doodle3.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:216b8a0a6401451ec87e7794c2e802aa3413aedcba969062f011642ec91e63de",
+      "shipped": true,
+      "size": 28278,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/doodle4.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:44195eec0774aff7bb9a3126000ab30dc608827aca3af72e3ac810be9e4c61ca",
+      "shipped": true,
+      "size": 12020,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/paperglide/doodle5.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:8b851c735d9e036619c7fe182e9d02b4089c1c32905c4f69bd5d2039aaa7df8f",
+      "shipped": true,
+      "size": 9266,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/notebook.jpg": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:4763404b8dd1d05287076b6cdd81a53c7da9185e0a806aaba4c91bd4d15003c3",
+      "shipped": true,
+      "size": 146212,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/pipe_body.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:f27f83a130356155f1f1217c0420e10b2cf1c5f9918da77e79a6025bb30b9095",
+      "shipped": true,
+      "size": 149358,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/pipe_cap.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:c929171370c3677365e2fb36282e146d412b2063ecca82ee53b6cafbe08c72df",
+      "shipped": true,
+      "size": 42895,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/plane.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:9451bbdb7027ffa3fec749a0545c09cc8adadfbd37409c870d70ac4f804043ec",
+      "shipped": true,
+      "size": 52505,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/share/favicon.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "game-sharing.json",
+        "project.godot"
+      ],
+      "regions": [],
+      "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
+      "shipped": true,
+      "size": 21187,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "game-sharing.json",
+        "project.godot"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/share/og.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "game-sharing.json"
+      ],
+      "regions": [],
+      "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
+      "shipped": true,
+      "size": 1365943,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "game-sharing.json"
+      ],
+      "used": true,
+      "usedBy": []
+    },
     "assets/template/characters/runner.png": {
       "declaredUseEvidence": [],
       "generator": {},
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "project.godot",
-        "scripts/entities/runner.gd",
-        "scripts/main.gd",
-        "scripts/ui/title_art.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:c88485773d6ff9361e036f37d8ac76fb77b8c3f7c041c3f52c8dd222adc8cc21",
-      "shipped": null,
+      "shipped": true,
       "size": 68885,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "project.godot",
-        "scripts/entities/runner.gd",
-        "scripts/main.gd",
-        "scripts/ui/title_art.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/characters/sentinel.png": {
@@ -36,24 +376,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/entities/sentinel.gd",
-        "scripts/ui/title_art.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:0d9fb751bca5507ba14f7090573e6605a94753390a9e7c53bf2f590f0a24918d",
-      "shipped": null,
+      "shipped": true,
       "size": 64998,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/entities/sentinel.gd",
-        "scripts/ui/title_art.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/environment/backdrop.png": {
@@ -62,22 +396,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/main.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:ec4ab7867e60fb483dd438459f587b478aac4c1e71ec4fe509ce74a18de34216",
-      "shipped": null,
+      "shipped": true,
       "size": 971282,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/main.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/environment/foreground.png": {
@@ -86,22 +416,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/main.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:4b6916024c69961fbfa7cdc929c68f547fea4561e61ebdb3405b3aba0efbd94d",
-      "shipped": null,
+      "shipped": true,
       "size": 58603,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/main.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/fonts/Figtree-VF.subset.woff2": {
@@ -117,12 +443,12 @@
       ],
       "regions": [],
       "sha256": "sha256:b3976c5969c8b1afd81dc3e314b61d8ffe3f3f58cf40906443105d330e6e0bdf",
-      "shipped": null,
+      "shipped": true,
       "size": 23660,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
       "useEvidence": [
         "assets/template/fonts/ui_bold.tres",
@@ -148,7 +474,7 @@
       ],
       "regions": [],
       "sha256": "sha256:38f4c5f927f746b3dfa4c3a5d7edf0b7a3e828e27438418fa54f9e1565289412",
-      "shipped": null,
+      "shipped": true,
       "size": 1869368,
       "source": {
         "name": "NotoSansSC-VF.subset.woff2",
@@ -171,24 +497,18 @@
       "license": {},
       "origin": "template",
       "referenceEvidence": [
-        "assets/template/fonts/display/generic_eyebrow.tres",
-        "assets/template/fonts/display/generic_heading.tres",
-        "assets/template/fonts/display/generic_menu.tres",
         "assets/template/fonts/display/generic_title.tres"
       ],
       "regions": [],
       "sha256": "sha256:438fbf4582548e76b266a738f2c11bcbd5137978f2d2e2f3aaabd49df69186f2",
-      "shipped": null,
+      "shipped": true,
       "size": 41696,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
       "useEvidence": [
-        "assets/template/fonts/display/generic_eyebrow.tres",
-        "assets/template/fonts/display/generic_heading.tres",
-        "assets/template/fonts/display/generic_menu.tres",
         "assets/template/fonts/display/generic_title.tres"
       ],
       "used": true,
@@ -200,26 +520,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/game/maze_world.gd",
-        "scripts/main.gd",
-        "scripts/ui/title_art.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:ffd7906f240f928e785d7c19a9e7a7b5dfab0d7483be5205dda3e4ba17ebe06a",
-      "shipped": null,
+      "shipped": true,
       "size": 50950,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/game/maze_world.gd",
-        "scripts/main.gd",
-        "scripts/ui/title_art.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/powerups/magnet.png": {
@@ -228,22 +540,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/game/maze_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:6e7354aa6510a462717218b09b9d784bb161b87878bff62ef4f2a9d03c053de7",
-      "shipped": null,
+      "shipped": true,
       "size": 53724,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/game/maze_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/powerups/overdrive.png": {
@@ -252,24 +560,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/game/maze_world.gd",
-        "scripts/ui/title_art.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:6a48a85886c0551c1af0df576b0225f0ec3ae86b326fd84fc614083fbfe2908b",
-      "shipped": null,
+      "shipped": true,
       "size": 37238,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/game/maze_world.gd",
-        "scripts/ui/title_art.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/powerups/shield.png": {
@@ -278,24 +580,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/game/maze_world.gd",
-        "scripts/ui/title_art.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:8cebf0cf730ca35c8c8697192ef78121c926442328a0725e0bd3e31701d64f13",
-      "shipped": null,
+      "shipped": true,
       "size": 39659,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/game/maze_world.gd",
-        "scripts/ui/title_art.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/powerups/slow_field.png": {
@@ -304,22 +600,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/game/maze_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:96874c000866b2e7503b40da73888afb918ae36e462f51488415157da52a8637",
-      "shipped": null,
+      "shipped": true,
       "size": 49145,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/game/maze_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/ui/loading-background.png": {
@@ -328,22 +620,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "project.godot"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:16dde3061f4e60802f8f0d1a6b875e72b6add05192237b03fef1fd313968a13a",
-      "shipped": null,
+      "shipped": true,
       "size": 473356,
       "source": {
         "starterId": "game-generic-v56"
       },
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "project.godot"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/ui/pause_glass.png": {
@@ -352,22 +640,18 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/main.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:c88a4725838df85e72c7270865848f275b62c525c5679a2a8b7ecefb1af82d4b",
-      "shipped": null,
+      "shipped": true,
       "size": 115691,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/main.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/ui/title_glass.png": {
@@ -376,99 +660,146 @@
       "inputs": [],
       "license": {},
       "origin": "template",
-      "referenceEvidence": [
-        "scripts/main.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:8860db07768f093d4effea10b51431f76a1552d4bc7fd4e57757f189c51f0429",
-      "shipped": null,
+      "shipped": true,
       "size": 155592,
       "source": {
         "starterId": "game-generic-v56"
       },
-      "status": "awaiting-restoration",
+      "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/main.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     }
   },
   "discoveries": {},
   "downloads": {},
+  "export": {
+    "coverage": "verified",
+    "hostMedia": [
+      {
+        "contentMatches": [],
+        "path": "index.apple-touch-icon.png",
+        "sha256": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
+        "size": 13586,
+        "sourcePaths": []
+      },
+      {
+        "contentMatches": [],
+        "path": "index.icon.png",
+        "sha256": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
+        "size": 21498,
+        "sourcePaths": []
+      },
+      {
+        "contentMatches": [],
+        "path": "index.png",
+        "sha256": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+        "size": 21443,
+        "sourcePaths": []
+      },
+      {
+        "contentMatches": [],
+        "path": "share/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
+        "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
+        "size": 21187,
+        "sourcePaths": [
+          "assets/share/favicon.png"
+        ]
+      },
+      {
+        "contentMatches": [],
+        "path": "share/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
+        "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
+        "size": 1365943,
+        "sourcePaths": [
+          "assets/share/og.png"
+        ]
+      }
+    ],
+    "pckSha256": "sha256:132686243365788bafbbc81dc7f966bb2664db1ff1e718ad9e9dcfa2ee10e04e",
+    "profile": "release",
+    "sourceFingerprint": "sha256:effa57b77370c6b1e6437195ee789163ab4662c8462bd9ada72523519f958096"
+  },
   "procedures": {},
   "summary": {
     "ancestry": {
       "ai": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "catalog": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "procedural": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       }
     },
     "derivatives": {
       "retained": 0,
-      "shipped": null,
+      "shipped": 0,
       "used": 0
     },
-    "exportedHostMedia": null,
+    "exportedHostMedia": {
+      "paths": 5,
+      "uniqueHashes": 5,
+      "unmatchedSourcePaths": 3
+    },
     "files": {
       "downloaded": 0,
-      "retained": 15,
-      "shipped": null,
-      "used": 15
+      "retained": 31,
+      "shipped": 31,
+      "used": 18
     },
     "origins": {
       "ai": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "catalog": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "derivative": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "external": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "procedural": {
         "retained": 0,
-        "shipped": null,
+        "shipped": 0,
         "used": 0
       },
       "template": {
         "retained": 15,
-        "shipped": null,
-        "used": 15
+        "shipped": 15,
+        "used": 3
       },
       "unknown": {
-        "retained": 0,
-        "shipped": null,
-        "used": 0
+        "retained": 16,
+        "shipped": 16,
+        "used": 15
       }
     },
     "packs": {
       "discovered": 0,
       "downloaded": 0,
-      "shipped": null,
+      "shipped": 0,
       "used": 0
     },
     "proceduralSystems": {
@@ -477,9 +808,83 @@
     },
     "spriteRegions": {
       "retained": 0,
-      "shipped": null,
+      "shipped": 0,
       "used": 0
+    },
+    "visualCoverage": {
+      "approvedRevision": 3,
+      "blueprintId": "gbp_89143ede07741d01dd941786",
+      "committedRoles": 3,
+      "expectedDigest": "50db0c553e96001ad4446f402e0c225736077b0d756efa2e46237c7266f84c68",
+      "fulfilledRoles": 0,
+      "roles": [
+        {
+          "id": "player-paper-plane",
+          "reasons": [
+            "unresolved"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "id": "pencil-pipe-obstacles",
+          "reasons": [
+            "unresolved"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "id": "notebook-playfield",
+          "reasons": [
+            "unresolved"
+          ],
+          "status": "unresolved"
+        }
+      ],
+      "search": {
+        "checkedPages": 0,
+        "outcomes": 0,
+        "overflowEvents": 0,
+        "requests": 0
+      },
+      "selectedButUnusedAssets": [],
+      "staleRenderedEvidence": [],
+      "status": "incomplete",
+      "unexplainedFallbacks": [],
+      "unresolvedRoles": [
+        "player-paper-plane",
+        "pencil-pipe-obstacles",
+        "notebook-playfield"
+      ],
+      "visualQuality": "requires_agent_review"
     }
   },
-  "version": 1
+  "version": 1,
+  "visualCoverage": {
+    "attempts": {},
+    "expected": {
+      "approvedRevision": 3,
+      "blueprintId": "gbp_89143ede07741d01dd941786",
+      "digest": "50db0c553e96001ad4446f402e0c225736077b0d756efa2e46237c7266f84c68",
+      "roles": [
+        {
+          "description": "Use a clearly readable side-view 2D folded paper plane as your player character, with a compact silhouette that remains distinct while rising, falling, and tilting during flight.",
+          "id": "player-paper-plane",
+          "label": "Your folded paper plane"
+        },
+        {
+          "description": "Use paired 2D pipe-like obstacles with clear gaps for your plane to fly through, drawn as pencil sketches that contrast enough with the notebook world for immediate collision readability.",
+          "id": "pencil-pipe-obstacles",
+          "label": "Your pencil-sketched pipe obstacles"
+        },
+        {
+          "description": "Use a restrained 2D notebook-paper playfield that supports the hand-drawn world without obscuring your plane, obstacles, or clearly visible score; fitting existing or template visuals may fulfill this role.",
+          "id": "notebook-playfield",
+          "label": "Your notebook-paper playfield"
+        }
+      ]
+    },
+    "overflowEvents": 0,
+    "resolutions": {},
+    "version": 1
+  }
 }

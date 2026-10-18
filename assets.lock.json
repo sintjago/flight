@@ -1,6 +1,18 @@
 {
   "version": 2,
   "groups": {
+    "backgrounds": {
+      "name": "Backgrounds",
+      "order": 20
+    },
+    "share": {
+      "name": "Share",
+      "order": 30
+    },
+    "sprites": {
+      "name": "Sprites",
+      "order": 10
+    },
     "template": {
       "name": "Template",
       "order": 0
@@ -8,13 +20,141 @@
   },
   "bundles": {},
   "assets": {
+    "assets/paperglide/cloud0.png": {
+      "path": "/manus-storage/game/sha256/5faea115fcf25616781a896d1714ac7413afe700d45a1148355b94e36248b79c.png",
+      "sha256": "sha256:5faea115fcf25616781a896d1714ac7413afe700d45a1148355b94e36248b79c",
+      "size": 255735,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/cloud1.png": {
+      "path": "/manus-storage/game/sha256/988c755da8b9964b729becc649004c34aa2c6ceee94687fe784b528182e12231.png",
+      "sha256": "sha256:988c755da8b9964b729becc649004c34aa2c6ceee94687fe784b528182e12231",
+      "size": 126217,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/cloud2.png": {
+      "path": "/manus-storage/game/sha256/ce55dc25bac332e3c8ff754a298a97714a650e17df15b8e19fd4777cec06ba66.png",
+      "sha256": "sha256:ce55dc25bac332e3c8ff754a298a97714a650e17df15b8e19fd4777cec06ba66",
+      "size": 109221,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/cloud3.png": {
+      "path": "/manus-storage/game/sha256/b78da1c6d17293c17b047888244087205872f245989f6242e0a8d93ae0e911b6.png",
+      "sha256": "sha256:b78da1c6d17293c17b047888244087205872f245989f6242e0a8d93ae0e911b6",
+      "size": 182789,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/doodle0.png": {
+      "path": "/manus-storage/game/sha256/564195beb297a78907e9d180a364a91db6725d7d5babd82ef062935a942aa873.png",
+      "sha256": "sha256:564195beb297a78907e9d180a364a91db6725d7d5babd82ef062935a942aa873",
+      "size": 42224,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/doodle1.png": {
+      "path": "/manus-storage/game/sha256/3e38e247f51db1a3360b5e6b5bbfa616263629ae3512cd9cfa6d4c8d75b40e8a.png",
+      "sha256": "sha256:3e38e247f51db1a3360b5e6b5bbfa616263629ae3512cd9cfa6d4c8d75b40e8a",
+      "size": 27083,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/doodle2.png": {
+      "path": "/manus-storage/game/sha256/879e8142d6ee0050bd324dca2823fddcf11804bfee8ce2e5cf5a00a44d808b52.png",
+      "sha256": "sha256:879e8142d6ee0050bd324dca2823fddcf11804bfee8ce2e5cf5a00a44d808b52",
+      "size": 34712,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/doodle3.png": {
+      "path": "/manus-storage/game/sha256/216b8a0a6401451ec87e7794c2e802aa3413aedcba969062f011642ec91e63de.png",
+      "sha256": "sha256:216b8a0a6401451ec87e7794c2e802aa3413aedcba969062f011642ec91e63de",
+      "size": 28278,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/doodle4.png": {
+      "path": "/manus-storage/game/sha256/44195eec0774aff7bb9a3126000ab30dc608827aca3af72e3ac810be9e4c61ca.png",
+      "sha256": "sha256:44195eec0774aff7bb9a3126000ab30dc608827aca3af72e3ac810be9e4c61ca",
+      "size": 12020,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": false
+    },
+    "assets/paperglide/doodle5.png": {
+      "path": "/manus-storage/game/sha256/8b851c735d9e036619c7fe182e9d02b4089c1c32905c4f69bd5d2039aaa7df8f.png",
+      "sha256": "sha256:8b851c735d9e036619c7fe182e9d02b4089c1c32905c4f69bd5d2039aaa7df8f",
+      "size": 9266,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/notebook.jpg": {
+      "path": "/manus-storage/game/sha256/4763404b8dd1d05287076b6cdd81a53c7da9185e0a806aaba4c91bd4d15003c3.jpg",
+      "sha256": "sha256:4763404b8dd1d05287076b6cdd81a53c7da9185e0a806aaba4c91bd4d15003c3",
+      "size": 146212,
+      "assetType": "image",
+      "groupId": "backgrounds",
+      "used": true
+    },
+    "assets/paperglide/pipe_body.png": {
+      "path": "/manus-storage/game/sha256/f27f83a130356155f1f1217c0420e10b2cf1c5f9918da77e79a6025bb30b9095.png",
+      "sha256": "sha256:f27f83a130356155f1f1217c0420e10b2cf1c5f9918da77e79a6025bb30b9095",
+      "size": 149358,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/pipe_cap.png": {
+      "path": "/manus-storage/game/sha256/c929171370c3677365e2fb36282e146d412b2063ecca82ee53b6cafbe08c72df.png",
+      "sha256": "sha256:c929171370c3677365e2fb36282e146d412b2063ecca82ee53b6cafbe08c72df",
+      "size": 42895,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/plane.png": {
+      "path": "/manus-storage/game/sha256/9451bbdb7027ffa3fec749a0545c09cc8adadfbd37409c870d70ac4f804043ec.png",
+      "sha256": "sha256:9451bbdb7027ffa3fec749a0545c09cc8adadfbd37409c870d70ac4f804043ec",
+      "size": 52505,
+      "assetType": "image",
+      "groupId": "sprites",
+      "used": true
+    },
+    "assets/share/favicon.png": {
+      "path": "/manus-storage/game/sha256/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
+      "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
+      "size": 21187,
+      "assetType": "image",
+      "groupId": "share",
+      "used": true
+    },
+    "assets/share/og.png": {
+      "path": "/manus-storage/game/sha256/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
+      "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
+      "size": 1365943,
+      "assetType": "image",
+      "groupId": "share",
+      "used": true
+    },
     "assets/template/characters/runner.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/c88485773d6ff9361e036f37d8ac76fb77b8c3f7c041c3f52c8dd222adc8cc21/assets/characters/runner.png",
       "sha256": "sha256:c88485773d6ff9361e036f37d8ac76fb77b8c3f7c041c3f52c8dd222adc8cc21",
       "size": 68885,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/characters/sentinel.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/0d9fb751bca5507ba14f7090573e6605a94753390a9e7c53bf2f590f0a24918d/assets/characters/sentinel.png",
@@ -22,7 +162,7 @@
       "size": 64998,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/environment/backdrop.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/ec4ab7867e60fb483dd438459f587b478aac4c1e71ec4fe509ce74a18de34216/assets/environment/backdrop.png",
@@ -30,7 +170,7 @@
       "size": 971282,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/environment/foreground.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/4b6916024c69961fbfa7cdc929c68f547fea4561e61ebdb3405b3aba0efbd94d/assets/environment/foreground.png",
@@ -38,7 +178,7 @@
       "size": 58603,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/fonts/Figtree-VF.subset.woff2": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/25/game-template/game-generic/2026.09.25-typography-v1/b3976c5969c8b1afd81dc3e314b61d8ffe3f3f58cf40906443105d330e6e0bdf/assets/template/fonts/Figtree-VF.subset.woff2",
@@ -70,7 +210,7 @@
       "size": 50950,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/powerups/magnet.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/6e7354aa6510a462717218b09b9d784bb161b87878bff62ef4f2a9d03c053de7/assets/powerups/magnet.png",
@@ -78,7 +218,7 @@
       "size": 53724,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/powerups/overdrive.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/6a48a85886c0551c1af0df576b0225f0ec3ae86b326fd84fc614083fbfe2908b/assets/powerups/overdrive.png",
@@ -86,7 +226,7 @@
       "size": 37238,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/powerups/shield.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/8cebf0cf730ca35c8c8697192ef78121c926442328a0725e0bd3e31701d64f13/assets/powerups/shield.png",
@@ -94,7 +234,7 @@
       "size": 39659,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/powerups/slow_field.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/96874c000866b2e7503b40da73888afb918ae36e462f51488415157da52a8637/assets/powerups/slow_field.png",
@@ -102,7 +242,7 @@
       "size": 49145,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/ui/loading-background.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/25/game-template/game-generic/2026.09.25-typography-v1/16dde3061f4e60802f8f0d1a6b875e72b6add05192237b03fef1fd313968a13a/assets/template/ui/loading-background.png",
@@ -110,7 +250,7 @@
       "size": 473356,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/ui/pause_glass.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/c88a4725838df85e72c7270865848f275b62c525c5679a2a8b7ecefb1af82d4b/assets/ui/pause_glass.png",
@@ -118,7 +258,7 @@
       "size": 115691,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     },
     "assets/template/ui/title_glass.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/8860db07768f093d4effea10b51431f76a1552d4bc7fd4e57757f189c51f0429/assets/ui/title_glass.png",
@@ -126,7 +266,7 @@
       "size": 155592,
       "assetType": "image",
       "groupId": "template",
-      "used": true
+      "used": false
     }
   }
 }

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "publicationOrigin": "https://paperglide-ntrvuiwm.manus.game",
+  "title": "Paper Glide",
+  "description": "Tap to keep a folded paper plane flying through pencil-sketched pipes in a hand-drawn notebook world. How many can you pass?",
+  "defaultCaptions": {},
+  "assets": {
+    "og": {
+      "digest": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
+      "path": "share/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
+      "mime": "image/png",
+      "width": 1200,
+      "height": 630,
+      "sizeBytes": 1365943,
+      "sourcePath": "assets/share/og.png"
+    },
+    "favicon": {
+      "digest": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
+      "path": "share/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
+      "mime": "image/png",
+      "width": 256,
+      "height": 256,
+      "sizeBytes": 21187,
+      "sourcePath": "assets/share/favicon.png"
+    }
+  }
+}

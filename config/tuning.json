@@ -38,63 +38,103 @@
       ]
     },
     {
-      "id": "gameplay.pickup.duration_multiplier",
+      "id": "gameplay.physics.gravity",
       "category": "Gameplay",
       "type": "number",
-      "default": 1,
-      "min": 0.5,
-      "max": 2,
-      "step": 0.1,
-      "decimals": 1,
-      "unit_key": "unit.multiplier",
-      "apply_mode": "NEXT_ACTION",
+      "default": 1500,
+      "min": 900,
+      "max": 2400,
+      "step": 50,
+      "decimals": 0,
+      "unit_key": "unit.px_per_second_squared",
+      "apply_mode": "NEXT_RUN",
       "integrity": "GAMEPLAY",
-      "label_key": "tuning.gameplay.pickup_duration",
-      "description_key": "tuning.gameplay.pickup_duration.description",
+      "label_key": "tuning.gameplay.gravity",
+      "description_key": "tuning.gameplay.gravity.description",
       "tags": [
-        "pickup",
-        "powerup",
-        "duration"
+        "gravity",
+        "fall",
+        "physics"
       ]
     },
     {
-      "id": "gameplay.respawn.invulnerability",
+      "id": "gameplay.physics.flap_speed",
       "category": "Gameplay",
       "type": "number",
-      "default": 1.2,
-      "min": 0.4,
-      "max": 3,
-      "step": 0.1,
-      "decimals": 1,
-      "unit_key": "unit.seconds",
-      "apply_mode": "NEXT_ACTION",
+      "default": 430,
+      "min": 300,
+      "max": 600,
+      "step": 10,
+      "decimals": 0,
+      "unit_key": "unit.px_per_second",
+      "apply_mode": "NEXT_RUN",
       "integrity": "GAMEPLAY",
-      "label_key": "tuning.gameplay.invulnerability",
-      "description_key": "tuning.gameplay.invulnerability.description",
+      "label_key": "tuning.gameplay.flap_speed",
+      "description_key": "tuning.gameplay.flap_speed.description",
       "tags": [
-        "respawn",
-        "damage",
-        "safety"
+        "flap",
+        "tap",
+        "lift"
       ]
     },
     {
-      "id": "gameplay.stage.transition_delay",
+      "id": "gameplay.course.scroll_speed",
       "category": "Gameplay",
       "type": "number",
-      "default": 1,
-      "min": 0.4,
-      "max": 2.5,
-      "step": 0.1,
-      "decimals": 1,
-      "unit_key": "unit.seconds",
-      "apply_mode": "NEXT_STAGE",
+      "default": 230,
+      "min": 150,
+      "max": 360,
+      "step": 10,
+      "decimals": 0,
+      "unit_key": "unit.px_per_second",
+      "apply_mode": "NEXT_RUN",
       "integrity": "GAMEPLAY",
-      "label_key": "tuning.gameplay.transition_delay",
-      "description_key": "tuning.gameplay.transition_delay.description",
+      "label_key": "tuning.gameplay.scroll_speed",
+      "description_key": "tuning.gameplay.scroll_speed.description",
       "tags": [
-        "stage",
-        "transition",
-        "timing"
+        "speed",
+        "scroll",
+        "pace"
+      ]
+    },
+    {
+      "id": "gameplay.course.gap_size",
+      "category": "Gameplay",
+      "type": "number",
+      "default": 230,
+      "min": 170,
+      "max": 320,
+      "step": 10,
+      "decimals": 0,
+      "unit_key": "unit.px",
+      "apply_mode": "NEXT_RUN",
+      "integrity": "GAMEPLAY",
+      "label_key": "tuning.gameplay.gap_size",
+      "description_key": "tuning.gameplay.gap_size.description",
+      "tags": [
+        "gap",
+        "pipes",
+        "difficulty"
+      ]
+    },
+    {
+      "id": "gameplay.course.pipe_spacing",
+      "category": "Gameplay",
+      "type": "number",
+      "default": 420,
+      "min": 320,
+      "max": 600,
+      "step": 10,
+      "decimals": 0,
+      "unit_key": "unit.px",
+      "apply_mode": "NEXT_RUN",
+      "integrity": "GAMEPLAY",
+      "label_key": "tuning.gameplay.pipe_spacing",
+      "description_key": "tuning.gameplay.pipe_spacing.description",
+      "tags": [
+        "spacing",
+        "pipes",
+        "rhythm"
       ]
     },
     {
@@ -194,52 +234,12 @@
       ]
     },
     {
-      "id": "player.move.max_speed",
-      "category": "Player",
-      "type": "number",
-      "default": 170,
-      "min": 90,
-      "max": 280,
-      "step": 5,
-      "decimals": 0,
-      "unit_key": "unit.px_per_second",
-      "apply_mode": "LIVE",
-      "integrity": "GAMEPLAY",
-      "label_key": "tuning.player.speed",
-      "description_key": "tuning.player.speed.description",
-      "tags": [
-        "movement",
-        "speed",
-        "runner"
-      ]
-    },
-    {
-      "id": "player.lives",
-      "category": "Player",
-      "type": "number",
-      "default": 3,
-      "min": 1,
-      "max": 6,
-      "step": 1,
-      "decimals": 0,
-      "unit_key": "unit.count",
-      "apply_mode": "NEXT_RUN",
-      "integrity": "GAMEPLAY",
-      "label_key": "tuning.player.lives",
-      "description_key": "tuning.player.lives.description",
-      "tags": [
-        "lives",
-        "difficulty",
-        "run"
-      ]
-    },
-    {
       "id": "player.visual.scale",
       "category": "Player",
       "type": "number",
       "default": 1,
-      "min": 0.8,
-      "max": 1.25,
+      "min": 0.7,
+      "max": 1.4,
       "step": 0.05,
       "decimals": 2,
       "unit_key": "unit.multiplier",
@@ -251,142 +251,6 @@
         "character",
         "scale",
         "visibility"
-      ]
-    },
-    {
-      "id": "enemies.move.speed_multiplier",
-      "category": "Enemies",
-      "type": "number",
-      "default": 1,
-      "min": 0.55,
-      "max": 1.65,
-      "step": 0.05,
-      "decimals": 2,
-      "unit_key": "unit.multiplier",
-      "apply_mode": "LIVE",
-      "integrity": "GAMEPLAY",
-      "label_key": "tuning.enemies.speed",
-      "description_key": "tuning.enemies.speed.description",
-      "tags": [
-        "enemy",
-        "speed",
-        "difficulty"
-      ]
-    },
-    {
-      "id": "enemies.ai.aggression",
-      "category": "Enemies",
-      "type": "number",
-      "default": 1,
-      "min": 0.5,
-      "max": 1.5,
-      "step": 0.1,
-      "decimals": 1,
-      "unit_key": "unit.multiplier",
-      "apply_mode": "NEXT_STAGE",
-      "integrity": "GAMEPLAY",
-      "label_key": "tuning.enemies.aggression",
-      "description_key": "tuning.enemies.aggression.description",
-      "tags": [
-        "ai",
-        "chase",
-        "difficulty"
-      ]
-    },
-    {
-      "id": "enemies.visual.scale",
-      "category": "Enemies",
-      "type": "number",
-      "default": 1,
-      "min": 0.8,
-      "max": 1.25,
-      "step": 0.05,
-      "decimals": 2,
-      "unit_key": "unit.multiplier",
-      "apply_mode": "LIVE",
-      "integrity": "COSMETIC",
-      "label_key": "tuning.enemies.scale",
-      "description_key": "tuning.enemies.scale.description",
-      "tags": [
-        "enemy",
-        "scale",
-        "visibility"
-      ]
-    },
-    {
-      "id": "environment.filter.enabled",
-      "category": "Environment",
-      "type": "boolean",
-      "default": true,
-      "unit_key": "unit.none",
-      "apply_mode": "LIVE",
-      "integrity": "COSMETIC",
-      "label_key": "tuning.environment.filter",
-      "description_key": "tuning.environment.filter.description",
-      "tags": [
-        "filter",
-        "post process",
-        "visual"
-      ]
-    },
-    {
-      "id": "environment.filter.intensity",
-      "category": "Environment",
-      "type": "number",
-      "default": 0.18,
-      "min": 0,
-      "max": 0.8,
-      "step": 0.02,
-      "decimals": 2,
-      "unit_key": "unit.none",
-      "apply_mode": "LIVE",
-      "integrity": "COSMETIC",
-      "label_key": "tuning.environment.filter_intensity",
-      "description_key": "tuning.environment.filter_intensity.description",
-      "tags": [
-        "filter",
-        "shader",
-        "strength"
-      ]
-    },
-    {
-      "id": "environment.particles.density",
-      "category": "Environment",
-      "type": "number",
-      "default": 0.4,
-      "min": 0,
-      "max": 2,
-      "step": 0.1,
-      "decimals": 1,
-      "unit_key": "unit.multiplier",
-      "apply_mode": "LIVE",
-      "integrity": "COSMETIC",
-      "label_key": "tuning.environment.particles",
-      "description_key": "tuning.environment.particles.description",
-      "tags": [
-        "particles",
-        "ambient",
-        "effects"
-      ]
-    },
-    {
-      "id": "environment.camera.zoom",
-      "category": "Environment",
-      "type": "number",
-      "default": 1,
-      "min": 0.85,
-      "max": 1.15,
-      "step": 0.05,
-      "decimals": 2,
-      "unit_key": "unit.multiplier",
-      "apply_mode": "LIVE",
-      "integrity": "COSMETIC",
-      "label_key": "tuning.environment.zoom",
-      "description_key": "tuning.environment.zoom.description",
-      "tags": [
-        "camera",
-        "zoom",
-        "layout"
       ]
     }
   ]
