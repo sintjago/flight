@@ -961,11 +961,11 @@
   },
   "files": {
     "THIRD_PARTY_NOTICES.txt": "sha256:c729a77bf07eb9745b2d89c3ce4ead3357438366f41743d2755ae35f98509cf9",
-    "game-sharing.json": "sha256:0f39738dfc754752ccc4b6eb3d1f453c90c32803bb5ffa28b0bc81c692936be6",
+    "game-sharing.json": "sha256:8dc06fb881af49aea9cbafe2b9971147eb3b22e177ad729843302cb8f128592a",
     "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
     "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
     "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-    "index.html": "sha256:008180b669881afb852071a11eab856833b47128ae554ba66d831e27e0cb8248",
+    "index.html": "sha256:1544c881eec106053abc7c4df4a09030f2f617c156294c204a237296b6e4a117",
     "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
     "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
     "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
