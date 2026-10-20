@@ -2,40 +2,59 @@ extends RefCounted
 ## Builds a two-choice math prompt, with a topic and short learning hint, for each difficulty.
 
 const DIFFICULTIES := ["easy", "medium", "hard"]
-const TOPIC_GROUPS := ["addition_subtraction", "multiplication_division", "fractions", "number_sense", "decimals_percent", "ratios_order", "algebra", "powers_roots", "geometry_trig"]
-const EASY_TOPIC_GROUPS := ["addition_subtraction", "multiplication_division", "fractions", "number_sense"]
-const MEDIUM_TOPIC_GROUPS := ["addition_subtraction", "multiplication_division", "fractions", "decimals_percent", "ratios_order"]
-const HARD_TOPIC_GROUPS := ["addition_subtraction", "multiplication_division", "fractions", "decimals_percent", "ratios_order", "algebra", "powers_roots", "geometry_trig"]
+const TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations", "integers", "algebra", "quadratics", "exponents", "roots", "geometry", "trigonometry"]
+const EASY_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"]
+const MEDIUM_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations"]
+const HARD_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations", "integers", "algebra", "exponents", "roots", "geometry"]
+const LEVEL_FIVE_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations", "integers", "algebra", "quadratics", "exponents", "roots", "geometry", "trigonometry"]
 
 
 static func difficulty_level_for(value: Variant) -> int:
 	if value is int or value is float:
-		return clampi(roundi(float(value)), 0, 10)
+		return clampi(roundi(float(value)), 1, 5)
 	match str(value):
 		"easy":
 			return 2
 		"medium":
-			return 5
+			return 3
 		"hard":
-			return 8
-	return 5
+			return 4
+	return 2
 
 
 static func band_for_level(level: int) -> String:
-	if level <= 3:
+	if level <= 2:
 		return "easy"
-	if level <= 6:
+	if level == 3:
 		return "medium"
 	return "hard"
 
 
 static func available_topic_groups(level: int) -> Array[String]:
-	var band := band_for_level(level)
+	var safe_level := clampi(level, 1, 5)
 	var groups: Array[String] = []
-	var source: Array = EASY_TOPIC_GROUPS if band == "easy" else MEDIUM_TOPIC_GROUPS if band == "medium" else HARD_TOPIC_GROUPS
+	var source: Array = EASY_TOPIC_GROUPS
+	if safe_level == 3:
+		source = MEDIUM_TOPIC_GROUPS
+	elif safe_level == 4:
+		source = HARD_TOPIC_GROUPS
+	elif safe_level == 5:
+		source = LEVEL_FIVE_TOPIC_GROUPS
 	for group: Variant in source:
 		groups.append(str(group))
 	return groups
+
+
+static func topic_unlock_level(group: String) -> int:
+	if group in EASY_TOPIC_GROUPS:
+		return 1
+	if group in MEDIUM_TOPIC_GROUPS:
+		return 3
+	if group in HARD_TOPIC_GROUPS:
+		return 4
+	if group in LEVEL_FIVE_TOPIC_GROUPS:
+		return 5
+	return 5
 
 
 static func generate(rng: RandomNumberGenerator, difficulty: Variant, selected_groups: Array = []) -> Dictionary:
@@ -48,7 +67,7 @@ static func generate(rng: RandomNumberGenerator, difficulty: Variant, selected_g
 	if eligible.is_empty():
 		eligible = available_topic_groups(level)
 	var group := eligible[rng.randi_range(0, eligible.size() - 1)]
-	var question := _generate_for_group(rng, mode, group)
+	var question := _generate_for_group(rng, mode, level, group)
 	question["difficulty"] = mode
 	question["difficulty_level"] = level
 	question["topic_group"] = group
@@ -62,36 +81,60 @@ static func generate(rng: RandomNumberGenerator, difficulty: Variant, selected_g
 	return question
 
 
-static func _generate_for_group(rng: RandomNumberGenerator, mode: String, group: String) -> Dictionary:
+static func _generate_for_group(rng: RandomNumberGenerator, mode: String, level: int, group: String) -> Dictionary:
 	match group:
-		"addition_subtraction":
+		"addition":
 			if mode == "easy":
-				return _easy_add(rng) if rng.randi_range(0, 1) == 0 else _easy_subtract(rng)
+				return _easy_add(rng, 20 if level == 1 else 100)
 			if mode == "medium":
-				return _medium_add(rng) if rng.randi_range(0, 1) == 0 else _medium_subtract(rng)
-			return _hard_signed_operation(rng, "add_sub")
-		"multiplication_division":
+				return _medium_add(rng)
+			return _hard_signed_operation(rng, "addition", level)
+		"subtraction":
 			if mode == "easy":
-				return _easy_multiply(rng) if rng.randi_range(0, 1) == 0 else _easy_divide(rng)
+				return _easy_subtract(rng, 20 if level == 1 else 100)
 			if mode == "medium":
-				return _medium_multiply(rng) if rng.randi_range(0, 1) == 0 else _medium_divide(rng)
-			return _hard_signed_operation(rng, "multiply_divide")
+				return _medium_subtract(rng)
+			return _hard_signed_operation(rng, "subtraction", level)
+		"multiplication":
+			if mode == "easy":
+				return _easy_multiply(rng, 5 if level == 1 else 10)
+			if mode == "medium":
+				return _medium_multiply(rng)
+			return _hard_signed_operation(rng, "multiplication", level)
+		"division":
+			if mode == "easy":
+				return _easy_divide(rng, 5 if level == 1 else 10)
+			if mode == "medium":
+				return _medium_divide(rng)
+			return _hard_signed_operation(rng, "division", level)
 		"fractions":
 			if mode == "easy":
-				return _easy_fraction_of(rng) if rng.randi_range(0, 1) == 0 else _easy_fraction_compare(rng)
-			return _fraction_operation(rng, mode == "hard")
+				return _easy_fraction_of(rng, level) if rng.randi_range(0, 1) == 0 else _easy_fraction_compare(rng)
+			return _fraction_operation(rng, level == 5)
 		"number_sense":
-			return _easy_place_value(rng) if rng.randi_range(0, 1) == 0 else _easy_pattern(rng)
-		"decimals_percent":
-			return _medium_decimal(rng) if rng.randi_range(0, 1) == 0 else _medium_percent(rng)
-		"ratios_order":
-			return _medium_ratio(rng) if rng.randi_range(0, 1) == 0 else _medium_order_operations(rng)
+			return _easy_place_value(rng) if rng.randi_range(0, 1) == 0 else _easy_pattern(rng, 20 if level == 1 else 100)
+		"decimals":
+			return _medium_decimal(rng)
+		"percentages":
+			return _medium_percent(rng)
+		"ratios":
+			return _medium_ratio(rng)
+		"order_of_operations":
+			return _medium_order_operations(rng)
+		"integers":
+			return _hard_signed_operation(rng, "integers", level)
 		"algebra":
-			return _hard_linear(rng) if rng.randi_range(0, 1) == 0 else _hard_quadratic(rng)
-		"powers_roots":
-			return _hard_exponents(rng) if rng.randi_range(0, 1) == 0 else _hard_roots(rng)
-		"geometry_trig":
-			return _hard_geometry(rng) if rng.randi_range(0, 1) == 0 else _hard_trigonometry(rng)
+			return _hard_linear(rng, level)
+		"quadratics":
+			return _hard_quadratic(rng)
+		"exponents":
+			return _hard_exponents(rng)
+		"roots":
+			return _hard_roots(rng)
+		"geometry":
+			return _hard_geometry(rng)
+		"trigonometry":
+			return _hard_trigonometry(rng)
 	return _easy_add(rng)
 
 
@@ -157,33 +200,35 @@ static func _generate_hard(rng: RandomNumberGenerator) -> Dictionary:
 			return _hard_trigonometry(rng)
 
 
-static func _easy_add(rng: RandomNumberGenerator) -> Dictionary:
-	var a := rng.randi_range(12, 89)
-	var b := rng.randi_range(1, 100 - a)
+static func _easy_add(rng: RandomNumberGenerator, max_total: int = 100) -> Dictionary:
+	var min_a := maxi(2, int(max_total * 0.12))
+	var max_a := maxi(min_a, int(max_total * 0.89))
+	var a := rng.randi_range(min_a, max_a)
+	var b := rng.randi_range(1, max_total - a)
 	return _integer_problem("%d + %d = ?" % [a, b], a + b, "addition", "hint.addition", "integer_operation", a, b, "+")
 
 
-static func _easy_subtract(rng: RandomNumberGenerator) -> Dictionary:
-	var a := rng.randi_range(10, 100)
+static func _easy_subtract(rng: RandomNumberGenerator, max_value: int = 100) -> Dictionary:
+	var a := rng.randi_range(maxi(2, int(max_value * 0.1)), max_value)
 	var b := rng.randi_range(1, a)
 	return _integer_problem("%d - %d = ?" % [a, b], a - b, "subtraction", "hint.subtraction", "integer_operation", a, b, "-")
 
 
-static func _easy_multiply(rng: RandomNumberGenerator) -> Dictionary:
-	var a := rng.randi_range(2, 10)
-	var b := rng.randi_range(2, 10)
+static func _easy_multiply(rng: RandomNumberGenerator, max_factor: int = 10) -> Dictionary:
+	var a := rng.randi_range(2, max_factor)
+	var b := rng.randi_range(2, max_factor)
 	return _integer_problem("%d × %d = ?" % [a, b], a * b, "multiplication", "hint.multiplication", "integer_operation", a, b, "×")
 
 
-static func _easy_divide(rng: RandomNumberGenerator) -> Dictionary:
-	var divisor := rng.randi_range(2, 10)
-	var quotient := rng.randi_range(2, 10)
+static func _easy_divide(rng: RandomNumberGenerator, max_factor: int = 10) -> Dictionary:
+	var divisor := rng.randi_range(2, max_factor)
+	var quotient := rng.randi_range(2, max_factor)
 	var dividend := divisor * quotient
 	return _integer_problem("%d ÷ %d = ?" % [dividend, divisor], quotient, "division", "hint.division", "integer_operation", dividend, divisor, "÷")
 
 
-static func _easy_fraction_of(rng: RandomNumberGenerator) -> Dictionary:
-	var denominator := 2 if rng.randi_range(0, 1) == 0 else 4
+static func _easy_fraction_of(rng: RandomNumberGenerator, level: int = 2) -> Dictionary:
+	var denominator := 2 if level == 1 or rng.randi_range(0, 1) == 0 else 4
 	var numerator := 1 if denominator == 2 or rng.randi_range(0, 1) == 0 else 3
 	var whole := denominator * rng.randi_range(2, 20)
 	var answer := int(numerator * whole / denominator)
@@ -215,9 +260,10 @@ static func _easy_place_value(rng: RandomNumberGenerator) -> Dictionary:
 	return _integer_problem("Tens digit of %d = ?" % number, answer, "place_value", "hint.place_value", "place_value", number, 10, "÷")
 
 
-static func _easy_pattern(rng: RandomNumberGenerator) -> Dictionary:
-	var step_size := rng.randi_range(2, 12)
-	var start := rng.randi_range(1, 100 - step_size * 3)
+static func _easy_pattern(rng: RandomNumberGenerator, max_value: int = 100) -> Dictionary:
+	var max_step := maxi(2, mini(12, int(max_value / 6)))
+	var step_size := rng.randi_range(2, max_step)
+	var start := rng.randi_range(1, max_value - step_size * 3)
 	var answer := start + step_size * 3
 	var expression := "%d, %d, %d, ?" % [start, start + step_size, start + step_size * 2]
 	return _integer_problem(expression, answer, "number_patterns", "hint.number_patterns", "number_pattern", start, step_size, "+")
@@ -325,25 +371,33 @@ static func _fraction_operation(rng: RandomNumberGenerator, advanced: bool) -> D
 
 
 static func _hard_integers(rng: RandomNumberGenerator) -> Dictionary:
-	return _hard_signed_operation(rng, "any")
+	return _hard_signed_operation(rng, "integers", 5)
 
 
-static func _hard_signed_operation(rng: RandomNumberGenerator, operation_group: String) -> Dictionary:
-	if operation_group == "multiply_divide":
-		if rng.randi_range(0, 1) == 0:
-			var left := rng.randi_range(2, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
-			var right := rng.randi_range(2, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
-			return _integer_problem("%d × (%d) = ?" % [left, right], left * right, "multiplication", "hint.multiplication", "integer_operation", left, right, "×")
-		var divisor := rng.randi_range(2, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
-		var quotient := rng.randi_range(2, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
+static func _hard_signed_operation(rng: RandomNumberGenerator, operation_group: String, level: int = 5) -> Dictionary:
+	var factor_limit := 8 if level == 4 else 12
+	if operation_group == "multiplication":
+		var left := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
+		var right := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
+		return _integer_problem("%d × (%d) = ?" % [left, right], left * right, "multiplication", "hint.multiplication", "integer_operation", left, right, "×")
+	if operation_group == "division":
+		var divisor := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
+		var quotient := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 		var dividend := divisor * quotient
 		return _integer_problem("%d ÷ (%d) = ?" % [dividend, divisor], quotient, "division", "hint.division", "integer_operation", dividend, divisor, "÷")
-	var operators: Array[String] = ["+", "-"]
-	if operation_group != "add_sub":
+	var operators: Array[String] = []
+	if operation_group == "addition":
+		operators.append("+")
+	elif operation_group == "subtraction":
+		operators.append("-")
+	else:
+		operators.append("+")
+		operators.append("-")
 		operators.append("×")
 	var operator: String = operators[rng.randi_range(0, operators.size() - 1)]
-	var a := rng.randi_range(-40, 40)
-	var b := rng.randi_range(-40, 40)
+	var magnitude := 20 if level == 4 else 40
+	var a := rng.randi_range(-magnitude, magnitude)
+	var b := rng.randi_range(-magnitude, magnitude)
 	if a == 0:
 		a = 17
 	if b == 0:
@@ -351,15 +405,17 @@ static func _hard_signed_operation(rng: RandomNumberGenerator, operation_group: 
 	var answer := a + b if operator == "+" else (a - b if operator == "-" else a * b)
 	var rendered_b := "(%d)" % b if b < 0 else str(b)
 	var expression := "%d %s %s = ?" % [a, operator, rendered_b]
-	var topic := "integers" if operator != "×" else "multiplication"
-	var hint := "hint.integers" if operator != "×" else "hint.multiplication"
+	var topic := operation_group
+	var hint := "hint.integers" if operation_group == "integers" or (a < 0 or b < 0) else ("hint.addition" if operator == "+" else "hint.subtraction")
+	if operator == "×":
+		hint = "hint.multiplication"
 	return _integer_problem(expression, answer, topic, hint, "integer_operation", a, b, operator)
 
 
-static func _hard_linear(rng: RandomNumberGenerator) -> Dictionary:
-	var coefficient := rng.randi_range(2, 9)
-	var solution := rng.randi_range(-8, 15)
-	var intercept := rng.randi_range(-20, 20)
+static func _hard_linear(rng: RandomNumberGenerator, level: int = 5) -> Dictionary:
+	var coefficient := rng.randi_range(2, 5 if level == 4 else 9)
+	var solution := rng.randi_range(1, 8) if level == 4 else rng.randi_range(-8, 15)
+	var intercept := rng.randi_range(-8, 8) if level == 4 else rng.randi_range(-20, 20)
 	var result := coefficient * solution + intercept
 	var sign := "+" if intercept >= 0 else "-"
 	var expression := "Solve: %dx %s %d = %d; x = ?" % [coefficient, sign, abs(intercept), result]

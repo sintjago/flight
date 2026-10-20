@@ -58,8 +58,9 @@ var plane_rot := 0.0
 var pipes: Array[Dictionary] = []
 var spawned := 0
 var difficulty := "easy"
-var difficulty_level := 2
-var selected_topic_groups: Array[String] = ["addition_subtraction", "multiplication_division", "fractions", "number_sense"]
+var difficulty_level := 1
+var speed_level := 1
+var selected_topic_groups: Array[String] = ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"]
 var current_question: Dictionary = {}
 var failure_reason := ""
 var failure_answer := ""
@@ -119,13 +120,11 @@ func _tuned(id: String, fallback: float) -> float:
 func load_tuning() -> void:
 	gravity = _tuned("gameplay.physics.gravity", 1500.0)
 	flap_speed = _tuned("gameplay.physics.flap_speed", 430.0)
-	var intensity := float(difficulty_level) / 10.0
-	var speed_offset := lerpf(-55.0, 35.0, intensity)
-	var gap_offset := lerpf(18.0, -18.0, intensity)
-	var spacing_offset := lerpf(140.0, 0.0, intensity)
-	base_speed = _tuned("gameplay.course.scroll_speed", 230.0) + speed_offset
-	base_gap = _tuned("gameplay.course.gap_size", 180.0) + gap_offset
-	pipe_spacing = _tuned("gameplay.course.pipe_spacing", 420.0) + spacing_offset
+	var challenge_intensity := float(difficulty_level - 1) / 4.0
+	var pace_intensity := float(speed_level - 1) / 4.0
+	base_speed = _tuned("gameplay.course.scroll_speed", 230.0) * lerpf(0.6, 1.2, pace_intensity)
+	base_gap = _tuned("gameplay.course.gap_size", 180.0) + lerpf(18.0, -18.0, challenge_intensity)
+	pipe_spacing = _tuned("gameplay.course.pipe_spacing", 420.0) + lerpf(220.0, -20.0, pace_intensity)
 	refresh_live_tuning()
 
 
@@ -173,6 +172,12 @@ func set_selected_topics(groups: Array) -> void:
 		selected_topic_groups = MathQuestion.available_topic_groups(difficulty_level)
 
 
+func set_speed_level(value: Variant) -> void:
+	speed_level = clampi(roundi(float(value)), 1, 5)
+	load_tuning()
+	queue_redraw()
+
+
 ## Flap input. The first flap of a fresh run starts it.
 func flap() -> void:
 	if state == "ready":
@@ -204,7 +209,7 @@ func _start_run() -> void:
 
 
 func current_speed() -> float:
-	return base_speed + minf(float(score) * 4.0, base_speed * 0.4)
+	return base_speed
 
 
 func current_gap(index: int) -> float:

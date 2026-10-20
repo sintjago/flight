@@ -31,18 +31,32 @@ var _title_card: PanelContainer
 var _title_prompt: Label
 var _title_best: Label
 var _difficulty_description: Label
-var _difficulty_slider: HSlider
 var _difficulty_value_label: Label
 var _topic_checkboxes: Dictionary = {}
+var _practice_buttons: Dictionary = {}
+var _difficulty_buttons: Dictionary = {}
+var _speed_buttons: Dictionary = {}
+var _topic_screen: Control
+var _difficulty_screen: Control
+var _speed_screen: Control
+var _topic_next_button: Button
+var _difficulty_summary: Label
+var _difficulty_next_button: Button
+var _speed_value_label: Label
+var _speed_description: Label
+var _speed_start_button: Button
 var _topic_selection: Dictionary = {
-	"addition_subtraction": true,
-	"multiplication_division": true,
+	"addition": true,
+	"subtraction": true,
+	"multiplication": true,
+	"division": true,
 	"fractions": true,
 	"number_sense": true,
 }
-var _start_button: Button
-var _selected_level := 2
+var _selected_level := 1
+var _selected_speed := 1
 var _selected_difficulty := "easy"
+var _selected_practice_area := "math"
 var _over_screen: Control
 var _over_card: PanelContainer
 var _over_title_label: Label
@@ -69,6 +83,9 @@ func _ready() -> void:
 	_build_world()
 	_build_hud()
 	_build_title()
+	_build_topic_screen()
+	_build_difficulty_screen()
+	_build_speed_screen()
 	_build_over()
 	_build_pause()
 	SfxBank.register_all(get_node_or_null("/root/AudioDirector"))
@@ -269,139 +286,308 @@ func _build_question_bar() -> void:
 	_hud.add_child(_question_bar)
 
 
-func _build_title() -> void:
-	_title_screen = _full_rect_control("TitleScreen")
-	_title_card = _make_card(Vector2(1080, 620), 360.0)
-	_title_screen.add_child(_title_card)
+func _make_setup_page(page_name: String, heading: String, subtitle: String) -> Dictionary:
+	var screen := _full_rect_control(page_name)
+	var card := _make_card(Vector2(1080, 620), 360.0)
+	screen.add_child(card)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 2)
-	_title_card.add_child(box)
-	var title := _make_label(I18n.t("game.title").to_upper(), 64, GRAPHITE, true)
+	box.add_theme_constant_override("separation", 7)
+	card.add_child(box)
+	var title := _make_label(heading.to_upper(), 42, GRAPHITE, true)
+	box.add_child(title)
+	box.add_child(_make_label(subtitle, 19, Color(GRAPHITE, 0.74)))
+	return {"screen": screen, "card": card, "box": box}
+
+
+func _make_setup_nav(box: VBoxContainer, back_text: String, back_action: Callable, next_text: String, next_action: Callable) -> Dictionary:
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 18)
+	var back := _make_button(back_text, 20, Color(0.78, 0.86, 0.96))
+	back.custom_minimum_size = Vector2(250, 56)
+	back.pressed.connect(back_action)
+	row.add_child(back)
+	var next := _make_button(next_text, 20, SAGE)
+	next.custom_minimum_size = Vector2(300, 56)
+	next.pressed.connect(next_action)
+	row.add_child(next)
+	box.add_child(row)
+	return {"back": back, "next": next}
+
+
+func _style_choice_button(button: Button, selected: bool, selected_color: Color) -> void:
+	for slot: String in ["normal", "hover", "pressed", "focus"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = selected_color if selected else CARD
+		if slot == "hover":
+			style.bg_color = style.bg_color.lightened(0.08)
+		elif slot == "pressed":
+			style.bg_color = style.bg_color.darkened(0.08)
+		style.border_color = BLUE_PENCIL if selected else GRAPHITE
+		style.set_border_width_all(4 if selected else 2)
+		style.set_corner_radius_all(12)
+		button.add_theme_stylebox_override(slot, style)
+
+
+func _build_title() -> void:
+	var page := _make_setup_page("PracticeSelectionScreen", I18n.t("game.title"), I18n.t("practice.prompt"))
+	_title_screen = page.screen
+	_title_card = page.card
+	var box: VBoxContainer = page.box
+	var title := box.get_child(0) as Label
+	title.add_theme_font_size_override("font_size", 64)
 	title.add_theme_color_override("font_shadow_color", Color(BLUE_PENCIL, 0.55))
 	title.add_theme_constant_override("shadow_offset_x", 4)
 	title.add_theme_constant_override("shadow_offset_y", 4)
-	box.add_child(title)
-	box.add_child(_make_label(I18n.t("title.tagline"), 22, Color(GRAPHITE, 0.85)))
-	box.add_child(_make_label(I18n.t("title.howto"), 16, Color(GRAPHITE, 0.72)))
-	box.add_child(_make_label(I18n.t("title.choose_difficulty"), 18, BLUE_PENCIL.darkened(0.15), true))
-	_difficulty_value_label = _make_label("", 21, GRAPHITE, true)
-	box.add_child(_difficulty_value_label)
-	var slider_row := HBoxContainer.new()
-	slider_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slider_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	slider_row.add_theme_constant_override("separation", 14)
-	box.add_child(slider_row)
-	slider_row.add_child(_make_label(I18n.t("title.slider_easy"), 15, BLUE_PENCIL.darkened(0.2), true))
-	_difficulty_slider = HSlider.new()
-	_difficulty_slider.name = "DifficultySlider"
-	_difficulty_slider.min_value = 0.0
-	_difficulty_slider.max_value = 10.0
-	_difficulty_slider.step = 1.0
-	_difficulty_slider.value = _selected_level
-	_difficulty_slider.custom_minimum_size = Vector2(650, 36)
-	_difficulty_slider.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_difficulty_slider.focus_mode = Control.FOCUS_ALL
-	_difficulty_slider.value_changed.connect(_on_difficulty_slider_changed)
-	slider_row.add_child(_difficulty_slider)
-	slider_row.add_child(_make_label(I18n.t("title.slider_hard"), 15, BLUE_PENCIL.darkened(0.2), true))
-	_difficulty_description = _make_label("", 16, Color(GRAPHITE, 0.72))
-	box.add_child(_difficulty_description)
-	box.add_child(_make_label(I18n.t("title.choose_content"), 18, BLUE_PENCIL.darkened(0.15), true))
-	box.add_child(_make_label(I18n.t("title.topic_unlocks"), 13, Color(GRAPHITE, 0.72)))
-	var topic_grid := GridContainer.new()
-	topic_grid.name = "TopicCheckboxes"
-	topic_grid.columns = 3
-	topic_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	topic_grid.add_theme_constant_override("h_separation", 20)
-	topic_grid.add_theme_constant_override("v_separation", 0)
-	box.add_child(topic_grid)
+	box.add_child(_make_label(I18n.t("practice.tagline"), 20, Color(GRAPHITE, 0.72)))
+	var math_button := _make_button(I18n.t("practice.math"), 26, SAGE)
+	math_button.name = "PracticeMathButton"
+	math_button.custom_minimum_size = Vector2(560, 62)
+	math_button.pressed.connect(_begin_from_title)
+	box.add_child(math_button)
+	_practice_buttons["math"] = math_button
+	for area: String in ["reading", "russian", "spanish", "science"]:
+		var button := _make_button(I18n.t("practice.coming_soon", {"area": I18n.t("practice." + area)}), 20, Color(0.93, 0.91, 0.85))
+		button.name = "Practice_" + area.capitalize()
+		button.custom_minimum_size = Vector2(560, 48)
+		button.disabled = true
+		button.add_theme_color_override("font_disabled_color", Color(GRAPHITE, 0.78))
+		var disabled_style := StyleBoxFlat.new()
+		disabled_style.bg_color = Color(0.92, 0.90, 0.84)
+		disabled_style.border_color = Color(GRAPHITE, 0.42)
+		disabled_style.set_border_width_all(2)
+		disabled_style.set_corner_radius_all(12)
+		button.add_theme_stylebox_override("disabled", disabled_style)
+		box.add_child(button)
+		_practice_buttons[area] = button
+	_title_prompt = _make_label(I18n.t("practice.future_note"), 14, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
+	box.add_child(_title_prompt)
+	_title_best = _make_label("", 18, Color(GRAPHITE, 0.8))
+	box.add_child(_title_best)
+
+
+func _build_topic_screen() -> void:
+	var page := _make_setup_page("MathTopicsScreen", I18n.t("topics.title"), I18n.t("topics.subtitle"))
+	_topic_screen = page.screen
+	var box: VBoxContainer = page.box
+	var grid := GridContainer.new()
+	grid.name = "TopicCheckboxes"
+	grid.columns = 2
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grid.add_theme_constant_override("h_separation", 20)
+	grid.add_theme_constant_override("v_separation", 1)
+	box.add_child(grid)
 	for group: String in MathQuestion.TOPIC_GROUPS:
 		var checkbox := CheckBox.new()
 		checkbox.name = "Topic_" + group
+		var unlock_level := MathQuestion.topic_unlock_level(group)
 		checkbox.text = I18n.t("topic_filter." + group)
-		checkbox.custom_minimum_size = Vector2(310, 34)
+		if unlock_level > 1:
+			checkbox.text += I18n.t("topics.unlock_suffix", {"level": unlock_level})
+		checkbox.custom_minimum_size = Vector2(470, 39)
 		checkbox.add_theme_font_size_override("font_size", 18)
 		checkbox.add_theme_color_override("font_color", GRAPHITE)
 		checkbox.add_theme_color_override("font_hover_color", GRAPHITE)
 		checkbox.add_theme_color_override("font_pressed_color", GRAPHITE)
 		checkbox.add_theme_color_override("font_focus_color", GRAPHITE)
-		checkbox.add_theme_color_override("font_disabled_color", Color(GRAPHITE, 0.72))
 		checkbox.focus_mode = Control.FOCUS_ALL
 		checkbox.set_pressed_no_signal(bool(_topic_selection.get(group, false)))
 		checkbox.toggled.connect(_on_topic_toggled.bind(group))
 		_topic_checkboxes[group] = checkbox
-		topic_grid.add_child(checkbox)
-	_start_button = _make_button(I18n.t("title.start"), 25, SAGE)
-	_start_button.custom_minimum_size = Vector2(260, 56)
-	_start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_start_button.pressed.connect(_begin_from_title)
-	box.add_child(_start_button)
-	_title_prompt = _make_label(I18n.t("title.prompt"), 14, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
-	box.add_child(_title_prompt)
-	_title_best = _make_label("", 20, Color(GRAPHITE, 0.8))
-	box.add_child(_title_best)
+		grid.add_child(checkbox)
+	var nav := _make_setup_nav(box, I18n.t("setup.back_home"), _show_title, I18n.t("setup.continue"), _continue_to_difficulty)
+	_topic_next_button = nav.next
+	_update_topic_selection()
+
+
+func _build_difficulty_screen() -> void:
+	var page := _make_setup_page("DifficultyScreen", I18n.t("difficulty.title"), I18n.t("difficulty.subtitle"))
+	_difficulty_screen = page.screen
+	var box: VBoxContainer = page.box
+	_difficulty_value_label = _make_label("", 26, GRAPHITE, true)
+	box.add_child(_difficulty_value_label)
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	for level in range(1, 6):
+		var button := _make_button("%d\n%s" % [level, I18n.t("difficulty.level." + str(level))], 19, CARD)
+		button.name = "DifficultyLevel%d" % level
+		button.custom_minimum_size = Vector2(178, 92)
+		button.add_theme_font_size_override("font_size", 18)
+		button.pressed.connect(_set_difficulty_level.bind(level))
+		_difficulty_buttons[level] = button
+		row.add_child(button)
+	_difficulty_description = _make_label("", 17, Color(GRAPHITE, 0.8))
+	box.add_child(_difficulty_description)
+	_difficulty_summary = _make_label("", 15, BLUE_PENCIL.darkened(0.2))
+	_difficulty_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_difficulty_summary)
+	var nav := _make_setup_nav(box, I18n.t("setup.back_topics"), _show_topic_selection, I18n.t("setup.continue"), _continue_to_speed)
+	_difficulty_next_button = nav.next
 	_set_difficulty_level(_selected_level)
 
 
-func _on_difficulty_slider_changed(value: float) -> void:
-	_set_difficulty_level(roundi(value))
+func _build_speed_screen() -> void:
+	var page := _make_setup_page("SpeedScreen", I18n.t("speed.title"), I18n.t("speed.subtitle"))
+	_speed_screen = page.screen
+	var box: VBoxContainer = page.box
+	_speed_value_label = _make_label("", 27, GRAPHITE, true)
+	box.add_child(_speed_value_label)
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	for level in range(1, 6):
+		var button := _make_button("%d\n%s" % [level, I18n.t("speed.pace." + str(level))], 18, CARD)
+		button.name = "SpeedLevel%d" % level
+		button.custom_minimum_size = Vector2(178, 92)
+		button.add_theme_font_size_override("font_size", 18)
+		button.pressed.connect(_set_speed_level.bind(level))
+		_speed_buttons[level] = button
+		row.add_child(button)
+	_speed_description = _make_label("", 17, Color(GRAPHITE, 0.8))
+	_speed_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_speed_description)
+	box.add_child(_make_label(I18n.t("speed.independent"), 15, BLUE_PENCIL.darkened(0.2)))
+	var nav := _make_setup_nav(box, I18n.t("setup.back_difficulty"), _show_difficulty_selection, I18n.t("speed.start"), _start_from_setup)
+	_speed_start_button = nav.next
+	_set_speed_level(_selected_speed)
+
+
+func _show_setup_page(target: Control, page_state: String) -> void:
+	_state = page_state
+	get_tree().paused = false
+	for screen: Control in [_title_screen, _topic_screen, _difficulty_screen, _speed_screen]:
+		screen.visible = screen == target
+	_over_screen.visible = false
+	_pause_screen.visible = false
+	_question_bar.visible = false
+	_pause_button.visible = false
+	_score_label.visible = false
+	_best_label.visible = false
+	_practice_label.visible = false
 
 
 func _set_difficulty_level(level: int) -> void:
-	_selected_level = clampi(level, 0, 10)
+	_selected_level = clampi(level, 1, 5)
 	_selected_difficulty = MathQuestion.band_for_level(_selected_level)
-	if _difficulty_slider != null:
-		_difficulty_slider.set_value_no_signal(_selected_level)
 	if _difficulty_value_label != null:
-		_difficulty_value_label.text = I18n.t("title.level_value", {
+		_difficulty_value_label.text = I18n.t("difficulty.level_value", {
 			"level": _selected_level,
-			"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
+			"description": I18n.t("difficulty.level." + str(_selected_level)).to_upper(),
 		})
 	if _difficulty_description != null:
-		_difficulty_description.text = I18n.t("difficulty." + _selected_difficulty + ".description")
-	_refresh_topic_checkboxes()
+		_difficulty_description.text = I18n.t("difficulty.description." + str(_selected_level))
+	for selected_level: int in _difficulty_buttons:
+		_style_choice_button(_difficulty_buttons[selected_level], selected_level == _selected_level, SAGE)
+	_update_difficulty_summary()
 	_update_title_best()
 
 
-func _select_difficulty(mode: String) -> void:
-	_set_difficulty_level(MathQuestion.difficulty_level_for(mode))
+func _update_difficulty_summary() -> void:
+	if _difficulty_summary == null:
+		return
+	var active_count := 0
+	var selected_count := 0
+	for group: String in MathQuestion.TOPIC_GROUPS:
+		if not bool(_topic_selection.get(group, false)):
+			continue
+		selected_count += 1
+		if group in MathQuestion.available_topic_groups(_selected_level):
+			active_count += 1
+	if active_count == 0:
+		_difficulty_summary.text = I18n.t("difficulty.no_topics")
+		_difficulty_next_button.disabled = true
+	elif active_count < selected_count:
+		_difficulty_summary.text = I18n.t("difficulty.some_topics_locked", {"active": active_count, "selected": selected_count})
+		_difficulty_next_button.disabled = false
+	else:
+		_difficulty_summary.text = I18n.t("difficulty.all_topics_ready", {"active": active_count})
+		_difficulty_next_button.disabled = false
 
 
-func _refresh_topic_checkboxes() -> void:
-	var available := MathQuestion.available_topic_groups(_selected_level)
-	var has_active_selection := false
-	for group: String in available:
-		has_active_selection = has_active_selection or bool(_topic_selection.get(group, false))
-	if not has_active_selection and not available.is_empty():
-		for group: String in available:
-			_topic_selection[group] = true
-	for group: String in _topic_checkboxes:
-		var checkbox: CheckBox = _topic_checkboxes[group]
-		checkbox.disabled = group not in available
-		checkbox.set_pressed_no_signal(bool(_topic_selection.get(group, false)))
-		var locked_key := "title.topic_locked_easy" if group in MathQuestion.EASY_TOPIC_GROUPS else ("title.topic_locked_medium" if group in MathQuestion.MEDIUM_TOPIC_GROUPS else "title.topic_locked_hard")
-		checkbox.tooltip_text = "" if group in available else I18n.t(locked_key)
+func _set_speed_level(level: int) -> void:
+	_selected_speed = clampi(level, 1, 5)
+	if _speed_value_label != null:
+		_speed_value_label.text = I18n.t("speed.selected", {
+			"level": _selected_speed,
+			"pace": I18n.t("speed.pace." + str(_selected_speed)),
+		})
+	if _speed_description != null:
+		_speed_description.text = I18n.t("speed.description." + str(_selected_speed))
+	for selected_level: int in _speed_buttons:
+		_style_choice_button(_speed_buttons[selected_level], selected_level == _selected_speed, Color(0.78, 0.86, 0.96))
+
+func _update_topic_selection() -> void:
+	var selected_count := 0
+	for group: String in MathQuestion.TOPIC_GROUPS:
+		if bool(_topic_selection.get(group, false)):
+			selected_count += 1
+	if _topic_next_button != null:
+		_topic_next_button.disabled = selected_count == 0
 
 
 func _on_topic_toggled(checked: bool, group: String) -> void:
 	_topic_selection[group] = checked
-	var available := MathQuestion.available_topic_groups(_selected_level)
-	var has_active_selection := false
-	for candidate: String in available:
-		has_active_selection = has_active_selection or bool(_topic_selection.get(candidate, false))
-	if not has_active_selection and _topic_checkboxes.has(group):
+	if not checked and _selected_topic_groups().is_empty():
 		_topic_selection[group] = true
 		(_topic_checkboxes[group] as CheckBox).set_pressed_no_signal(true)
+	_update_topic_selection()
 
 
 func _selected_topic_groups() -> Array[String]:
 	var selected: Array[String] = []
-	for group: String in MathQuestion.available_topic_groups(_selected_level):
+	for group: String in MathQuestion.TOPIC_GROUPS:
 		if bool(_topic_selection.get(group, false)):
 			selected.append(group)
 	return selected
+
+
+func _has_selected_topic_at_level(level: int) -> bool:
+	var available := MathQuestion.available_topic_groups(level)
+	for group: String in _selected_topic_groups():
+		if group in available:
+			return true
+	return false
+
+
+func _continue_to_difficulty() -> void:
+	if _selected_topic_groups().is_empty():
+		return
+	_show_setup_page(_difficulty_screen, "difficulty")
+
+
+func _continue_to_speed() -> void:
+	if _difficulty_next_button.disabled:
+		return
+	_show_setup_page(_speed_screen, "speed")
+
+
+func _show_topic_selection() -> void:
+	_show_setup_page(_topic_screen, "topics")
+
+
+func _show_difficulty_selection() -> void:
+	_show_setup_page(_difficulty_screen, "difficulty")
+
+
+func _begin_from_title() -> void:
+	if _state != "title":
+		return
+	_selected_practice_area = "math"
+	_show_setup_page(_topic_screen, "topics")
+
+
+func _start_from_setup() -> void:
+	if _state != "speed":
+		return
+	_start_new_run()
 
 
 func _update_title_best() -> void:
@@ -409,7 +595,7 @@ func _update_title_best() -> void:
 		return
 	var best := _best_score(_selected_difficulty)
 	_title_best.text = I18n.t("title.best", {
-		"difficulty": I18n.t("difficulty." + _selected_difficulty),
+		"difficulty": I18n.t("difficulty.level." + str(_selected_level)),
 		"score": best,
 	}) if best > 0 else ""
 	_title_best.visible = best > 0
@@ -519,19 +705,11 @@ func _best_score(difficulty: String = "") -> int:
 
 
 func _show_title() -> void:
-	_state = "title"
-	get_tree().paused = false
 	_world.call("set_difficulty", _selected_level)
 	_world.call("set_selected_topics", _selected_topic_groups())
+	_world.call("set_speed_level", _selected_speed)
 	_world.call("reset_ready")
-	_title_screen.visible = true
-	_over_screen.visible = false
-	_pause_screen.visible = false
-	_question_bar.visible = false
-	_pause_button.visible = false
-	_score_label.visible = false
-	_best_label.visible = false
-	_practice_label.visible = false
+	_show_setup_page(_title_screen, "title")
 	_update_title_best()
 
 
@@ -539,15 +717,20 @@ func _show_title() -> void:
 func _start_new_run() -> void:
 	_world.call("set_difficulty", _selected_level)
 	_world.call("set_selected_topics", _selected_topic_groups())
+	_world.call("set_speed_level", _selected_speed)
 	_world.call("reset_ready")
 	_title_screen.visible = false
+	_topic_screen.visible = false
+	_difficulty_screen.visible = false
+	_speed_screen.visible = false
 	_over_screen.visible = false
 	_pause_screen.visible = false
 	_question_bar.visible = true
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
 		"level": _selected_level,
-		"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
+		"difficulty": I18n.t("difficulty.level." + str(_selected_level)).to_upper(),
 		"topic": I18n.t("topic.ready").to_upper(),
+		"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
 	})
 	_question_label.text = I18n.t("hud.tap_to_launch")
 	_question_hint_label.text = I18n.t("hud.question_wait")
@@ -564,16 +747,6 @@ func _start_new_run() -> void:
 	_best_label.visible = best > 0
 	_practice_label.visible = false
 	_state = "playing"
-
-
-func _begin_from_title() -> void:
-	if _state != "title":
-		return
-	_start_new_run()
-	_world.call("flap")
-	_after_flap_start()
-
-
 func _restart() -> void:
 	_start_new_run()
 	_world.call("flap")
@@ -581,7 +754,7 @@ func _restart() -> void:
 
 
 func _lower_difficulty_and_restart() -> void:
-	if _selected_level <= 0:
+	if _selected_level <= 1 or not _has_selected_topic_at_level(_selected_level - 1):
 		return
 	_set_difficulty_level(_selected_level - 1)
 	_restart()
@@ -610,10 +783,6 @@ func _flap_input() -> void:
 	if audio != null:
 		audio.call("unlock_audio")
 	match _state:
-		"title":
-			_start_new_run()
-			_world.call("flap")
-			_after_flap_start()
 		"playing":
 			var was_ready: bool = _world.get("state") == "ready"
 			_world.call("flap")
@@ -686,6 +855,7 @@ func _on_question_changed(question: Dictionary) -> void:
 		"level": level,
 		"difficulty": I18n.t("difficulty." + difficulty).to_upper(),
 		"topic": I18n.t("topic." + topic).to_upper(),
+		"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
 	})
 	_question_hint_label.text = I18n.t(str(question.get("hint_key", "hint.addition")))
 
@@ -743,7 +913,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	}) if wrong_answer else ""
 	_over_stamp.visible = is_best
 	_over_note.visible = _last_run_practice
-	_over_easier_button.disabled = _selected_level == 0
+	_over_easier_button.disabled = _selected_level == 1 or not _has_selected_topic_at_level(_selected_level - 1)
 	await get_tree().create_timer(0.7).timeout
 	if _state != "over":
 		return
@@ -784,13 +954,26 @@ func _is_flap_event(event: InputEvent) -> bool:
 	return false
 
 
+func _back_setup_step() -> void:
+	match _state:
+		"topics":
+			_show_title()
+		"difficulty":
+			_show_topic_selection()
+		"speed":
+			_show_difficulty_selection()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not event.is_echo():
-		_toggle_pause()
+		if _state in ["title", "topics", "difficulty", "speed"]:
+			_back_setup_step()
+		else:
+			_toggle_pause()
 		get_viewport().set_input_as_handled()
 		return
 	if _state == "paused":
 		return
-	if _is_flap_event(event):
+	if _state == "playing" and _is_flap_event(event):
 		_flap_input()
 		get_viewport().set_input_as_handled()
