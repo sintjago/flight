@@ -700,29 +700,11 @@
         "sha256": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
         "size": 21443,
         "sourcePaths": []
-      },
-      {
-        "contentMatches": [],
-        "path": "share/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
-        "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
-        "size": 21187,
-        "sourcePaths": [
-          "assets/share/favicon.png"
-        ]
-      },
-      {
-        "contentMatches": [],
-        "path": "share/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
-        "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
-        "size": 1365943,
-        "sourcePaths": [
-          "assets/share/og.png"
-        ]
       }
     ],
-    "pckSha256": "sha256:e19d248bd57294d6042dda74ca71194c14afd220ff72b06acc0737ab8d867eab",
-    "profile": "release",
-    "sourceFingerprint": "sha256:6d652ce5d16358e7449b8e96490776ca0b442a735402f70d62dfa71d6c85d87b"
+    "pckSha256": "sha256:12135aa657e33ba4d8a6ce2328e8b4c9fad313d3ce49923d424f2b6926fcb73b",
+    "profile": "preview",
+    "sourceFingerprint": "sha256:c8185e393228c24c3ded0d80ffc479c6bb43a47e1eda2bdb943570265eed6667"
   },
   "procedures": {},
   "summary": {
@@ -749,8 +731,8 @@
       "used": 0
     },
     "exportedHostMedia": {
-      "paths": 5,
-      "uniqueHashes": 5,
+      "paths": 3,
+      "uniqueHashes": 3,
       "unmatchedSourcePaths": 3
     },
     "files": {

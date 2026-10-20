@@ -2,11 +2,11 @@ extends RefCounted
 ## Builds a two-choice math prompt, with a topic and short learning hint, for each difficulty.
 
 const DIFFICULTIES := ["easy", "medium", "hard"]
-const TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations", "integers", "algebra", "quadratics", "exponents", "roots", "geometry", "trigonometry"]
-const EASY_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"]
-const MEDIUM_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations"]
-const HARD_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations", "integers", "algebra", "exponents", "roots", "geometry"]
-const LEVEL_FIVE_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations", "integers", "algebra", "quadratics", "exponents", "roots", "geometry", "trigonometry"]
+const TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics", "integers", "algebra", "quadratics", "exponents", "roots", "trigonometry"]
+const EASY_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability"]
+const MEDIUM_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics"]
+const HARD_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics", "integers", "algebra", "exponents", "roots"]
+const LEVEL_FIVE_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics", "integers", "algebra", "quadratics", "exponents", "roots", "trigonometry"]
 
 
 static func difficulty_level_for(value: Variant) -> int:
@@ -110,17 +110,25 @@ static func _generate_for_group(rng: RandomNumberGenerator, mode: String, level:
 		"fractions":
 			if mode == "easy":
 				return _easy_fraction_of(rng, level) if rng.randi_range(0, 1) == 0 else _easy_fraction_compare(rng)
-			return _fraction_operation(rng, level == 5)
+			return _fraction_operation(rng, level == 5, level)
 		"number_sense":
 			return _easy_place_value(rng) if rng.randi_range(0, 1) == 0 else _easy_pattern(rng, 20 if level == 1 else 100)
+		"measurement":
+			return _measurement_question(rng, level)
+		"geometry":
+			return _geometry_question(rng, level)
+		"probability":
+			return _probability_question(rng, level)
 		"decimals":
-			return _medium_decimal(rng)
+			return _decimal_question(rng, level)
 		"percentages":
-			return _medium_percent(rng)
+			return _percentage_question(rng, level)
 		"ratios":
-			return _medium_ratio(rng)
+			return _ratio_question(rng, level)
 		"order_of_operations":
-			return _medium_order_operations(rng)
+			return _order_operations_question(rng, level)
+		"statistics":
+			return _statistics_question(rng, level)
 		"integers":
 			return _hard_signed_operation(rng, "integers", level)
 		"algebra":
@@ -131,8 +139,6 @@ static func _generate_for_group(rng: RandomNumberGenerator, mode: String, level:
 			return _hard_exponents(rng)
 		"roots":
 			return _hard_roots(rng)
-		"geometry":
-			return _hard_geometry(rng)
 		"trigonometry":
 			return _hard_trigonometry(rng)
 	return _easy_add(rng)
@@ -348,13 +354,161 @@ static func _medium_order_operations(rng: RandomNumberGenerator) -> Dictionary:
 	})
 
 
-static func _fraction_operation(rng: RandomNumberGenerator, advanced: bool) -> Dictionary:
+static func _decimal_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level <= 3:
+		return _medium_decimal(rng)
+	var operator := "×" if rng.randi_range(0, 1) == 0 else "÷"
+	if level == 4:
+		var whole := rng.randi_range(2, 9)
+		var answer_tenths := rng.randi_range(12, 90)
+		var left_tenths := answer_tenths * whole if operator == "÷" else rng.randi_range(12, 90)
+		if operator == "×":
+			answer_tenths = left_tenths * whole
+		var answer := _format_scaled_decimal(answer_tenths, 1)
+		var left_text := _format_scaled_decimal(left_tenths, 1)
+		var expression := "%s %s %d = ?" % [left_text, operator, whole]
+		return _problem(expression, answer, "decimals", "hint.decimals", "decimal_operation_advanced", answer_tenths, 10, {
+			"operator": operator, "form_type": "decimal_by_whole", "left_scaled": left_tenths, "left_scale": 10,
+			"right_scaled": whole, "right_scale": 1, "answer_scale": 10,
+			"distractor_pool": _decimal_distractor_pool(answer_tenths, 1),
+		})
+	var right_tenths := rng.randi_range(2, 9)
+	var left_scaled := rng.randi_range(10, 90)
+	var left_scale := 10
+	var answer_scale := 100
+	var answer_scaled := 0
+	var expression := ""
+	if operator == "×":
+		answer_scaled = left_scaled * right_tenths
+		expression = "%s × %s = ?" % [_format_scaled_decimal(left_scaled, 1), _format_scaled_decimal(right_tenths, 1)]
+	else:
+		answer_scaled = rng.randi_range(10, 90)
+		left_scaled = answer_scaled * right_tenths
+		left_scale = 100
+		answer_scale = 10
+		expression = "%s ÷ %s = ?" % [_format_scaled_decimal(left_scaled, 2), _format_scaled_decimal(right_tenths, 1)]
+	var answer_text := _format_scaled_decimal(answer_scaled, 1 if answer_scale == 10 else 2)
+	return _problem(expression, answer_text, "decimals", "hint.decimals", "decimal_operation_advanced", answer_scaled, answer_scale, {
+		"operator": operator, "form_type": "decimal_by_decimal", "left_scaled": left_scaled, "left_scale": left_scale,
+		"right_scaled": right_tenths, "right_scale": 10, "answer_scale": answer_scale,
+		"distractor_pool": _decimal_distractor_pool(answer_scaled, 1 if answer_scale == 10 else 2),
+	})
+
+
+static func _format_scaled_decimal(value: int, decimal_places: int) -> String:
+	if decimal_places == 1:
+		return "%.1f" % (float(value) / 10.0)
+	return "%.2f" % (float(value) / 100.0)
+
+
+static func _decimal_distractor_pool(value: int, decimal_places: int) -> Array[String]:
+	var pool: Array[String] = []
+	for offset: int in [-3, -2, 2, 3]:
+		if value + offset >= 0:
+			pool.append(_format_scaled_decimal(value + offset, decimal_places))
+	return pool
+
+
+static func _percentage_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level <= 3:
+		return _medium_percent(rng)
+	if level == 4 or rng.randi_range(0, 1) == 0:
+		return _percentage_change(rng)
+	return _percentage_reverse(rng)
+
+
+static func _percentage_change(rng: RandomNumberGenerator) -> Dictionary:
+	var bases: Array[int] = [80, 100, 120, 200, 320, 500]
+	var percents: Array[int] = [10, 15, 20, 25, 50]
+	var base := bases[rng.randi_range(0, bases.size() - 1)]
+	var percent := percents[rng.randi_range(0, percents.size() - 1)]
+	var amount_change := int(base * percent / 100)
+	var discount := rng.randi_range(0, 1) == 0
+	var answer := base - amount_change if discount else base + amount_change
+	var form := "discount" if discount else "increase"
+	var expression := "%d; %d%% off = ?" % [base, percent] if discount else "%d; add %d%% = ?" % [base, percent]
+	var pool: Array[String] = [str(base), str(amount_change), str(base + amount_change)]
+	return _integer_problem(expression, answer, "percentages", "hint.percentages", "percentage_change", base, percent, "%", {
+		"base_amount": base, "percent": percent, "amount_change": amount_change, "change_type": form, "form_type": form,
+		"distractor_pool": pool,
+	})
+
+
+static func _percentage_reverse(rng: RandomNumberGenerator) -> Dictionary:
+	var bases: Array[int] = [60, 80, 100, 120, 200, 320]
+	var percents: Array[int] = [10, 20, 25, 50]
+	var answer := bases[rng.randi_range(0, bases.size() - 1)]
+	var percent := percents[rng.randi_range(0, percents.size() - 1)]
+	var known_part := int(answer * percent / 100)
+	var expression := "%d is %d%% of ?" % [known_part, percent]
+	var pool: Array[String] = [str(maxi(1, answer - 20)), str(answer + 20), str(answer * 2)]
+	return _integer_problem(expression, answer, "percentages", "hint.percentages", "percentage_reverse", known_part, percent, "%", {
+		"known_part": known_part, "percent": percent, "form_type": "reverse", "distractor_pool": pool,
+	})
+
+
+static func _ratio_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level <= 3:
+		return _medium_ratio(rng)
+	if level == 4:
+		var item_count := rng.randi_range(3, 12)
+		var unit_rate := rng.randi_range(2, 24)
+		var total := item_count * unit_rate
+		return _integer_problem("%d items cost $%d; each costs ?" % [item_count, total], unit_rate, "ratios", "hint.ratios", "unit_rate", total, item_count, "÷", {
+			"item_count": item_count, "total_cost": total, "unit_rate": unit_rate, "form_type": "unit_rate",
+			"distractor_pool": [str(unit_rate - 1), str(unit_rate + 1), str(total)],
+		})
+	var servings := rng.randi_range(2, 5)
+	var cups := rng.randi_range(1, 4)
+	var scale := rng.randi_range(2, 6)
+	var target_servings := servings * scale
+	var answer := cups * scale
+	return _integer_problem("%d cups for %d servings; %d servings = ? cups" % [cups, servings, target_servings], answer, "ratios", "hint.ratios", "ratio_proportion", cups, servings, ":", {
+		"cups": cups, "base_servings": servings, "target_servings": target_servings, "scale": scale,
+		"form_type": "word_proportion", "distractor_pool": [str(answer - 1), str(answer + 1), str(cups * target_servings)],
+	})
+
+
+static func _order_operations_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level <= 3:
+		return _medium_order_operations(rng)
+	if level == 4:
+		var addend := rng.randi_range(8, 36)
+		var divisor := rng.randi_range(2, 8)
+		var quotient := rng.randi_range(2, 12)
+		var multiplier := rng.randi_range(2, 5)
+		var dividend := divisor * quotient
+		var answer := addend + quotient * multiplier
+		var expression := "%d + %d ÷ %d × %d = ?" % [addend, dividend, divisor, multiplier]
+		return _problem(expression, str(answer), "order_of_operations", "hint.order_operations", "order_operations_extended", answer, 1, {
+			"form_type": "exact_division_chain", "addend": addend, "dividend": dividend, "divisor": divisor,
+			"multiplier": multiplier,
+		})
+	var base := rng.randi_range(2, 5)
+	var exponent := rng.randi_range(2, 3)
+	var left_factor := rng.randi_range(2, 12)
+	var right_factor := rng.randi_range(2, 12)
+	var power_value := int(pow(float(base), float(exponent)))
+	var answer := power_value + left_factor * right_factor
+	var expression := "%d^%d + %d × %d = ?" % [base, exponent, left_factor, right_factor]
+	return _problem(expression, str(answer), "order_of_operations", "hint.order_operations", "order_operations_extended", answer, 1, {
+		"form_type": "powers_first", "base": base, "exponent": exponent, "left_factor": left_factor,
+		"right_factor": right_factor,
+	})
+
+
+static func _fraction_operation(rng: RandomNumberGenerator, advanced: bool, level: int = 3) -> Dictionary:
 	var max_denominator := 20 if advanced else 12
 	var left_den := rng.randi_range(2, max_denominator)
 	var right_den := rng.randi_range(2, max_denominator)
 	var left_num := rng.randi_range(1, left_den - 1)
 	var right_num := rng.randi_range(1, right_den - 1)
-	var operator := "+" if rng.randi_range(0, 1) == 0 else "-"
+	var operators: Array[String] = ["+", "-"]
+	if level >= 4:
+		operators.append("×")
+	if level >= 5:
+		operators.append("÷")
+	var operator: String = operators[rng.randi_range(0, operators.size() - 1)]
 	if not advanced and operator == "-" and left_num * right_den < right_num * left_den:
 		var old_num := left_num
 		var old_den := left_den
@@ -362,12 +516,174 @@ static func _fraction_operation(rng: RandomNumberGenerator, advanced: bool) -> D
 		left_den = right_den
 		right_num = old_num
 		right_den = old_den
-	var numerator := left_num * right_den + (right_num * left_den if operator == "+" else -right_num * left_den)
-	var denominator := left_den * right_den
+	var numerator: int = 0
+	var denominator: int = 1
+	match operator:
+		"+":
+			numerator = left_num * right_den + right_num * left_den
+			denominator = left_den * right_den
+		"-":
+			numerator = left_num * right_den - right_num * left_den
+			denominator = left_den * right_den
+		"×":
+			numerator = left_num * right_num
+			denominator = left_den * right_den
+		_:
+			numerator = left_num * right_den
+			denominator = left_den * right_num
 	var answer := _format_fraction(numerator, denominator)
 	return _problem("%s %s %s = ?" % [_format_fraction(left_num, left_den), operator, _format_fraction(right_num, right_den)], answer, "fractions", "hint.fraction_operations", "fraction_operation", numerator, denominator, {
 		"left_num": left_num, "left_den": left_den, "right_num": right_num, "right_den": right_den, "operator": operator,
 	})
+
+
+static func _measurement_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level <= 1:
+		match rng.randi_range(0, 2):
+			0:
+				var coins: Array[int] = [5, 10, 25, 50]
+				var first_coin: int = coins[rng.randi_range(0, coins.size() - 1)]
+				var second_coin: int = coins[rng.randi_range(0, coins.size() - 1)]
+				return _integer_problem("%d¢ + %d¢ = ?¢" % [first_coin, second_coin], first_coin + second_coin, "measurement", "hint.measurement", "money_sum", first_coin, second_coin, "+")
+			1:
+				var hours := rng.randi_range(1, 4)
+				return _integer_problem("%d hours = ? minutes" % hours, hours * 60, "measurement", "hint.measurement", "unit_conversion", hours, 60, "×", {"conversion": "hours_to_minutes", "input_value": hours})
+			_:
+				var first_cm := rng.randi_range(5, 35)
+				var second_cm := rng.randi_range(5, 35)
+				return _integer_problem("%d cm + %d cm = ? cm" % [first_cm, second_cm], first_cm + second_cm, "measurement", "hint.measurement", "measurement_sum", first_cm, second_cm, "+")
+	if level == 2:
+		match rng.randi_range(0, 3):
+			0:
+				var meters := rng.randi_range(1, 9)
+				return _integer_problem("%d m = ? cm" % meters, meters * 100, "measurement", "hint.measurement", "unit_conversion", meters, 100, "×", {"conversion": "meters_to_cm", "input_value": meters})
+			1:
+				var kilograms := rng.randi_range(1, 8)
+				return _integer_problem("%d kg = ? g" % kilograms, kilograms * 1000, "measurement", "hint.measurement", "unit_conversion", kilograms, 1000, "×", {"conversion": "kilograms_to_g", "input_value": kilograms})
+			2:
+				var hours := rng.randi_range(1, 5)
+				return _integer_problem("%d hours = ? minutes" % hours, hours * 60, "measurement", "hint.measurement", "unit_conversion", hours, 60, "×", {"conversion": "hours_to_minutes", "input_value": hours})
+			_:
+				var meters_from_cm := rng.randi_range(2, 9)
+				return _integer_problem("%d cm = ? m" % (meters_from_cm * 100), meters_from_cm, "measurement", "hint.measurement", "unit_conversion", meters_from_cm * 100, 100, "÷", {"conversion": "cm_to_m", "input_value": meters_from_cm * 100})
+	var hours_travelled := rng.randi_range(2, 5 if level == 3 else 8)
+	var speed := rng.randi_range(20, 80 if level < 5 else 140)
+	var distance := hours_travelled * speed
+	return _integer_problem("%d km in %d h: ? km/h" % [distance, hours_travelled], speed, "measurement", "hint.measurement", "measurement_rate", distance, hours_travelled, "÷", {
+		"distance": distance, "time_hours": hours_travelled, "speed": speed,
+	})
+
+
+static func _probability_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	var favorable := 1
+	var total := 2
+	var expression := "Fair coin: P(tails) = ?"
+	if level <= 1:
+		if rng.randi_range(0, 1) == 0:
+			expression = "Fair coin: P(tails) = ?"
+			favorable = 1
+			total = 2
+		else:
+			expression = "Fair die: P(even roll) = ?"
+			favorable = 3
+			total = 6
+	elif level == 2:
+		var sections := rng.randi_range(5, 10)
+		favorable = rng.randi_range(1, sections - 1)
+		total = sections
+		expression = "Spinner: %d of %d blue; P(blue) = ?" % [favorable, total]
+	elif level == 3:
+		total = rng.randi_range(6, 12)
+		favorable = rng.randi_range(1, total - 1)
+		expression = "Bag: %d red of %d; P(red) = ?" % [favorable, total]
+	elif level == 4:
+		if rng.randi_range(0, 1) == 0:
+			expression = "2 coin flips: P(both heads) = ?"
+			favorable = 1
+			total = 4
+		else:
+			expression = "2 coin flips: P(at least 1 head) = ?"
+			favorable = 3
+			total = 4
+	else:
+		expression = "3 coin flips: P(at least 1 head) = ?"
+		favorable = 7
+		total = 8
+	var answer := _format_fraction(favorable, total)
+	var distractors: Array[String] = ["1/6", "1/5", "1/4", "1/3", "1/2", "2/3", "3/4", "5/6", "7/8"]
+	return _problem(expression, answer, "probability", "hint.probability", "probability", favorable, total, {
+		"favorable": favorable, "outcomes": total, "distractor_pool": distractors,
+	})
+
+
+static func _statistics_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	var choices: Array[String] = ["mean", "median", "range"]
+	if level >= 4:
+		choices.append("mode")
+	var statistic: String = choices[rng.randi_range(0, choices.size() - 1)]
+	var center := rng.randi_range(5, 20 if level == 3 else 60)
+	var values: Array[int] = []
+	var answer := center
+	match statistic:
+		"mean":
+			var spread_a := rng.randi_range(1, 5)
+			var spread_b := rng.randi_range(1, 6)
+			values = [center - spread_a, center - spread_b, center, center + spread_b, center + spread_a]
+		"median":
+			values = [center + 5, center - 2, center, center + 3, center - 1]
+		"range":
+			var spread := rng.randi_range(6, 18)
+			values = [center, center + 2, center + spread, center + 4, center + 1]
+			answer = spread
+		_:
+			values = [center, center, center + 2, center + 1, center]
+	var statistic_names := {"mean": "Mean", "median": "Median", "range": "Range", "mode": "Mode"}
+	var expression := "%s %s = ?" % [str(statistic_names[statistic]), str(values).replace(" ", "")]
+	return _integer_problem(expression, answer, "statistics", "hint.statistics", "statistic", answer, 1, statistic, {
+		"values": values, "statistic": statistic,
+	})
+
+
+static func _geometry_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level == 1:
+		var shapes: Array[Dictionary] = [
+			{"name": "triangle", "sides": 3}, {"name": "square", "sides": 4},
+			{"name": "pentagon", "sides": 5}, {"name": "hexagon", "sides": 6},
+		]
+		var shape: Dictionary = shapes[rng.randi_range(0, shapes.size() - 1)]
+		return _integer_problem("Sides in a %s = ?" % str(shape.name), int(shape.sides), "geometry", "hint.geometry", "geometry_shape_sides", int(shape.sides), 1, "sides", {"sides": int(shape.sides)})
+	if level == 2:
+		var length := rng.randi_range(3, 12)
+		var width := rng.randi_range(2, 10)
+		if rng.randi_range(0, 1) == 0:
+			return _integer_problem("Rect %d × %d: perimeter = ?" % [length, width], 2 * (length + width), "geometry", "hint.geometry", "rectangle_perimeter", length, width, "perimeter")
+		return _integer_problem("Rect %d × %d: area = ?" % [length, width], length * width, "geometry", "hint.geometry", "rectangle_area", length, width, "area")
+	if level == 3:
+		if rng.randi_range(0, 1) == 0:
+			var base := rng.randi_range(2, 10) * 2
+			var height := rng.randi_range(2, 12)
+			return _integer_problem("Triangle b=%d, h=%d: area = ?" % [base, height], int(base * height / 2), "geometry", "hint.geometry", "triangle_area", base, height, "area")
+		var first_angle := rng.randi_range(25, 85)
+		var second_angle := rng.randi_range(25, 170 - first_angle)
+		return _integer_problem("Triangle: %d°, %d°, ?°" % [first_angle, second_angle], 180 - first_angle - second_angle, "geometry", "hint.geometry", "triangle_angle", first_angle, second_angle, "angle")
+	if level == 4:
+		return _pythagorean_question(rng)
+	if rng.randi_range(0, 1) == 0:
+		var radius := rng.randi_range(2, 15)
+		return _integer_problem("Circle r=%d: area/π = ?" % radius, radius * radius, "geometry", "hint.geometry", "circle_area_factor", radius, 1, "r²", {"radius": radius})
+	var side_a := rng.randi_range(2, 9)
+	var side_b := rng.randi_range(2, 9)
+	var side_c := rng.randi_range(2, 9)
+	return _integer_problem("Box %d × %d × %d: volume = ?" % [side_a, side_b, side_c], side_a * side_b * side_c, "geometry", "hint.geometry", "box_volume", side_a, side_b, "volume", {"side_c": side_c})
+
+
+static func _pythagorean_question(rng: RandomNumberGenerator) -> Dictionary:
+	var triples: Array = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 40, 41]]
+	var triple: Array = triples[rng.randi_range(0, triples.size() - 1)]
+	var a := int(triple[0])
+	var b := int(triple[1])
+	var c := int(triple[2])
+	return _integer_problem("Right triangle: legs %d, %d; c = ?" % [a, b], c, "geometry", "hint.geometry", "pythagorean", a, b, "c", {"hypotenuse": c})
 
 
 static func _hard_integers(rng: RandomNumberGenerator) -> Dictionary:
@@ -416,25 +732,64 @@ static func _hard_linear(rng: RandomNumberGenerator, level: int = 5) -> Dictiona
 	var coefficient := rng.randi_range(2, 5 if level == 4 else 9)
 	var solution := rng.randi_range(1, 8) if level == 4 else rng.randi_range(-8, 15)
 	var intercept := rng.randi_range(-8, 8) if level == 4 else rng.randi_range(-20, 20)
+	var form_count := 2 if level == 4 else 3
+	var form := rng.randi_range(0, form_count - 1)
+	if form == 2:
+		var left_coefficient := rng.randi_range(3, 9)
+		var right_coefficient := rng.randi_range(1, left_coefficient - 1)
+		var left_constant := rng.randi_range(-18, 18)
+		var right_constant := (left_coefficient - right_coefficient) * solution + left_constant
+		var left_sign := "+ %d" % left_constant if left_constant >= 0 else "- %d" % abs(left_constant)
+		var right_sign := "+ %d" % right_constant if right_constant >= 0 else "- %d" % abs(right_constant)
+		var expression := "%dx %s = %dx %s; x = ?" % [left_coefficient, left_sign, right_coefficient, right_sign]
+		return _integer_problem(expression, solution, "algebra", "hint.algebra", "linear_equation", left_coefficient, left_constant, "x", {
+			"form_type": "both_sides", "solution": solution, "left_coefficient": left_coefficient,
+			"left_constant": left_constant, "right_coefficient": right_coefficient, "right_constant": right_constant,
+		})
+	if form == 1:
+		var inside := rng.randi_range(2, 8) if level == 4 else rng.randi_range(-9, 12)
+		var result := coefficient * (solution + inside)
+		var inside_sign := "+ %d" % inside if inside >= 0 else "- %d" % abs(inside)
+		var expression := "Solve: %d(x %s) = %d; x = ?" % [coefficient, inside_sign, result]
+		return _integer_problem(expression, solution, "algebra", "hint.algebra", "linear_equation", coefficient, coefficient * inside, "x", {
+			"form_type": "parentheses", "coefficient": coefficient, "solution": solution,
+			"intercept": coefficient * inside, "result": result, "inside": inside,
+		})
 	var result := coefficient * solution + intercept
 	var sign := "+" if intercept >= 0 else "-"
-	var expression := "Solve: %dx %s %d = %d; x = ?" % [coefficient, sign, abs(intercept), result]
-	return _integer_problem(expression, solution, "algebra", "hint.algebra", "linear_equation", coefficient, intercept, "x", {
-		"coefficient": coefficient, "solution": solution, "intercept": intercept, "result": result,
+	var basic_expression := "Solve: %dx %s %d = %d; x = ?" % [coefficient, sign, abs(intercept), result]
+	return _integer_problem(basic_expression, solution, "algebra", "hint.algebra", "linear_equation", coefficient, intercept, "x", {
+		"form_type": "basic", "coefficient": coefficient, "solution": solution, "intercept": intercept, "result": result,
 	})
 
 
 static func _hard_quadratic(rng: RandomNumberGenerator) -> Dictionary:
-	var first_root := rng.randi_range(1, 12)
-	var second_root := rng.randi_range(1, 12)
+	var first_root := rng.randi_range(1, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
+	var second_root := rng.randi_range(1, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 	while second_root == first_root:
-		second_root = rng.randi_range(1, 12)
+		second_root = rng.randi_range(1, 12) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 	var sum_roots := first_root + second_root
 	var product_roots := first_root * second_root
-	var answer := mini(first_root, second_root)
-	var expression := "Smallest root: x^2 - %dx + %d = 0; x = ?" % [sum_roots, product_roots]
+	var factorized := rng.randi_range(0, 1) == 1
+	var requested_root := "larger" if factorized else "smaller"
+	var answer := maxi(first_root, second_root) if factorized else mini(first_root, second_root)
+	var expression := ""
+	if factorized:
+		var factor_a := "(x - %d)" % first_root if first_root > 0 else "(x + %d)" % abs(first_root)
+		var factor_b := "(x - %d)" % second_root if second_root > 0 else "(x + %d)" % abs(second_root)
+		expression = "%s%s = 0; larger root = ?" % [factor_a, factor_b]
+	else:
+		var x_term := ""
+		if sum_roots > 0:
+			x_term = " - %d x" % sum_roots
+		elif sum_roots < 0:
+			x_term = " + %d x" % abs(sum_roots)
+		var constant_term := " + %d" % product_roots if product_roots > 0 else " - %d" % abs(product_roots)
+		expression = "x^2%s%s = 0; smaller root = ?" % [x_term, constant_term]
 	return _integer_problem(expression, answer, "quadratics", "hint.quadratics", "quadratic", sum_roots, product_roots, "roots", {
 		"root_a": first_root, "root_b": second_root, "sum_roots": sum_roots, "product_roots": product_roots,
+		"requested_root": requested_root, "factorized": factorized,
+		"form_type": "factored" if factorized else "expanded",
 	})
 
 
@@ -459,28 +814,45 @@ static func _hard_roots(rng: RandomNumberGenerator) -> Dictionary:
 
 
 static func _hard_geometry(rng: RandomNumberGenerator) -> Dictionary:
-	var triples: Array = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 40, 41]]
-	var triple: Array = triples[rng.randi_range(0, triples.size() - 1)]
-	var a := int(triple[0])
-	var b := int(triple[1])
-	var c := int(triple[2])
-	return _integer_problem("Right triangle: legs %d, %d; c = ?" % [a, b], c, "geometry", "hint.geometry", "pythagorean", a, b, "c", {"hypotenuse": c})
+	return _pythagorean_question(rng)
 
 
 static func _hard_trigonometry(rng: RandomNumberGenerator) -> Dictionary:
-	var table: Array[Dictionary] = [
-		{"expression": "sin(30 deg) = ?", "answer": "1/2"},
-		{"expression": "cos(60 deg) = ?", "answer": "1/2"},
-		{"expression": "sin(45 deg) = ?", "answer": "sqrt(2)/2"},
-		{"expression": "cos(45 deg) = ?", "answer": "sqrt(2)/2"},
-		{"expression": "sin(60 deg) = ?", "answer": "sqrt(3)/2"},
-		{"expression": "cos(30 deg) = ?", "answer": "sqrt(3)/2"},
-		{"expression": "sin(90 deg) = ?", "answer": "1"},
-		{"expression": "cos(0 deg) = ?", "answer": "1"},
-	]
-	var item: Dictionary = table[rng.randi_range(0, table.size() - 1)]
-	var pool: Array[String] = ["1/2", "sqrt(2)/2", "sqrt(3)/2", "1", "0"]
-	return _problem(str(item.expression), str(item.answer), "trigonometry", "hint.trigonometry", "trigonometry", 0, 1, {"distractor_pool": pool})
+	var pool: Array[String] = ["1/2", "sqrt(2)/2", "sqrt(3)/2", "sqrt(3)/3", "sqrt(3)", "1", "0", "3/5", "4/5", "3/4", "5/13", "12/13", "5/12"]
+	if rng.randi_range(0, 1) == 0:
+		var table: Array[Dictionary] = [
+			{"function": "sin", "angle": 30, "answer": "1/2"},
+			{"function": "sin", "angle": 45, "answer": "sqrt(2)/2"},
+			{"function": "sin", "angle": 60, "answer": "sqrt(3)/2"},
+			{"function": "sin", "angle": 90, "answer": "1"},
+			{"function": "cos", "angle": 0, "answer": "1"},
+			{"function": "cos", "angle": 30, "answer": "sqrt(3)/2"},
+			{"function": "cos", "angle": 45, "answer": "sqrt(2)/2"},
+			{"function": "cos", "angle": 60, "answer": "1/2"},
+			{"function": "tan", "angle": 30, "answer": "sqrt(3)/3"},
+			{"function": "tan", "angle": 45, "answer": "1"},
+			{"function": "tan", "angle": 60, "answer": "sqrt(3)"},
+		]
+		var item: Dictionary = table[rng.randi_range(0, table.size() - 1)]
+		var expression := "%s(%d°) = ?" % [str(item.function), int(item.angle)]
+		return _problem(expression, str(item.answer), "trigonometry", "hint.trigonometry", "trigonometry", 0, 1, {
+			"distractor_pool": pool, "form_type": "special_angle", "trig_function": str(item.function), "angle": int(item.angle),
+		})
+	var triples: Array = [[3, 4, 5], [5, 12, 13], [8, 15, 17]]
+	var triple: Array = triples[rng.randi_range(0, triples.size() - 1)]
+	var opposite := int(triple[0])
+	var adjacent := int(triple[1])
+	var hypotenuse := int(triple[2])
+	var functions: Array[String] = ["sin", "cos", "tan"]
+	var trig_function: String = functions[rng.randi_range(0, functions.size() - 1)]
+	var top := opposite if trig_function != "cos" else adjacent
+	var bottom := hypotenuse if trig_function != "tan" else adjacent
+	var side_names := "opp %d, hyp %d" % [opposite, hypotenuse] if trig_function == "sin" else ("adj %d, hyp %d" % [adjacent, hypotenuse] if trig_function == "cos" else "opp %d, adj %d" % [opposite, adjacent])
+	var expression := "%s θ = ? (%s)" % [trig_function, side_names]
+	return _problem(expression, _format_fraction(top, bottom), "trigonometry", "hint.trigonometry", "trigonometry", top, bottom, {
+		"distractor_pool": pool, "form_type": "triangle_ratio", "trig_function": trig_function,
+		"ratio_top": top, "ratio_bottom": bottom, "opposite": opposite, "adjacent": adjacent, "hypotenuse": hypotenuse,
+	})
 
 
 static func _integer_problem(expression: String, answer: int, topic: String, hint_key: String, kind: String, a: int, b: int, operator: String, extra: Dictionary = {}) -> Dictionary:

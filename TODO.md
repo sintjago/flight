@@ -30,3 +30,6 @@
 
 ## Separate flight-speed setup and default pacing — complete
 - [x] After difficulty, show a separate flight-speed choice, independent of math difficulty. The default must be slower and place the answer gates farther apart than the existing default; keep the user's speed choice through back-navigation, retry, and Home.
+
+## Expanded math knowledge content — complete
+- [x] “add the missing math content.” Expand the existing Math pack without changing the staged practice flow. Add age-stepped measurement, basic probability, and data/statistics; broaden geometry from a single right-triangle formula to age-appropriate shape, perimeter/area, angle, and high-school content; include multiplication and division of fractions in advanced levels; and give higher-level algebra/trigonometry more than one prompt form. At higher levels, progress decimals into multiplication/division, percentages into increases/discounts/reverse-percent questions, ratios into unit rates and word proportions, and order of operations into exact division and powers. Every new category must respect its unlock level and checkbox, include a learner-facing hint, have a mathematically correct answer and a distinct wrong choice, and be covered by the existing gameplay checks.

@@ -24,10 +24,34 @@ func _run() -> void:
 		_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
 		var practice_buttons: Dictionary = main.get("_practice_buttons")
 		_check(practice_buttons.size() == 5 and not (practice_buttons["math"] as Button).disabled, "pack offers Math plus future practice areas")
-		for area: String in ["reading", "russian", "spanish", "science"]:
-			var future_button: Button = practice_buttons[area]
-			_check(future_button.disabled and future_button.text.contains("COMING SOON"), "future pack is clearly marked: " + area)
-		var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
+			for area: String in ["reading", "russian", "spanish", "science"]:
+				var future_button: Button = practice_buttons[area]
+				_check(future_button.disabled and future_button.text.contains("COMING SOON"), "future pack is clearly marked: " + area)
+			var content_rng := RandomNumberGenerator.new()
+			content_rng.seed = 20261020
+			for level: int in range(1, 6):
+				for group: String in MathQuestion.available_topic_groups(level):
+					var sample: Dictionary = MathQuestion.generate(content_rng, level, [group])
+					var choices: Array[String] = [str(sample.upper_answer), str(sample.lower_answer)]
+					_check(str(sample.topic_group) == group and choices[0] != choices[1] and choices.count(str(sample.answer)) == 1, "packed curriculum serves " + group + " at level " + str(level))
+					_check(I18n.t(str(sample.hint_key)) != str(sample.hint_key), "packed topic has a learner hint: " + group)
+			var advanced_contracts: Array[Dictionary] = [
+				{"level": 4, "group": "decimals", "kind": "decimal_operation_advanced"},
+				{"level": 5, "group": "percentages", "kind": "percentage_reverse"},
+				{"level": 4, "group": "ratios", "kind": "unit_rate"},
+				{"level": 5, "group": "ratios", "kind": "ratio_proportion"},
+				{"level": 4, "group": "order_of_operations", "kind": "order_operations_extended"},
+				{"level": 5, "group": "order_of_operations", "kind": "order_operations_extended"},
+			]
+			for contract: Dictionary in advanced_contracts:
+				var found_form := false
+				for _sample_index in 64:
+					var advanced_sample: Dictionary = MathQuestion.generate(content_rng, int(contract.level), [str(contract.group)])
+					if str(advanced_sample.kind) == str(contract.kind):
+						found_form = true
+						break
+				_check(found_form, "packed generator includes " + str(contract.group) + " advanced form")
+			var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
 		_check(topic_checkboxes.size() == MathQuestion.TOPIC_GROUPS.size(), "pack includes all selectable math subjects")
 		_check(topic_checkboxes.has("addition") and topic_checkboxes.has("subtraction") and topic_checkboxes.has("multiplication") and topic_checkboxes.has("division"), "core operations have separate checkboxes")
 		var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")

@@ -63,11 +63,11 @@ func _test_math_questions() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 918273
 	var required_groups: Dictionary = {
-		1: ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"],
-		2: ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"],
-		3: ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "decimals", "percentages", "ratios", "order_of_operations"],
-		4: ["integers", "algebra", "exponents", "roots", "geometry"],
-		5: ["quadratics", "trigonometry"],
+		1: ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability"],
+		2: ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability"],
+		3: ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics"],
+		4: ["integers", "algebra", "exponents", "roots", "geometry", "measurement", "probability", "statistics"],
+		5: ["quadratics", "trigonometry", "measurement", "probability", "statistics", "geometry"],
 	}
 	_check(MathQuestion.difficulty_level_for("easy") == 2 and MathQuestion.difficulty_level_for("medium") == 3 and MathQuestion.difficulty_level_for("hard") == 4, "legacy score bands map safely into the new five-point scale")
 	for level: int in range(1, 6):
@@ -96,6 +96,68 @@ func _test_math_questions() -> void:
 			_check(int(filtered.difficulty_level) == level, "question keeps the exact selected level")
 	for level: int in range(1, 6):
 		_check(MathQuestion.topic_unlock_level("quadratics") == 5 or level < 5, "high-school topics have a level-five unlock")
+	_test_extended_question_forms(rng)
+
+
+func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:
+	for level: int in range(1, 6):
+		for group: String in MathQuestion.available_topic_groups(level):
+			var seen_kinds: Dictionary = {}
+			var seen_forms: Dictionary = {}
+			var seen_operations: Dictionary = {}
+			var seen_statistics: Dictionary = {}
+			var seen_measurements: Dictionary = {}
+			for _sample in 80:
+				var question: Dictionary = MathQuestion.generate(rng, level, [group])
+				_check(str(question.topic_group) == group, "filtered subject %s never leaks another topic" % group)
+				_validate_math_question(question, MathQuestion.band_for_level(level), level)
+				seen_kinds[str(question.kind)] = true
+				seen_forms[str(question.get("form_type", ""))] = true
+				seen_operations[str(question.get("operator", question.get("trig_function", "")))] = true
+				seen_statistics[str(question.get("statistic", ""))] = true
+				seen_measurements[str(question.get("conversion", ""))] = true
+			if group == "measurement" and level == 1:
+				_check(seen_kinds.has("money_sum") and seen_kinds.has("unit_conversion") and seen_kinds.has("measurement_sum"), "level one measurement includes money, time, and length practice")
+			if group == "measurement" and level == 2:
+				_check(seen_measurements.has("meters_to_cm") and seen_measurements.has("kilograms_to_g") and seen_measurements.has("hours_to_minutes") and seen_measurements.has("cm_to_m"), "level two measurement includes metric and time conversions in both directions")
+			if group == "measurement" and level == 3:
+				_check(seen_kinds.has("measurement_rate"), "level three measurement includes distance, time, and speed")
+			if group == "geometry" and level == 2:
+				_check(seen_kinds.has("rectangle_perimeter") and seen_kinds.has("rectangle_area"), "level two geometry teaches rectangle perimeter and area")
+			if group == "geometry" and level == 3:
+				_check(seen_kinds.has("triangle_area") and seen_kinds.has("triangle_angle"), "level three geometry teaches triangle area and angle sums")
+			if group == "geometry" and level == 5:
+				_check(seen_kinds.has("circle_area_factor") and seen_kinds.has("box_volume"), "level five geometry includes circle area and volume")
+			if group == "fractions" and level == 4:
+				_check(seen_operations.has("×"), "level four fractions include multiplication")
+			if group == "fractions" and level == 5:
+				_check(seen_operations.has("×") and seen_operations.has("÷"), "level five fractions include multiplication and division")
+			if group == "statistics" and level == 3:
+				_check(seen_statistics.has("mean") and seen_statistics.has("median") and seen_statistics.has("range"), "level three statistics include mean, median, and range")
+			if group == "statistics" and level >= 4:
+				_check(seen_statistics.has("mode"), "upper-level statistics include mode")
+			if group == "algebra" and level == 4:
+				_check(seen_forms.has("basic") and seen_forms.has("parentheses"), "level four algebra includes inverse-operation and parentheses forms")
+			if group == "algebra" and level == 5:
+				_check(seen_forms.has("both_sides"), "level five algebra includes x on both sides")
+			if group == "quadratics" and level == 5:
+				_check(seen_forms.has("expanded") and seen_forms.has("factored"), "level five quadratics include expanded and factorized forms")
+			if group == "trigonometry" and level == 5:
+				_check(seen_forms.has("special_angle") and seen_forms.has("triangle_ratio") and seen_operations.has("tan"), "trigonometry includes special-angle tangent and triangle ratios")
+			if group == "decimals" and level >= 4:
+				_check(seen_kinds.has("decimal_operation_advanced") and seen_operations.has("×") and seen_operations.has("÷"), "upper-level decimals include multiplication and division")
+			if group == "percentages" and level == 4:
+				_check(seen_forms.has("discount") and seen_forms.has("increase"), "level four percentages include discounts and increases")
+			if group == "percentages" and level == 5:
+				_check(seen_forms.has("reverse") and (seen_forms.has("discount") or seen_forms.has("increase")), "level five percentages include reverse-percent and change problems")
+			if group == "ratios" and level == 4:
+				_check(seen_kinds.has("unit_rate"), "level four ratios include unit rates")
+			if group == "ratios" and level == 5:
+				_check(seen_kinds.has("ratio_proportion"), "level five ratios include word proportions")
+			if group == "order_of_operations" and level == 4:
+				_check(seen_forms.has("exact_division_chain"), "level four order of operations includes exact division chains")
+			if group == "order_of_operations" and level == 5:
+				_check(seen_forms.has("powers_first"), "level five order of operations includes exponent precedence")
 
 
 func _validate_math_question(question: Dictionary, mode: String, level: int) -> void:
@@ -146,23 +208,120 @@ func _validate_math_question(question: Dictionary, mode: String, level: int) -> 
 		"place_value":
 			_check(int(question.a) >= 10 and int(question.a) <= 99 and answer_text == str(int(int(question.a) / 10)), "place-value prompt identifies the tens digit")
 		"number_pattern":
-				var limit := 20 if level == 1 else 100
-				_check(int(question.a) + 3 * int(question.b) == int(answer_text) and int(answer_text) <= limit, "number pattern fits its selected easy level")
+			var limit := 20 if level == 1 else 100
+			_check(int(question.a) + 3 * int(question.b) == int(answer_text) and int(answer_text) <= limit, "number pattern fits its selected easy level")
 		"fraction_operation":
-			var sign := 1 if str(question.operator) == "+" else -1
-			var numerator := int(question.left_num) * int(question.right_den) + sign * int(question.right_num) * int(question.left_den)
-			var denominator := int(question.left_den) * int(question.right_den)
+			var numerator := 0
+			var denominator := 1
+			match str(question.operator):
+				"+":
+					numerator = int(question.left_num) * int(question.right_den) + int(question.right_num) * int(question.left_den)
+					denominator = int(question.left_den) * int(question.right_den)
+				"-":
+					numerator = int(question.left_num) * int(question.right_den) - int(question.right_num) * int(question.left_den)
+					denominator = int(question.left_den) * int(question.right_den)
+				"×":
+					numerator = int(question.left_num) * int(question.right_num)
+					denominator = int(question.left_den) * int(question.right_den)
+				_:
+					numerator = int(question.left_num) * int(question.right_den)
+					denominator = int(question.left_den) * int(question.right_num)
 			_check(int(question.value_num) * denominator == numerator * int(question.value_den), "fraction operation is arithmetically correct")
 			_check(answer_text == MathQuestion._format_fraction(numerator, denominator), "fraction answer is shown in simplest form")
+		"money_sum", "measurement_sum":
+			_check(int(question.a) + int(question.b) == int(answer_text), "measurement addition answer is correct")
+		"unit_conversion":
+			var input_value := int(question.input_value)
+			var expected_conversion := 0
+			match str(question.conversion):
+				"hours_to_minutes":
+					expected_conversion = input_value * 60
+				"meters_to_cm":
+					expected_conversion = input_value * 100
+				"kilograms_to_g":
+					expected_conversion = input_value * 1000
+				"cm_to_m":
+					expected_conversion = int(input_value / 100)
+			_check(answer_text == str(expected_conversion), "measurement conversion answer is correct")
+		"measurement_rate":
+			var time_hours := int(question.time_hours)
+			_check(time_hours > 0 and int(question.distance) % time_hours == 0, "distance divided by time is exact")
+			_check(int(int(question.distance) / time_hours) == int(question.speed) and answer_text == str(int(question.speed)), "measurement rate answer is correct")
+		"probability":
+			_check(int(question.favorable) >= 0 and int(question.outcomes) > 0 and int(question.favorable) <= int(question.outcomes), "probability counts valid outcomes")
+			_check(answer_text == MathQuestion._format_fraction(int(question.favorable), int(question.outcomes)), "probability is shown as the reduced favorable-to-total fraction")
+		"statistic":
+			var data: Array = question["values"]
+			var ordered: Array = data.duplicate()
+			ordered.sort()
+			var expected_stat := 0
+			match str(question.statistic):
+				"mean":
+					var total := 0
+					for value: Variant in data:
+						total += int(value)
+					_check(total % data.size() == 0, "mean exercise has a whole-number average")
+					expected_stat = int(total / data.size())
+				"median":
+					expected_stat = int(ordered[int(ordered.size() / 2)])
+				"range":
+					expected_stat = int(ordered[-1]) - int(ordered[0])
+				_:
+					var frequencies: Dictionary = {}
+					for value: Variant in data:
+						frequencies[int(value)] = int(frequencies.get(int(value), 0)) + 1
+					var greatest_frequency := 0
+					for value: Variant in frequencies:
+						if int(frequencies[value]) > greatest_frequency:
+							greatest_frequency = int(frequencies[value])
+							expected_stat = int(value)
+			_check(answer_text == str(expected_stat), "data statistic answer is correct")
+		"geometry_shape_sides":
+			_check(int(question.sides) == int(answer_text), "shape question counts the correct number of sides")
+		"rectangle_perimeter":
+			_check(int(question.a) * 2 + int(question.b) * 2 == int(answer_text), "rectangle perimeter uses both pairs of sides")
+		"rectangle_area":
+			_check(int(question.a) * int(question.b) == int(answer_text), "rectangle area multiplies length by width")
+		"triangle_area":
+			_check(int(question.a) * int(question.b) / 2 == int(answer_text), "triangle area is half base times height")
+		"triangle_angle":
+			_check(180 - int(question.a) - int(question.b) == int(answer_text), "triangle interior angles sum to 180 degrees")
+		"circle_area_factor":
+			_check(int(question.radius) * int(question.radius) == int(answer_text), "circle area divided by pi uses radius squared")
+		"box_volume":
+			_check(int(question.a) * int(question.b) * int(question.side_c) == int(answer_text), "box volume multiplies its three dimensions")
 		"decimal_operation":
 			var cents := int(question.a_cents) + int(question.b_cents) if str(question.operator) == "+" else int(question.a_cents) - int(question.b_cents)
 			_check(answer_text == MathQuestion._format_decimal_cents(cents), "decimal operation keeps place values aligned")
+		"decimal_operation_advanced":
+			var left_scaled := int(question.left_scaled)
+			var right_scaled := int(question.right_scaled)
+			var answer_scale := int(question.answer_scale)
+			var expected_numerator := left_scaled * right_scaled * answer_scale if str(question.operator) == "×" else left_scaled * int(question.right_scale) * answer_scale
+			var expected_denominator := int(question.left_scale) * int(question.right_scale) if str(question.operator) == "×" else int(question.left_scale) * right_scaled
+			_check(expected_denominator > 0 and expected_numerator % expected_denominator == 0, "decimal multiplication/division is exact")
+			var expected_scaled := int(expected_numerator / expected_denominator)
+			var decimal_places := 1 if answer_scale == 10 else 2
+			_check(answer_text == MathQuestion._format_scaled_decimal(expected_scaled, decimal_places), "advanced decimal answer uses the correct place value")
 		"percentage":
 			var result := int(question.amount) * int(question.percent)
 			_check(result % 100 == 0 and answer_text == str(int(result / 100)), "percentage-of-amount answer is exact")
+		"percentage_change":
+			var base_amount := int(question.base_amount)
+			var percent_change := int(base_amount * int(question.percent) / 100)
+			var expected_amount := base_amount - percent_change if str(question.change_type) == "discount" else base_amount + percent_change
+			_check(int(question.amount_change) == percent_change and answer_text == str(expected_amount), "percentage increase/discount answer is correct")
+		"percentage_reverse":
+			_check(int(question.known_part) * 100 == int(question.value_num) * int(question.percent), "reverse-percent answer scales back to 100 percent")
 		"ratio":
 			_check(int(question.known) == int(question.a) * int(question.scale), "ratio known term uses the stated scale")
 			_check(answer_text == str(int(question.b) * int(question.scale)), "ratio answer preserves equivalence")
+		"unit_rate":
+			_check(int(question.total_cost) == int(question.item_count) * int(question.unit_rate), "unit rate multiplies back to the stated total")
+			_check(answer_text == str(int(question.unit_rate)), "unit rate answer is cost per one item")
+		"ratio_proportion":
+			_check(int(question.cups) * int(question.scale) == int(answer_text), "recipe proportion scales the ingredient amount")
+			_check(int(question.base_servings) * int(question.scale) == int(question.target_servings), "recipe proportion scales servings by the same factor")
 		"order_operations":
 			var expected := int(question.a) + int(question.b) * int(question.c)
 			if int(question.form) == 1:
@@ -170,13 +329,27 @@ func _validate_math_question(question: Dictionary, mode: String, level: int) -> 
 			elif int(question.form) == 2:
 				expected = int(question.a) * int(question.b) - int(question.c)
 			_check(answer_text == str(expected), "medium order-of-operations answer is correct")
+		"order_operations_extended":
+			var expected_extended := 0
+			if str(question.form_type) == "exact_division_chain":
+				_check(int(question.dividend) % int(question.divisor) == 0, "order-of-operations division is exact")
+				expected_extended = int(question.addend) + int(int(question.dividend) / int(question.divisor)) * int(question.multiplier)
+			else:
+				expected_extended = int(pow(float(question.base), float(question.exponent))) + int(question.left_factor) * int(question.right_factor)
+			_check(answer_text == str(expected_extended), "advanced order-of-operations answer respects precedence")
 		"linear_equation":
-			_check(int(question.coefficient) * int(question.solution) + int(question.intercept) == int(question.result), "linear equation balances")
+			if str(question.form_type) == "both_sides":
+				var left_result := int(question.left_coefficient) * int(question.solution) + int(question.left_constant)
+				var right_result := int(question.right_coefficient) * int(question.solution) + int(question.right_constant)
+				_check(left_result == right_result, "both-sides linear equation balances")
+			else:
+				_check(int(question.coefficient) * int(question.solution) + int(question.intercept) == int(question.result), "linear equation balances")
 			_check(answer_text == str(int(question.solution)), "linear equation reveals the correct x")
 		"quadratic":
 			var root := int(answer_text)
 			_check(root * root - int(question.sum_roots) * root + int(question.product_roots) == 0, "quadratic answer is a root")
-			_check(root == mini(int(question.root_a), int(question.root_b)), "quadratic answer is the requested smaller root")
+			var requested := maxi(int(question.root_a), int(question.root_b)) if str(question.requested_root) == "larger" else mini(int(question.root_a), int(question.root_b))
+			_check(root == requested, "quadratic answer matches the requested root")
 		"exponent":
 			var power_result := int(pow(float(question.base), float(question.power))) + int(question.offset)
 			_check(answer_text == str(power_result), "exponent expression is correct")
@@ -188,7 +361,16 @@ func _validate_math_question(question: Dictionary, mode: String, level: int) -> 
 			_check(int(question.a) * int(question.a) + int(question.b) * int(question.b) == c * c, "right-triangle dimensions satisfy Pythagoras")
 			_check(c == int(question.hypotenuse), "geometry answer is the hypotenuse")
 		"trigonometry":
-			_check(answer_text in ["1/2", "sqrt(2)/2", "sqrt(3)/2", "1"], "trigonometry uses a standard exact-angle value")
+			if str(question.form_type) == "triangle_ratio":
+				_check(answer_text == MathQuestion._format_fraction(int(question.ratio_top), int(question.ratio_bottom)), "right-triangle trig ratio uses the correct sides")
+			else:
+				var special_values := {
+					"sin_30": "1/2", "sin_45": "sqrt(2)/2", "sin_60": "sqrt(3)/2", "sin_90": "1",
+					"cos_0": "1", "cos_30": "sqrt(3)/2", "cos_45": "sqrt(2)/2", "cos_60": "1/2",
+					"tan_30": "sqrt(3)/3", "tan_45": "1", "tan_60": "sqrt(3)",
+				}
+				var special_key := "%s_%d" % [str(question.trig_function), int(question.angle)]
+				_check(answer_text == str(special_values.get(special_key, "")), "special-angle trig value is exact")
 		_:
 			_check(false, "unrecognized generated question type: %s" % kind)
 
