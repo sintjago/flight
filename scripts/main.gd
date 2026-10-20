@@ -4,6 +4,7 @@ extends Control
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const SfxBank = preload("res://scripts/flight/sfx_bank.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
+const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 const TITLE_FONT: Font = preload("res://assets/template/fonts/display/generic_title.tres")
 
 const GRAPHITE := Color(0.16, 0.17, 0.2)
@@ -42,9 +43,11 @@ var _speed_screen: Control
 var _topic_next_button: Button
 var _difficulty_summary: Label
 var _difficulty_next_button: Button
+var _difficulty_subtitle_label: Label
 var _speed_value_label: Label
 var _speed_description: Label
 var _speed_start_button: Button
+var _speed_subtitle_label: Label
 var _topic_selection: Dictionary = {
 	"addition": true,
 	"subtraction": true,
@@ -278,6 +281,8 @@ func _build_question_bar() -> void:
 	_question_difficulty_label = _make_label("", 16, BLUE_PENCIL.darkened(0.2), true)
 	box.add_child(_question_difficulty_label)
 	_question_label = _make_label(I18n.t("hud.tap_to_launch"), 40, GRAPHITE, true)
+	_question_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_question_label.custom_minimum_size = Vector2(0, 58)
 	box.add_child(_question_label)
 	_question_hint_label = _make_label(I18n.t("hud.question_wait"), 16, Color(GRAPHITE, 0.72))
 	box.add_child(_question_hint_label)
@@ -346,24 +351,17 @@ func _build_title() -> void:
 	var math_button := _make_button(I18n.t("practice.math"), 26, SAGE)
 	math_button.name = "PracticeMathButton"
 	math_button.custom_minimum_size = Vector2(560, 62)
-	math_button.pressed.connect(_begin_from_title)
+	math_button.pressed.connect(_begin_from_title.bind("math"))
 	box.add_child(math_button)
 	_practice_buttons["math"] = math_button
 	for area: String in ["reading", "russian", "spanish", "science"]:
-		var button := _make_button(I18n.t("practice.coming_soon", {"area": I18n.t("practice." + area)}), 20, Color(0.93, 0.91, 0.85))
+		var button := _make_button(I18n.t("practice." + area), 20, Color(0.88, 0.92, 0.88))
 		button.name = "Practice_" + area.capitalize()
 		button.custom_minimum_size = Vector2(560, 48)
-		button.disabled = true
-		button.add_theme_color_override("font_disabled_color", Color(GRAPHITE, 0.78))
-		var disabled_style := StyleBoxFlat.new()
-		disabled_style.bg_color = Color(0.92, 0.90, 0.84)
-		disabled_style.border_color = Color(GRAPHITE, 0.42)
-		disabled_style.set_border_width_all(2)
-		disabled_style.set_corner_radius_all(12)
-		button.add_theme_stylebox_override("disabled", disabled_style)
+		button.pressed.connect(_begin_from_title.bind(area))
 		box.add_child(button)
 		_practice_buttons[area] = button
-	_title_prompt = _make_label(I18n.t("practice.future_note"), 14, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
+	_title_prompt = _make_label(I18n.t("practice.pack_note"), 14, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
 	box.add_child(_title_prompt)
 	_title_best = _make_label("", 18, Color(GRAPHITE, 0.8))
 	box.add_child(_title_best)
@@ -407,6 +405,7 @@ func _build_difficulty_screen() -> void:
 	var page := _make_setup_page("DifficultyScreen", I18n.t("difficulty.title"), I18n.t("difficulty.subtitle"))
 	_difficulty_screen = page.screen
 	var box: VBoxContainer = page.box
+	_difficulty_subtitle_label = box.get_child(1) as Label
 	_difficulty_value_label = _make_label("", 26, GRAPHITE, true)
 	box.add_child(_difficulty_value_label)
 	var row := HBoxContainer.new()
@@ -436,6 +435,7 @@ func _build_speed_screen() -> void:
 	var page := _make_setup_page("SpeedScreen", I18n.t("speed.title"), I18n.t("speed.subtitle"))
 	_speed_screen = page.screen
 	var box: VBoxContainer = page.box
+	_speed_subtitle_label = box.get_child(1) as Label
 	_speed_value_label = _make_label("", 27, GRAPHITE, true)
 	box.add_child(_speed_value_label)
 	var row := HBoxContainer.new()
@@ -477,13 +477,19 @@ func _show_setup_page(target: Control, page_state: String) -> void:
 func _set_difficulty_level(level: int) -> void:
 	_selected_level = clampi(level, 1, 5)
 	_selected_difficulty = MathQuestion.band_for_level(_selected_level)
+	if _difficulty_subtitle_label != null:
+		var subtitle_key := "difficulty.subtitle.math" if _selected_practice_area == "math" else "difficulty.subtitle.learning"
+		_difficulty_subtitle_label.text = I18n.t(subtitle_key)
 	if _difficulty_value_label != null:
 		_difficulty_value_label.text = I18n.t("difficulty.level_value", {
 			"level": _selected_level,
 			"description": I18n.t("difficulty.level." + str(_selected_level)).to_upper(),
 		})
 	if _difficulty_description != null:
-		_difficulty_description.text = I18n.t("difficulty.description." + str(_selected_level))
+		var description_key := "difficulty.description." + str(_selected_level)
+		if _selected_practice_area != "math":
+			description_key = "difficulty.description." + _selected_practice_area + "." + str(_selected_level)
+		_difficulty_description.text = I18n.t(description_key)
 	for selected_level: int in _difficulty_buttons:
 		_style_choice_button(_difficulty_buttons[selected_level], selected_level == _selected_level, SAGE)
 	_update_difficulty_summary()
@@ -492,6 +498,12 @@ func _set_difficulty_level(level: int) -> void:
 
 func _update_difficulty_summary() -> void:
 	if _difficulty_summary == null:
+		return
+	if _selected_practice_area != "math":
+		_difficulty_summary.text = I18n.t("difficulty.pack_summary", {
+			"area": I18n.t("practice." + _selected_practice_area).capitalize(),
+		})
+		_difficulty_next_button.disabled = false
 		return
 	var active_count := 0
 	var selected_count := 0
@@ -514,6 +526,9 @@ func _update_difficulty_summary() -> void:
 
 func _set_speed_level(level: int) -> void:
 	_selected_speed = clampi(level, 1, 5)
+	if _speed_subtitle_label != null:
+		var subtitle_key := "speed.subtitle.math" if _selected_practice_area == "math" else "speed.subtitle.learning"
+		_speed_subtitle_label.text = I18n.t(subtitle_key)
 	if _speed_value_label != null:
 		_speed_value_label.text = I18n.t("speed.selected", {
 			"level": _selected_speed,
@@ -550,6 +565,8 @@ func _selected_topic_groups() -> Array[String]:
 
 
 func _has_selected_topic_at_level(level: int) -> bool:
+	if _selected_practice_area != "math":
+		return true
 	var available := MathQuestion.available_topic_groups(level)
 	for group: String in _selected_topic_groups():
 		if group in available:
@@ -566,10 +583,14 @@ func _continue_to_difficulty() -> void:
 func _continue_to_speed() -> void:
 	if _difficulty_next_button.disabled:
 		return
+	_set_speed_level(_selected_speed)
 	_show_setup_page(_speed_screen, "speed")
 
 
 func _show_topic_selection() -> void:
+	if _selected_practice_area != "math":
+		_show_title()
+		return
 	_show_setup_page(_topic_screen, "topics")
 
 
@@ -577,11 +598,17 @@ func _show_difficulty_selection() -> void:
 	_show_setup_page(_difficulty_screen, "difficulty")
 
 
-func _begin_from_title() -> void:
+func _begin_from_title(area: String = "math") -> void:
 	if _state != "title":
 		return
-	_selected_practice_area = "math"
-	_show_setup_page(_topic_screen, "topics")
+	if area != "math" and area not in LearningQuestion.PRACTICE_AREAS:
+		return
+	_selected_practice_area = area
+	_set_difficulty_level(_selected_level)
+	if area == "math":
+		_show_setup_page(_topic_screen, "topics")
+	else:
+		_show_setup_page(_difficulty_screen, "difficulty")
 
 
 func _start_from_setup() -> void:
@@ -595,6 +622,7 @@ func _update_title_best() -> void:
 		return
 	var best := _best_score(_selected_difficulty)
 	_title_best.text = I18n.t("title.best", {
+		"area": I18n.t("practice." + _selected_practice_area).capitalize(),
 		"difficulty": I18n.t("difficulty.level." + str(_selected_level)),
 		"score": best,
 	}) if best > 0 else ""
@@ -701,11 +729,12 @@ func _best_score(difficulty: String = "") -> int:
 	var save := _save()
 	if save == null:
 		return 0
-	return int(save.call("get_best_score", difficulty)) if not difficulty.is_empty() else int(save.call("get_best_score"))
+	return int(save.call("get_best_score", difficulty, _selected_practice_area)) if not difficulty.is_empty() else int(save.call("get_best_score"))
 
 
 func _show_title() -> void:
 	_world.call("set_difficulty", _selected_level)
+	_world.call("set_practice_area", _selected_practice_area)
 	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("set_speed_level", _selected_speed)
 	_world.call("reset_ready")
@@ -716,6 +745,7 @@ func _show_title() -> void:
 ## Starts a fresh run in the "ready" pose; the first flap launches it.
 func _start_new_run() -> void:
 	_world.call("set_difficulty", _selected_level)
+	_world.call("set_practice_area", _selected_practice_area)
 	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("set_speed_level", _selected_speed)
 	_world.call("reset_ready")
@@ -727,10 +757,11 @@ func _start_new_run() -> void:
 	_pause_screen.visible = false
 	_question_bar.visible = true
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
-		"level": _selected_level,
-		"difficulty": I18n.t("difficulty.level." + str(_selected_level)).to_upper(),
-		"topic": I18n.t("topic.ready").to_upper(),
-		"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
+			"level": _selected_level,
+			"difficulty": I18n.t("difficulty.level." + str(_selected_level)).to_upper(),
+			"area": I18n.t("practice." + _selected_practice_area).to_upper(),
+			"topic": I18n.t("topic.ready").to_upper(),
+			"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
 	})
 	_question_label.text = I18n.t("hud.tap_to_launch")
 	_question_hint_label.text = I18n.t("hud.question_wait")
@@ -741,6 +772,7 @@ func _start_new_run() -> void:
 	_best_label.visible = true
 	var best := _best_score(_selected_difficulty)
 	_best_label.text = I18n.t("hud.best", {
+		"area": I18n.t("practice." + _selected_practice_area).to_upper(),
 		"difficulty": I18n.t("difficulty." + _selected_difficulty).to_upper(),
 		"score": best,
 	})
@@ -842,6 +874,7 @@ func _on_question_changed(question: Dictionary) -> void:
 	var difficulty := str(question.get("difficulty", "medium"))
 	var level := int(question.get("difficulty_level", _selected_level))
 	var topic := str(question.get("topic", "addition"))
+	var area := str(question.get("practice_area", _selected_practice_area))
 	_question_label.text = expression
 	var equation_size := 40
 	if expression.length() > 22:
@@ -854,6 +887,7 @@ func _on_question_changed(question: Dictionary) -> void:
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
 		"level": level,
 		"difficulty": I18n.t("difficulty." + difficulty).to_upper(),
+		"area": I18n.t("practice." + area).to_upper(),
 		"topic": I18n.t("topic." + topic).to_upper(),
 		"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
 	})
@@ -886,7 +920,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	var save := _save()
 	var is_best := false
 	if save != null:
-		is_best = bool(save.call("record_run", total, ranked, _selected_difficulty))
+		is_best = bool(save.call("record_run", total, ranked, _selected_difficulty, _selected_practice_area))
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
 		audio.call("play_cue", "enemy.impact")
@@ -900,6 +934,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	_over_score.text = str(total)
 	var best := _best_score(_selected_difficulty)
 	_over_best.text = I18n.t("over.best", {
+		"area": I18n.t("practice." + _selected_practice_area).to_upper(),
 		"difficulty": I18n.t("difficulty." + _selected_difficulty),
 		"score": best,
 	})

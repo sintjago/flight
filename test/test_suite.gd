@@ -2,6 +2,7 @@ extends Node
 
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
+const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 
 var _failures := PackedStringArray()
 var _checks := 0
@@ -22,6 +23,7 @@ func _run() -> void:
 	_test_autoloads_and_schema()
 	_test_geometry()
 	_test_math_questions()
+	_test_learning_questions()
 	await _test_simulation()
 	_test_fairness_bot()
 	_test_save_store()
@@ -97,6 +99,42 @@ func _test_math_questions() -> void:
 	for level: int in range(1, 6):
 		_check(MathQuestion.topic_unlock_level("quadratics") == 5 or level < 5, "high-school topics have a level-five unlock")
 	_test_extended_question_forms(rng)
+
+
+func _test_learning_questions() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 58291
+	_check(LearningQuestion.PRACTICE_AREAS.size() == 4, "four additional learner packs are available")
+	for area: String in LearningQuestion.PRACTICE_AREAS:
+		_check(I18n.t("practice." + area) != "practice." + area, "%s practice area has a learner-facing name" % area)
+		for level: int in range(1, 6):
+			var pool: Array = LearningQuestion.questions_for(area, level)
+			_check(pool.size() >= 5, "%s level %d has a varied starter question bank" % [area, level])
+			var seen_prompts: Dictionary = {}
+			for template: Dictionary in pool:
+				var topic_key := "topic." + str(template.get("topic", ""))
+				var hint_key := str(template.get("hint_key", ""))
+				var prompt := str(template.get("expression", ""))
+				_check(not prompt.is_empty() and not seen_prompts.has(prompt), "%s level %d prompts are present and varied" % [area, level])
+				seen_prompts[prompt] = true
+				_check(str(template.get("answer", "")) != str(template.get("distractor", "")), "%s level %d has distinct answer choices" % [area, level])
+				_check(I18n.t(topic_key) != topic_key, "%s prompt topic is labeled" % area)
+				_check(not hint_key.is_empty() and I18n.t(hint_key) != hint_key, "%s prompt has a translated learning hint" % area)
+				for text_value: String in [prompt, str(template.get("answer", "")), str(template.get("distractor", ""))]:
+					for char_index: int in text_value.length():
+						_check(ThemeDB.fallback_font.has_char(text_value.unicode_at(char_index)), "%s question and answer font supports its lesson characters" % area)
+				for answer_text: String in [str(template.get("answer", "")), str(template.get("distractor", ""))]:
+					var font_size := FlightWorld.fit_answer_font_size(answer_text, 104.0)
+					var measured_width := ThemeDB.fallback_font.get_string_size(answer_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x
+					_check(measured_width <= 104.0, "%s gate answer fits inside its label plate" % area)
+			for _sample in 40:
+				var question: Dictionary = LearningQuestion.generate(rng, area, level)
+				var answers: Array[String] = [str(question.upper_answer), str(question.lower_answer)]
+				var correct_option := str(question.upper_answer) if question.correct_lane == "upper" else str(question.lower_answer)
+				_check(str(question.practice_area) == area and int(question.difficulty_level) == level, "%s question keeps its pack and selected level" % area)
+				_check(str(question.difficulty) == MathQuestion.band_for_level(level), "%s question records the matching score band" % area)
+				_check(answers[0] != answers[1] and answers.count(str(question.answer)) == 1, "%s gate has two choices and one correct answer" % area)
+				_check(correct_option == str(question.answer), "%s correct lane matches the teaching answer" % area)
 
 
 func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:
@@ -535,8 +573,11 @@ func _test_save_store() -> void:
 	_check(SaveStore.record_run(3, true, "easy"), "a separate difficulty starts its own best")
 	_check(SaveStore.get_best_score("easy") == 3 and SaveStore.get_best_score("medium") == 7, "difficulty bests do not overwrite each other")
 	_check(not SaveStore.record_run(99, false, "hard"), "practice runs never set the best")
+	_check(SaveStore.record_run(4, true, "medium", "reading"), "reading starts its own subject best")
+	_check(SaveStore.get_best_score("medium", "reading") == 4 and SaveStore.get_best_score("medium", "math") == 7, "subject bests stay separate at the same challenge band")
+	_check(not SaveStore.record_run(3, true, "medium", "reading"), "a lower reading score is not a new subject best")
 	_check(SaveStore.get_best_score() == 7, "overall best persists across modes")
-	_check(SaveStore.get_games_played() == 4, "every run is counted")
+	_check(SaveStore.get_games_played() == 6, "every run is counted")
 
 
 func _test_runtime_scene() -> void:
@@ -556,8 +597,8 @@ func _test_runtime_scene() -> void:
 	_check(practice_buttons.size() == 5, "first setup step offers math, reading, Russian, Spanish, and science")
 	_check(not (practice_buttons["math"] as Button).disabled, "math knowledge pack is available")
 	for area: String in ["reading", "russian", "spanish", "science"]:
-		var future_button: Button = practice_buttons[area]
-		_check(future_button.disabled and future_button.text.contains("COMING SOON"), "%s is honestly marked as a future pack" % area)
+		var pack_button: Button = practice_buttons[area]
+		_check(not pack_button.disabled and pack_button.text == I18n.t("practice." + area), "%s is an enabled, clearly named learning pack" % area)
 	var tap := InputEventMouseButton.new()
 	tap.button_index = MOUSE_BUTTON_LEFT
 	tap.pressed = true
@@ -616,7 +657,7 @@ func _test_runtime_scene() -> void:
 	_check(str((main.get("_question_label") as Label).text).contains("?"), "equation bar shows the active question")
 	_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "equation bar shows a learning hint")
 	var hud_mode_text := str((main.get("_question_difficulty_label") as Label).text)
-	_check(hud_mode_text.begins_with("LEVEL 5/5") and hud_mode_text.contains("HARD") and hud_mode_text.contains("LEISURELY") and hud_mode_text.split("·").size() == 4, "question bar identifies challenge level, topic, and pace")
+	_check(hud_mode_text.begins_with("LEVEL 5/5") and hud_mode_text.contains("HARD") and hud_mode_text.contains("MATH") and hud_mode_text.contains("LEISURELY") and hud_mode_text.split("·").size() == 5, "question bar identifies challenge level, learning area, topic, and pace")
 	main.call("_set_paused", true)
 	_check(get_tree().paused and main.get("_state") == "paused", "pause freezes the tree")
 	main.call("_set_paused", false)
@@ -653,6 +694,32 @@ func _test_runtime_scene() -> void:
 	(main.get("_over_again_button") as Button).emit_signal("pressed")
 	await get_tree().process_frame
 	_check(main.get("_state") == "playing" and int(main.get("_selected_level")) == 1 and int(world.get("speed_level")) == 1, "Try Again restarts with the same challenge and flight pace")
+	for area: String in ["reading", "russian", "spanish", "science"]:
+		main.call("_show_title")
+		var pack_button: Button = practice_buttons[area]
+		pack_button.emit_signal("pressed")
+		_check(main.get("_state") == "difficulty" and main.get("_selected_practice_area") == area and not bool((main.get("_topic_screen") as Control).visible), "%s skips the Math-only topic page and enters its level step" % area)
+		_check(str((main.get("_difficulty_subtitle_label") as Label).text).contains("STEP 2 OF 3"), "%s uses the correct three-step setup count" % area)
+		main.call("_show_topic_selection")
+		_check(main.get("_state") == "title", "%s can navigate back to practice-area selection" % area)
+		pack_button.emit_signal("pressed")
+		main.call("_set_difficulty_level", 2)
+		main.call("_continue_to_speed")
+		_check(main.get("_state") == "speed" and str((main.get("_speed_subtitle_label") as Label).text).contains("STEP 3 OF 3"), "%s advances to its final setup step" % area)
+		main.call("_set_speed_level", 1)
+		main.call("_start_from_setup")
+		_check(world.get("practice_area") == area and int(world.get("difficulty_level")) == 2 and int(world.get("speed_level")) == 1, "%s pack, challenge, and pace reach the flight world" % area)
+		main.call("_flap_input")
+		var learning_question: Dictionary = world.get("current_question")
+		var topic_key := "topic." + str(learning_question.get("topic", ""))
+		_check(str(learning_question.get("practice_area", "")) == area and not str(learning_question.get("expression", "")).is_empty(), "%s flight starts with a question from its own pack" % area)
+		_check(I18n.t(topic_key) != topic_key and I18n.t(str(learning_question.get("hint_key", ""))) != str(learning_question.get("hint_key", "")), "%s question shows a translated topic and teaching hint" % area)
+		_check(str((main.get("_question_difficulty_label") as Label).text).contains(area.to_upper()), "%s is identified in the in-flight question bar" % area)
+		main.call("_return_to_home")
+	main.call("_show_title")
+	(practice_buttons["math"] as Button).emit_signal("pressed")
+	main.call("_continue_to_difficulty")
+	_check(str((main.get("_difficulty_subtitle_label") as Label).text).contains("STEP 3 OF 4") and str((main.get("_difficulty_description") as Label).text).contains("Build confidence"), "returning to Math restores its four-step flow and math description")
 	get_tree().paused = false
 	main.queue_free()
 	await get_tree().process_frame

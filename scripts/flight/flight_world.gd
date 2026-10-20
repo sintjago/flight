@@ -48,6 +48,7 @@ const T_DOODLES: Array[Texture2D] = [
 	preload("res://assets/paperglide/doodle5.png"),
 ]
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
+const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 
 ## "ready" (waiting for the first tap), "playing" or "dead".
 var state := "ready"
@@ -61,6 +62,7 @@ var difficulty := "easy"
 var difficulty_level := 1
 var speed_level := 1
 var selected_topic_groups: Array[String] = ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"]
+var practice_area := "math"
 var current_question: Dictionary = {}
 var failure_reason := ""
 var failure_answer := ""
@@ -172,6 +174,10 @@ func set_selected_topics(groups: Array) -> void:
 		selected_topic_groups = MathQuestion.available_topic_groups(difficulty_level)
 
 
+func set_practice_area(value: String) -> void:
+	practice_area = value if value == "math" or value in LearningQuestion.PRACTICE_AREAS else "math"
+
+
 func set_speed_level(value: Variant) -> void:
 	speed_level = clampi(roundi(float(value)), 1, 5)
 	load_tuning()
@@ -220,7 +226,11 @@ func _spawn_gate(x: float) -> void:
 	var gap := current_gap(spawned)
 	var upper_y := rng.randf_range(235.0, 250.0)
 	var lower_y := upper_y + LANE_SEPARATION
-	var question: Dictionary = MathQuestion.generate(rng, difficulty_level, selected_topic_groups)
+	var question: Dictionary
+	if practice_area == "math":
+		question = MathQuestion.generate(rng, difficulty_level, selected_topic_groups)
+	else:
+		question = LearningQuestion.generate(rng, practice_area, difficulty_level)
 	pipes.append({
 		"x": x,
 		"upper_y": upper_y,
@@ -602,16 +612,21 @@ func _draw_pipe_arm(length: float) -> void:
 		remaining -= segment
 
 
+static func fit_answer_font_size(answer_text: String, max_width: float) -> int:
+	var safe_width := maxf(max_width, 1.0)
+	for candidate_size: int in range(28, 11, -1):
+		var text_width := ThemeDB.fallback_font.get_string_size(answer_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, candidate_size).x
+		if text_width <= safe_width:
+			return candidate_size
+	return 12
+
+
 func _draw_answer_label(center_x: float, center_y: float, answer: Variant) -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var plate := Rect2(center_x - 58.0, center_y - 21.0, 116.0, 42.0)
 	var shadow := Rect2(plate.position + Vector2(3.0, 3.0), plate.size)
 	var answer_text := str(answer)
-	var font_size := 28
-	if answer_text.length() > 4:
-		font_size = 24
-	if answer_text.length() > 6:
-		font_size = 20
+	var font_size := fit_answer_font_size(answer_text, plate.size.x - 12.0)
 	draw_rect(shadow, Color(GRAPHITE, 0.18), true)
 	draw_rect(plate, PAPER, true)
 	draw_rect(plate, Color(BLUE_PENCIL, 0.95), false, 2.5)

@@ -3,7 +3,7 @@
   "engineVersion": "4.7.2.stable.official.ed1daf0bf",
   "inputs": {
     "objectFormat": "sha1",
-    "tree": "79386224914b3ad54adc7413f78ffe26f600ef04",
+    "tree": "b0e5e66866455fca07a7a67dbe19d2c2ae318068",
     "entries": [
       {
         "path": ".gitignore",
@@ -33,7 +33,7 @@
         "path": "TODO.md",
         "type": "file",
         "mode": "100644",
-        "object": "8fc809bbf3178d4baaf39e9b593d1e215acfb631"
+        "object": "cca86fec4e16e0049b232b45ec052f223d1627a7"
       },
       {
         "path": "assets.lock.json",
@@ -530,7 +530,7 @@
         "path": "autoload/save_store.gd",
         "type": "file",
         "mode": "100644",
-        "object": "183920e98144fae7cf72d1bc434ef0bfb04ff964"
+        "object": "bfbbb5225b3a7cb0ba5702e5ced04efb5cdc21c2"
       },
       {
         "path": "autoload/save_store.gd.uid",
@@ -596,7 +596,7 @@
         "path": "localization/en.json",
         "type": "file",
         "mode": "100644",
-        "object": "df9f4dd9ae85bab98b34c4bfe1276946dfc8e072"
+        "object": "7d9323a2a78a1fa9f20122d22f090df241193bae"
       },
       {
         "path": "package.json",
@@ -620,7 +620,7 @@
         "path": "scripts/flight/flight_world.gd",
         "type": "file",
         "mode": "100644",
-        "object": "d42c40eb3abe538901e1ef30a101a605e2635df3"
+        "object": "d659b0a801c205d6194ea3bb8ac426244906af3f"
       },
       {
         "path": "scripts/flight/flight_world.gd.uid",
@@ -629,10 +629,22 @@
         "object": "e0bddaa021111c0038a6cf937116ae9d0d54dcd6"
       },
       {
+        "path": "scripts/flight/learning_question.gd",
+        "type": "file",
+        "mode": "100644",
+        "object": "7101272e89447d3868cbd287cac5506105d673cf"
+      },
+      {
+        "path": "scripts/flight/learning_question.gd.uid",
+        "type": "file",
+        "mode": "100644",
+        "object": "142170d0a80fce0e8ec61aa6fd612f357e004a1a"
+      },
+      {
         "path": "scripts/flight/math_question.gd",
         "type": "file",
         "mode": "100644",
-        "object": "5b6539fc7847c03ddc64cd177e8ac127da67d416"
+        "object": "f1c1d51d384da5a73e171b0be7628d20747662ce"
       },
       {
         "path": "scripts/flight/math_question.gd.uid",
@@ -656,7 +668,7 @@
         "path": "scripts/main.gd",
         "type": "file",
         "mode": "100644",
-        "object": "fc2167a230e3e48bbffc1821427fbdaa54b7afcc"
+        "object": "12e37b117bf9b522403900406b8da8aab64bae4d"
       },
       {
         "path": "scripts/main.gd.uid",
@@ -818,7 +830,7 @@
         "path": "test/test_suite.gd",
         "type": "file",
         "mode": "100644",
-        "object": "23953342a989a3ab12a08a0c1183e634b00f3129"
+        "object": "158b4048d200b2403e5f6887a9c5f6bd933d887a"
       },
       {
         "path": "test/test_suite.gd.uid",
@@ -884,7 +896,7 @@
         "path": "tools/verify_exported_pack.gd",
         "type": "file",
         "mode": "100644",
-        "object": "50d8feb0b672ec35270efd5866c601b400370742"
+        "object": "2b76e7c8fbefcf2fb0b3ef3409673a25db92aa3d"
       },
       {
         "path": "tools/verify_exported_pack.gd.uid",
@@ -907,7 +919,7 @@
     ]
   },
   "build": {
-    "snapshotId": "sha256:fa9fcbbdb6fa242f2767af78738854b41dba176044195c004ebd28d33532fd8b",
+    "snapshotId": "sha256:4c13cf91a633bd19555cb325b960ddc048e1b746a947d059e3599bf7159002bb",
     "toolchain": {
       "engineVersion": "4.7.2.stable.official.ed1daf0bf",
       "engineDigest": "sha256:8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
@@ -920,21 +932,21 @@
     "profile": "release",
     "export": {
       "profile": "release",
-      "snapshotId": "sha256:fa9fcbbdb6fa242f2767af78738854b41dba176044195c004ebd28d33532fd8b",
+      "snapshotId": "sha256:4c13cf91a633bd19555cb325b960ddc048e1b746a947d059e3599bf7159002bb",
       "files": {
         "THIRD_PARTY_NOTICES.txt": "sha256:c729a77bf07eb9745b2d89c3ce4ead3357438366f41743d2755ae35f98509cf9",
         "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
         "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
         "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-        "index.html": "sha256:d98ae217fa52694b902d2bc6bb471a624e9031d4ddc254a41954c53b634baaba",
+        "index.html": "sha256:7480d712952fc8e6063281cccdf52aa2eed0dfa86b13db6b41d2d6990167dcfb",
         "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
         "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
-        "index.pck": "sha256:e19d248bd57294d6042dda74ca71194c14afd220ff72b06acc0737ab8d867eab",
+        "index.pck": "sha256:e0b6fd599f52e6b2bddd27aa70b8639ae5f1a7549a4b99156bb8f78fb6c6d5b2",
         "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
         "index.wasm": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0",
         "open-source-licenses.html": "sha256:9215f5fdd50039a9b6f3d8f0271cbc21bbdf64b917fb118dd29c8a16b9974e00"
       },
-      "digest": "sha256:4ee020316c21f5b2df0108f321ea771aca1e8937f47a6dff5f5c76f83d0a222b"
+      "digest": "sha256:cb77dc3ef6d216618055edb6aba2ca795ff68d67e023f1929d42ad6d22958e1b"
     }
   },
   "artifacts": {
@@ -943,8 +955,8 @@
       "sha256": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0"
     },
     "pck": {
-      "path": "/manus-storage/game/sha256/e19d248bd57294d6042dda74ca71194c14afd220ff72b06acc0737ab8d867eab.pck",
-      "sha256": "sha256:e19d248bd57294d6042dda74ca71194c14afd220ff72b06acc0737ab8d867eab"
+      "path": "/manus-storage/game/sha256/e0b6fd599f52e6b2bddd27aa70b8639ae5f1a7549a4b99156bb8f78fb6c6d5b2.pck",
+      "sha256": "sha256:e0b6fd599f52e6b2bddd27aa70b8639ae5f1a7549a4b99156bb8f78fb6c6d5b2"
     }
   },
   "files": {
@@ -953,7 +965,7 @@
     "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
     "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
     "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-    "index.html": "sha256:fcd785a81f9c7c4295ef908ba536d8b6c87290def18c9cbf69763d3047a46db7",
+    "index.html": "sha256:b912541683f357264c857048749d0bbb0e10e97af1f9e1dd35302497824beeec",
     "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
     "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
     "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
