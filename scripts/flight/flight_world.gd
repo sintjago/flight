@@ -69,6 +69,7 @@ var failure_answer := ""
 var failure_question := ""
 var failure_hint_key := ""
 var _learning_prompt_history: Dictionary = {}
+var _math_prompt_history: Dictionary = {}
 var _math_topic_bag: Array[String] = []
 var _math_topic_bag_key := ""
 var _last_math_topic := ""
@@ -211,6 +212,7 @@ func _start_run() -> void:
 	pipes.clear()
 	current_question.clear()
 	_learning_prompt_history.clear()
+	_math_prompt_history.clear()
 	_math_topic_bag.clear()
 	_math_topic_bag_key = ""
 	_last_math_topic = ""
@@ -265,7 +267,11 @@ func _spawn_gate(x: float) -> void:
 	var lower_y := upper_y + LANE_SEPARATION
 	var question: Dictionary
 	if practice_area == "math":
-		question = MathQuestion.generate(rng, difficulty_level, [_next_math_topic_group()])
+		var group := _next_math_topic_group()
+		var history_key := "%d:%s" % [difficulty_level, group]
+		var used_prompts: Array = _math_prompt_history.get(history_key, [])
+		question = MathQuestion.generate_with_history(rng, difficulty_level, [group], used_prompts)
+		_math_prompt_history[history_key] = used_prompts
 	else:
 		var history_key := "%s:%d" % [practice_area, difficulty_level]
 		var used_prompts: Array = _learning_prompt_history.get(history_key, [])

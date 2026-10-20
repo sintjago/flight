@@ -81,6 +81,33 @@ static func generate(rng: RandomNumberGenerator, difficulty: Variant, selected_g
 	return question
 
 
+static func generate_with_history(rng: RandomNumberGenerator, difficulty: Variant, selected_groups: Array, used_prompts: Array) -> Dictionary:
+	var question: Dictionary = {}
+	var seen_prompts: Dictionary = {}
+	for prompt: Variant in used_prompts:
+		seen_prompts[str(prompt)] = true
+	var attempt_limit := maxi(2048, (seen_prompts.size() + 1) * 16)
+	for _attempt in attempt_limit:
+		question = generate(rng, difficulty, selected_groups)
+		var prompt := str(question.get("expression", ""))
+		if not prompt.is_empty() and not seen_prompts.has(prompt):
+			used_prompts.append(prompt)
+			return question
+	var previous_prompt := str(used_prompts.back()) if not used_prompts.is_empty() else ""
+	used_prompts.clear()
+	if not previous_prompt.is_empty():
+		used_prompts.append(previous_prompt)
+	for _attempt in 2048:
+		question = generate(rng, difficulty, selected_groups)
+		var prompt := str(question.get("expression", ""))
+		if not prompt.is_empty() and prompt != previous_prompt:
+			used_prompts.append(prompt)
+			return question
+	question = generate(rng, difficulty, selected_groups)
+	used_prompts.append(str(question.get("expression", "")))
+	return question
+
+
 static func _generate_for_group(rng: RandomNumberGenerator, mode: String, level: int, group: String) -> Dictionary:
 	match group:
 		"addition":
@@ -578,42 +605,102 @@ static func _probability_question(rng: RandomNumberGenerator, level: int) -> Dic
 	var favorable := 1
 	var total := 2
 	var expression := "Fair coin: P(tails) = ?"
+	var event := "tails"
 	if level <= 1:
 		if rng.randi_range(0, 1) == 0:
 			expression = "Fair coin: P(tails) = ?"
+			event = "tails"
 			favorable = 1
 			total = 2
 		else:
 			expression = "Fair die: P(even roll) = ?"
+			event = "even roll"
 			favorable = 3
 			total = 6
 	elif level == 2:
 		var sections := rng.randi_range(5, 10)
 		favorable = rng.randi_range(1, sections - 1)
 		total = sections
+		event = "blue sections"
 		expression = "Spinner: %d of %d blue; P(blue) = ?" % [favorable, total]
 	elif level == 3:
-		total = rng.randi_range(6, 12)
+		total = rng.randi_range(8, 40)
 		favorable = rng.randi_range(1, total - 1)
+		event = "red outcomes"
 		expression = "Bag: %d red of %d; P(red) = ?" % [favorable, total]
 	elif level == 4:
 		if rng.randi_range(0, 1) == 0:
-			expression = "2 coin flips: P(both heads) = ?"
-			favorable = 1
-			total = 4
+			var flips := rng.randi_range(2, 7)
+			total = int(pow(2.0, float(flips)))
+			var event_index := rng.randi_range(0, 3)
+			if event_index == 0:
+				event = "all heads"
+				favorable = 1
+			elif event_index == 1:
+				event = "at least 1 head"
+				favorable = total - 1
+			elif event_index == 2:
+				event = "exactly 1 head"
+				favorable = flips
+			else:
+				event = "exactly 2 heads"
+				favorable = _binomial_coefficient(flips, 2)
+			expression = "%d coin flips: P(%s) = ?" % [flips, event]
 		else:
-			expression = "2 coin flips: P(at least 1 head) = ?"
-			favorable = 3
-			total = 4
+			var colours: Array[String] = ["red", "blue", "green", "gold"]
+			var colour: String = colours[rng.randi_range(0, colours.size() - 1)]
+			total = rng.randi_range(8, 60)
+			favorable = rng.randi_range(1, total - 1)
+			event = colour + " outcomes"
+			if rng.randi_range(0, 1) == 0:
+				expression = "Spinner: %d of %d slices are %s; P(%s) = ?" % [favorable, total, colour, colour]
+			else:
+				expression = "Bag: %d %s counters among %d; P(%s) = ?" % [favorable, colour, total, colour]
 	else:
-		expression = "3 coin flips: P(at least 1 head) = ?"
-		favorable = 7
-		total = 8
+		if rng.randi_range(0, 2) == 0:
+			var flips := rng.randi_range(4, 12)
+			total = int(pow(2.0, float(flips)))
+			var event_index := rng.randi_range(0, 3)
+			if event_index == 0:
+				event = "at least 1 head"
+				favorable = total - 1
+			elif event_index == 1:
+				event = "exactly 1 head"
+				favorable = flips
+			elif event_index == 2:
+				event = "exactly 2 heads"
+				favorable = _binomial_coefficient(flips, 2)
+			else:
+				event = "all heads"
+				favorable = 1
+			if rng.randi_range(0, 1) == 0:
+				expression = "%d fair coins: P(%s) = ?" % [flips, event]
+			else:
+				expression = "Flip %d coins. Probability of %s?" % [flips, event]
+		else:
+			var colours: Array[String] = ["red", "blue", "green", "gold", "white"]
+			var colour: String = colours[rng.randi_range(0, colours.size() - 1)]
+			total = rng.randi_range(12, 100)
+			favorable = rng.randi_range(1, total - 1)
+			event = colour + " outcomes"
+			var container := "spinner" if rng.randi_range(0, 1) == 0 else "bag"
+			if container == "spinner":
+				expression = "A spinner has %d %s sections of %d; P(%s) = ?" % [favorable, colour, total, colour]
+			else:
+				expression = "A bag has %d %s counters out of %d; P(%s) = ?" % [favorable, colour, total, colour]
 	var answer := _format_fraction(favorable, total)
 	var distractors: Array[String] = ["1/6", "1/5", "1/4", "1/3", "1/2", "2/3", "3/4", "5/6", "7/8"]
 	return _problem(expression, answer, "probability", "hint.probability", "probability", favorable, total, {
-		"favorable": favorable, "outcomes": total, "distractor_pool": distractors,
+		"favorable": favorable, "outcomes": total, "event": event, "distractor_pool": distractors,
 	})
+
+
+static func _binomial_coefficient(n: int, k: int) -> int:
+	var result := 1
+	var take := mini(k, n - k)
+	for index in take:
+		result = int(result * (n - index) / (index + 1))
+	return result
 
 
 static func _statistics_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
@@ -669,21 +756,32 @@ static func _geometry_question(rng: RandomNumberGenerator, level: int) -> Dictio
 	if level == 4:
 		return _pythagorean_question(rng)
 	if rng.randi_range(0, 1) == 0:
-		var radius := rng.randi_range(2, 15)
+		var radius := rng.randi_range(2, 99)
 		return _integer_problem("Circle r=%d: area/π = ?" % radius, radius * radius, "geometry", "hint.geometry", "circle_area_factor", radius, 1, "r²", {"radius": radius})
-	var side_a := rng.randi_range(2, 9)
-	var side_b := rng.randi_range(2, 9)
-	var side_c := rng.randi_range(2, 9)
+	var side_a := rng.randi_range(2, 20)
+	var side_b := rng.randi_range(2, 20)
+	var side_c := rng.randi_range(2, 20)
 	return _integer_problem("Box %d × %d × %d: volume = ?" % [side_a, side_b, side_c], side_a * side_b * side_c, "geometry", "hint.geometry", "box_volume", side_a, side_b, "volume", {"side_c": side_c})
 
 
 static func _pythagorean_question(rng: RandomNumberGenerator) -> Dictionary:
-	var triples: Array = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 40, 41]]
-	var triple: Array = triples[rng.randi_range(0, triples.size() - 1)]
+	var triple := _random_pythagorean_triple(rng)
 	var a := int(triple[0])
 	var b := int(triple[1])
 	var c := int(triple[2])
 	return _integer_problem("Right triangle: legs %d, %d; c = ?" % [a, b], c, "geometry", "hint.geometry", "pythagorean", a, b, "c", {"hypotenuse": c})
+
+
+static func _random_pythagorean_triple(rng: RandomNumberGenerator) -> Array[int]:
+	var m := rng.randi_range(2, 40)
+	var n := rng.randi_range(1, m - 1)
+	var side_a := m * m - n * n
+	var side_b := 2 * m * n
+	if side_a > side_b:
+		var held := side_a
+		side_a = side_b
+		side_b = held
+	return [side_a, side_b, m * m + n * n]
 
 
 static func _hard_integers(rng: RandomNumberGenerator) -> Dictionary:
@@ -838,8 +936,7 @@ static func _hard_trigonometry(rng: RandomNumberGenerator) -> Dictionary:
 		return _problem(expression, str(item.answer), "trigonometry", "hint.trigonometry", "trigonometry", 0, 1, {
 			"distractor_pool": pool, "form_type": "special_angle", "trig_function": str(item.function), "angle": int(item.angle),
 		})
-	var triples: Array = [[3, 4, 5], [5, 12, 13], [8, 15, 17]]
-	var triple: Array = triples[rng.randi_range(0, triples.size() - 1)]
+	var triple := _random_pythagorean_triple(rng)
 	var opposite := int(triple[0])
 	var adjacent := int(triple[1])
 	var hypotenuse := int(triple[2])

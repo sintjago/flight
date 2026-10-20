@@ -2,6 +2,7 @@ extends RefCounted
 ## Curated, age-stepped non-math learning packs for Paper Glide.
 
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
+const QuestionGenerator = preload("res://scripts/flight/learning_question_generator.gd")
 const PRACTICE_AREAS: Array[String] = ["reading", "russian", "spanish", "science"]
 
 const BANK := {
@@ -273,20 +274,45 @@ static func generate_with_history(rng: RandomNumberGenerator, area: String, leve
 	var pool := questions_for(area, safe_level)
 	if pool.is_empty():
 		return {}
-	var available: Array = []
-	for template: Dictionary in pool:
-		var prompt := str(template.get("expression", ""))
-		if prompt not in used_prompts:
-			available.append(template)
-	if available.is_empty():
+	var question: Dictionary = {}
+	var found_new_prompt := false
+	var seen_prompts: Dictionary = {}
+	for prompt: Variant in used_prompts:
+		seen_prompts[str(prompt)] = true
+	var attempt_limit := maxi(2048, (seen_prompts.size() + 1) * 16)
+	for _attempt in attempt_limit:
+		if rng.randi_range(0, 5) == 0:
+			question = pool[rng.randi_range(0, pool.size() - 1)].duplicate(true)
+		else:
+			question = QuestionGenerator.generate(rng, area, safe_level)
+		var prompt := str(question.get("expression", ""))
+		if not prompt.is_empty() and not seen_prompts.has(prompt):
+			used_prompts.append(prompt)
+			found_new_prompt = true
+			break
+	if not found_new_prompt:
+		var previous_prompt := str(used_prompts.back()) if not used_prompts.is_empty() else ""
 		used_prompts.clear()
-		available = pool
-	var question: Dictionary = available[rng.randi_range(0, available.size() - 1)].duplicate(true)
-	used_prompts.append(str(question.expression))
+		if not previous_prompt.is_empty():
+			used_prompts.append(previous_prompt)
+		for _attempt in 2048:
+			if rng.randi_range(0, 5) == 0:
+				question = pool[rng.randi_range(0, pool.size() - 1)].duplicate(true)
+			else:
+				question = QuestionGenerator.generate(rng, area, safe_level)
+			var prompt := str(question.get("expression", ""))
+			if not prompt.is_empty() and prompt != previous_prompt:
+				used_prompts.append(prompt)
+				found_new_prompt = true
+				break
+		if not found_new_prompt:
+			question = QuestionGenerator.generate(rng, area, safe_level)
+			used_prompts.append(str(question.get("expression", "")))
 	question["practice_area"] = area
 	question["difficulty"] = MathQuestion.band_for_level(safe_level)
 	question["difficulty_level"] = safe_level
 	question["topic_group"] = str(question.topic)
+	question["generator_kind"] = str(question.get("kind", "knowledge_choice"))
 	question["kind"] = "knowledge_choice"
 	question["value_num"] = 0
 	question["value_den"] = 1

@@ -97,6 +97,42 @@ func _test_math_questions() -> void:
 			var filtered: Dictionary = MathQuestion.generate(rng, level, [group])
 			_check(str(filtered.topic_group) == group, "level %d question follows the selected %s checkbox" % [level, group])
 			_check(int(filtered.difficulty_level) == level, "question keeps the exact selected level")
+		var math_history: Array = []
+		var math_prompts: Dictionary = {}
+		for _sample in 80:
+			var generated: Dictionary = MathQuestion.generate_with_history(rng, level, ["addition"], math_history)
+			var generated_expression := str(generated.expression)
+			_check(not math_prompts.has(generated_expression), "Math level %d avoids repeated equation prompts" % level)
+			math_prompts[generated_expression] = true
+		_check(math_history.size() == 80 and math_prompts.size() == 80, "Math level %d maintains a generated no-repeat sequence" % level)
+	var broad_math_topics: Array[Dictionary] = [
+		{"level":4,"topic":"geometry"}, {"level":4,"topic":"probability"},
+		{"level":5,"topic":"trigonometry"}, {"level":5,"topic":"probability"},
+	]
+	for item: Dictionary in broad_math_topics:
+		var history: Array = []
+		var prompts: Dictionary = {}
+		for _sample in 120:
+			var question: Dictionary = MathQuestion.generate_with_history(rng, int(item.level), [str(item.topic)], history)
+			var expression := str(question.expression)
+			_check(not prompts.has(expression), "Math %s level %d avoids prompt repeats" % [str(item.topic), int(item.level)])
+			prompts[expression] = true
+			if str(question.kind) == "probability":
+				_check(int(question.favorable) >= 0 and int(question.favorable) <= int(question.outcomes), "generated probability has valid favorable outcomes")
+				_check(str(question.answer) == MathQuestion._format_fraction(int(question.favorable), int(question.outcomes)), "generated probability answer matches its outcome counts")
+				if int(item.level) >= 4:
+					var probability_prompt := expression.to_lower()
+					_check(probability_prompt.contains("coin") or probability_prompt.contains("spinner") or probability_prompt.contains("bag"), "advanced probability prompt describes its generated experiment")
+			elif str(question.kind) == "pythagorean":
+				_check(int(question.a) * int(question.a) + int(question.b) * int(question.b) == int(question.hypotenuse) * int(question.hypotenuse), "generated Pythagorean triple satisfies a² + b² = c²")
+			elif str(question.kind) == "trigonometry" and str(question.get("form_type", "")) == "triangle_ratio":
+				_check(str(question.answer) == MathQuestion._format_fraction(int(question.ratio_top), int(question.ratio_bottom)), "generated right-triangle ratio is reduced correctly")
+		_check(history.size() == 120 and prompts.size() == 120, "Math %s level %d generates a large varied prompt run" % [str(item.topic), int(item.level)])
+	var shape_history: Array = ["Sides in a triangle = ?", "Sides in a square = ?", "Sides in a pentagon = ?", "Sides in a hexagon = ?"]
+	var shape_rng := RandomNumberGenerator.new()
+	shape_rng.seed = 34918
+	var next_shape: Dictionary = MathQuestion.generate_with_history(shape_rng, 1, ["geometry"], shape_history)
+	_check(str(next_shape.expression) != "Sides in a hexagon = ?", "a fresh Math cycle does not immediately repeat its last prompt")
 	for level: int in range(1, 6):
 		_check(MathQuestion.topic_unlock_level("quadratics") == 5 or level < 5, "high-school topics have a level-five unlock")
 	_test_extended_question_forms(rng)
@@ -110,7 +146,7 @@ func _test_learning_questions() -> void:
 		_check(I18n.t("practice." + area) != "practice." + area, "%s practice area has a learner-facing name" % area)
 		for level: int in range(1, 6):
 			var pool: Array = LearningQuestion.questions_for(area, level)
-			_check(pool.size() >= 10, "%s level %d has an expanded question bank" % [area, level])
+			_check(pool.size() >= 10, "%s level %d retains its curated starter questions" % [area, level])
 			if area == "science" and level <= 2:
 				for template: Dictionary in pool:
 					var easy_prompt := str(template.get("expression", "")).to_lower()
@@ -120,36 +156,71 @@ func _test_learning_questions() -> void:
 				var topic_key := "topic." + str(template.get("topic", ""))
 				var hint_key := str(template.get("hint_key", ""))
 				var prompt := str(template.get("expression", ""))
-				_check(not prompt.is_empty() and not seen_prompts.has(prompt), "%s level %d prompts are present and varied" % [area, level])
+				_check(not prompt.is_empty() and not seen_prompts.has(prompt), "%s level %d curated prompts are present and varied" % [area, level])
 				seen_prompts[prompt] = true
-				_check(str(template.get("answer", "")) != str(template.get("distractor", "")), "%s level %d has distinct answer choices" % [area, level])
+				_check(str(template.get("answer", "")) != str(template.get("distractor", "")), "%s level %d curated choices are distinct" % [area, level])
 				_check(I18n.t(topic_key) != topic_key, "%s prompt topic is labeled" % area)
 				_check(not hint_key.is_empty() and I18n.t(hint_key) != hint_key, "%s prompt has a translated learning hint" % area)
 				for text_value: String in [prompt, str(template.get("answer", "")), str(template.get("distractor", ""))]:
 					for char_index: int in text_value.length():
-						_check(ThemeDB.fallback_font.has_char(text_value.unicode_at(char_index)), "%s question and answer font supports its lesson characters" % area)
+						_check(ThemeDB.fallback_font.has_char(text_value.unicode_at(char_index)), "%s curated lesson characters are supported" % area)
 				for answer_text: String in [str(template.get("answer", "")), str(template.get("distractor", ""))]:
 					var font_size := FlightWorld.fit_answer_font_size(answer_text, 104.0)
 					var measured_width := ThemeDB.fallback_font.get_string_size(answer_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x
-					_check(measured_width <= 104.0, "%s gate answer '%s' fits at %.1f px" % [area, answer_text, measured_width])
+					_check(measured_width <= 104.0, "%s curated gate answer '%s' fits at %.1f px" % [area, answer_text, measured_width])
 			var history: Array = []
-			var cycle_prompts: Dictionary = {}
-			for _cycle_index in pool.size():
-				var cycle_question: Dictionary = LearningQuestion.generate_with_history(rng, area, level, history)
-				var cycle_prompt := str(cycle_question.expression)
-				_check(not cycle_prompts.has(cycle_prompt), "%s level %d has no prompt repeats inside a cycle" % [area, level])
-				cycle_prompts[cycle_prompt] = true
-			_check(history.size() == pool.size(), "%s level %d tracks the complete question cycle" % [area, level])
-			LearningQuestion.generate_with_history(rng, area, level, history)
-			_check(history.size() == 1, "%s level %d reshuffles after exhausting its bank" % [area, level])
-			for _sample in 40:
-				var question: Dictionary = LearningQuestion.generate(rng, area, level)
+			var generated_prompts: Dictionary = {}
+			var procedural_count := 0
+			for _sample in 160:
+				var question: Dictionary = LearningQuestion.generate_with_history(rng, area, level, history)
 				var answers: Array[String] = [str(question.upper_answer), str(question.lower_answer)]
 				var correct_option := str(question.upper_answer) if question.correct_lane == "upper" else str(question.lower_answer)
-				_check(str(question.practice_area) == area and int(question.difficulty_level) == level, "%s question keeps its pack and selected level" % area)
+				var generated_prompt := str(question.expression)
+				if str(question.get("generator_kind", "")).begins_with("generated_"):
+					procedural_count += 1
+				_check(not generated_prompts.has(generated_prompt), "%s level %d does not repeat generated prompts during a run" % [area, level])
+				generated_prompts[generated_prompt] = true
+				_check(str(question.practice_area) == area and int(question.difficulty_level) == level, "%s generated question keeps its pack and selected level" % area)
 				_check(str(question.difficulty) == MathQuestion.band_for_level(level), "%s question records the matching score band" % area)
-				_check(answers[0] != answers[1] and answers.count(str(question.answer)) == 1, "%s gate has two choices and one correct answer" % area)
-				_check(correct_option == str(question.answer), "%s correct lane matches the teaching answer" % area)
+				_check(answers[0] != answers[1] and answers.count(str(question.answer)) == 1, "%s generated gate has two choices and one correct answer" % area)
+				_check(correct_option == str(question.answer), "%s generated correct lane matches the teaching answer" % area)
+				var topic_key := "topic." + str(question.topic)
+				_check(I18n.t(topic_key) != topic_key, "%s generated topic has a learner-facing label" % area)
+				_check(I18n.t(str(question.hint_key)) != str(question.hint_key), "%s generated prompt has a teaching hint" % area)
+				for answer_text: String in answers:
+					var font_size := FlightWorld.fit_answer_font_size(answer_text, 104.0)
+					var measured_width := ThemeDB.fallback_font.get_string_size(answer_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x
+					_check(measured_width <= 104.0, "%s generated gate answer '%s' fits at %.1f px" % [area, answer_text, measured_width])
+				match str(question.get("generator_kind", "")):
+					"generated_science_speed":
+						_check(int(question.distance) == int(question.expected_speed) * int(question.time_hours), "generated Science speed answers use distance ÷ time")
+					"generated_science_force":
+						_check(int(question.expected_force) == int(question.mass) * int(question.acceleration), "generated Science force answers use mass × acceleration")
+					"generated_science_density":
+						_check(int(question.mass) == int(question.expected_density) * int(question.volume), "generated Science density answers use mass ÷ volume")
+					"generated_science_voltage":
+						_check(int(question.expected_voltage) == int(question.current) * int(question.resistance), "generated Science voltage answers use current × resistance")
+					"generated_science_power":
+						_check(int(question.work) == int(question.expected_power) * int(question.time), "generated Science power answers use work ÷ time")
+					"generated_spanish_conjugation":
+						var forms: Array = question.get("conjugation_forms", [])
+						_check(forms.has(str(question.answer)) and forms.has(str(question.distractor)) and question.answer != question.distractor, "Spanish conjugation choices are distinct valid verb forms")
+					"generated_reading_detail":
+						for story_name: String in ["Mia", "Leo", "Ava", "Noah", "Ivy", "Max", "Zoe", "Ben"]:
+							for past_verb: String in ["found", "drew", "carried", "opened", "packed", "planted", "borrowed", "painted", "chose", "fixed"]:
+								_check(not generated_prompt.contains("did %s %s" % [story_name, past_verb]), "Reading comprehension uses a base verb after did")
+					"generated_science_plant_part":
+						_check(str(question.answer) == str(question.plant_part) and generated_prompt.contains(str(question.plant_job)), "Science plant question and answer match the plant function")
+					"generated_science_state":
+						_check(str(question.answer) == str(question.science_state) and not generated_prompt.to_lower().contains("room temperature"), "Science state question avoids an incorrect ice-at-room-temperature claim")
+				if area == "science" and level <= 2:
+					var easy_prompt := generated_prompt.to_lower()
+					_check(not easy_prompt.contains("photosynthesis") and not easy_prompt.contains("transpiration"), "basic generated Science avoids specialist plant terms")
+				if area == "reading" and level == 1:
+					for advanced_word: String in ["reluctant", "arduous", "scarce", "precise"]:
+						_check(not generated_prompt.to_lower().contains(advanced_word), "beginner Reading excludes advanced vocabulary: %s" % advanced_word)
+			_check(history.size() == 160 and generated_prompts.size() == 160, "%s level %d maintains a large no-repeat generated run" % [area, level])
+			_check(procedural_count >= 100, "%s level %d relies on procedural questions rather than only the starter bank" % [area, level])
 
 
 func _test_question_rotation() -> void:
@@ -166,6 +237,20 @@ func _test_question_rotation() -> void:
 		last_selected_group = group
 	var next_group := str(math_world.call("_next_math_topic_group"))
 	_check(next_group != last_selected_group, "Math starts a fresh shuffled topic cycle")
+	math_world.call("set_selected_topics", ["addition"])
+	math_world.call("set_difficulty", 2)
+	var math_flight_prompts: Dictionary = {}
+	for index in 80:
+		math_world.call("_spawn_gate", 2000.0 + float(index) * 500.0)
+		var math_question: Dictionary = math_world.get("current_question")
+		var math_prompt := str(math_question.get("expression", ""))
+		_check(not math_flight_prompts.has(math_prompt), "Math flight does not repeat generated addition before the cycle ends")
+		math_flight_prompts[math_prompt] = true
+	_check(math_flight_prompts.size() == 80, "Math flight draws many generated equations from its selected topic")
+	math_world.call("_start_run")
+	var math_history_state: Dictionary = math_world.get("_math_prompt_history")
+	var active_math_history: Array = math_history_state.get("2:addition", [])
+	_check(active_math_history.size() == 1, "starting a Math run resets the equation-prompt history")
 	remove_child(math_world)
 	math_world.free()
 
