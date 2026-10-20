@@ -24,6 +24,7 @@ func _run() -> void:
 	_test_geometry()
 	_test_math_questions()
 	_test_learning_questions()
+	_test_question_rotation()
 	await _test_simulation()
 	_test_fairness_bot()
 	_test_save_store()
@@ -109,7 +110,11 @@ func _test_learning_questions() -> void:
 		_check(I18n.t("practice." + area) != "practice." + area, "%s practice area has a learner-facing name" % area)
 		for level: int in range(1, 6):
 			var pool: Array = LearningQuestion.questions_for(area, level)
-			_check(pool.size() >= 5, "%s level %d has a varied starter question bank" % [area, level])
+			_check(pool.size() >= 10, "%s level %d has an expanded question bank" % [area, level])
+			if area == "science" and level <= 2:
+				for template: Dictionary in pool:
+					var easy_prompt := str(template.get("expression", "")).to_lower()
+					_check(not easy_prompt.contains("photosynthesis") and not easy_prompt.contains("transpiration"), "basic Science levels avoid specialist plant terms")
 			var seen_prompts: Dictionary = {}
 			for template: Dictionary in pool:
 				var topic_key := "topic." + str(template.get("topic", ""))
@@ -126,7 +131,17 @@ func _test_learning_questions() -> void:
 				for answer_text: String in [str(template.get("answer", "")), str(template.get("distractor", ""))]:
 					var font_size := FlightWorld.fit_answer_font_size(answer_text, 104.0)
 					var measured_width := ThemeDB.fallback_font.get_string_size(answer_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x
-					_check(measured_width <= 104.0, "%s gate answer fits inside its label plate" % area)
+					_check(measured_width <= 104.0, "%s gate answer '%s' fits at %.1f px" % [area, answer_text, measured_width])
+			var history: Array = []
+			var cycle_prompts: Dictionary = {}
+			for _cycle_index in pool.size():
+				var cycle_question: Dictionary = LearningQuestion.generate_with_history(rng, area, level, history)
+				var cycle_prompt := str(cycle_question.expression)
+				_check(not cycle_prompts.has(cycle_prompt), "%s level %d has no prompt repeats inside a cycle" % [area, level])
+				cycle_prompts[cycle_prompt] = true
+			_check(history.size() == pool.size(), "%s level %d tracks the complete question cycle" % [area, level])
+			LearningQuestion.generate_with_history(rng, area, level, history)
+			_check(history.size() == 1, "%s level %d reshuffles after exhausting its bank" % [area, level])
 			for _sample in 40:
 				var question: Dictionary = LearningQuestion.generate(rng, area, level)
 				var answers: Array[String] = [str(question.upper_answer), str(question.lower_answer)]
@@ -135,6 +150,43 @@ func _test_learning_questions() -> void:
 				_check(str(question.difficulty) == MathQuestion.band_for_level(level), "%s question records the matching score band" % area)
 				_check(answers[0] != answers[1] and answers.count(str(question.answer)) == 1, "%s gate has two choices and one correct answer" % area)
 				_check(correct_option == str(question.answer), "%s correct lane matches the teaching answer" % area)
+
+
+func _test_question_rotation() -> void:
+	var math_world := FlightWorld.new()
+	add_child(math_world)
+	math_world.call("set_selected_topics", ["addition", "multiplication", "fractions"])
+	var first_cycle: Dictionary = {}
+	var last_selected_group := ""
+	for _index in 3:
+		var group := str(math_world.call("_next_math_topic_group"))
+		_check(group in ["addition", "multiplication", "fractions"], "Math rotation honors selected topics")
+		_check(not first_cycle.has(group), "Math shows each selected topic once before repeating")
+		first_cycle[group] = true
+		last_selected_group = group
+	var next_group := str(math_world.call("_next_math_topic_group"))
+	_check(next_group != last_selected_group, "Math starts a fresh shuffled topic cycle")
+	remove_child(math_world)
+	math_world.free()
+
+	var science_world := FlightWorld.new()
+	add_child(science_world)
+	science_world.call("set_practice_area", "science")
+	science_world.call("set_difficulty", 1)
+	var seen_science_prompts: Dictionary = {}
+	for index in 10:
+		science_world.call("_spawn_gate", 2000.0 + float(index) * 500.0)
+		var question: Dictionary = science_world.get("current_question")
+		var prompt := str(question.get("expression", ""))
+		_check(not seen_science_prompts.has(prompt), "Science flight does not repeat a prompt in the first cycle")
+		seen_science_prompts[prompt] = true
+	_check(seen_science_prompts.size() == 10, "Science flight uses the expanded basic bank")
+	science_world.call("_start_run")
+	var history_state: Dictionary = science_world.get("_learning_prompt_history")
+	var active_history: Array = history_state.get("science:1", [])
+	_check(active_history.size() == 1, "starting a new run resets the learning question cycle")
+	remove_child(science_world)
+	science_world.free()
 
 
 func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:

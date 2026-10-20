@@ -68,6 +68,10 @@ var failure_reason := ""
 var failure_answer := ""
 var failure_question := ""
 var failure_hint_key := ""
+var _learning_prompt_history: Dictionary = {}
+var _math_topic_bag: Array[String] = []
+var _math_topic_bag_key := ""
+var _last_math_topic := ""
 
 var gravity := 1500.0
 var flap_speed := 430.0
@@ -206,6 +210,10 @@ func _start_run() -> void:
 	spawned = 0
 	pipes.clear()
 	current_question.clear()
+	_learning_prompt_history.clear()
+	_math_topic_bag.clear()
+	_math_topic_bag_key = ""
+	_last_math_topic = ""
 	failure_reason = ""
 	failure_answer = ""
 	failure_question = ""
@@ -222,15 +230,47 @@ func current_gap(index: int) -> float:
 	return maxf(base_gap - float(index) * 1.2, base_gap * 0.84)
 
 
+func _next_math_topic_group() -> String:
+	var eligible: Array[String] = []
+	for group: String in MathQuestion.available_topic_groups(difficulty_level):
+		if selected_topic_groups.is_empty() or group in selected_topic_groups:
+			eligible.append(group)
+	if eligible.is_empty():
+		eligible = MathQuestion.available_topic_groups(difficulty_level)
+	var key_parts := PackedStringArray([str(difficulty_level)])
+	for group: String in eligible:
+		key_parts.append(group)
+	var bag_key := "|".join(key_parts)
+	if _math_topic_bag_key != bag_key or _math_topic_bag.is_empty():
+		_math_topic_bag = eligible.duplicate()
+		for index: int in range(_math_topic_bag.size() - 1, 0, -1):
+			var swap_index := rng.randi_range(0, index)
+			var held := _math_topic_bag[index]
+			_math_topic_bag[index] = _math_topic_bag[swap_index]
+			_math_topic_bag[swap_index] = held
+		if _math_topic_bag.size() > 1 and _math_topic_bag[0] == _last_math_topic:
+			var different_index := rng.randi_range(1, _math_topic_bag.size() - 1)
+			var first := _math_topic_bag[0]
+			_math_topic_bag[0] = _math_topic_bag[different_index]
+			_math_topic_bag[different_index] = first
+		_math_topic_bag_key = bag_key
+	var next_group := str(_math_topic_bag.pop_front())
+	_last_math_topic = next_group
+	return next_group
+
+
 func _spawn_gate(x: float) -> void:
 	var gap := current_gap(spawned)
 	var upper_y := rng.randf_range(235.0, 250.0)
 	var lower_y := upper_y + LANE_SEPARATION
 	var question: Dictionary
 	if practice_area == "math":
-		question = MathQuestion.generate(rng, difficulty_level, selected_topic_groups)
+		question = MathQuestion.generate(rng, difficulty_level, [_next_math_topic_group()])
 	else:
-		question = LearningQuestion.generate(rng, practice_area, difficulty_level)
+		var history_key := "%s:%d" % [practice_area, difficulty_level]
+		var used_prompts: Array = _learning_prompt_history.get(history_key, [])
+		question = LearningQuestion.generate_with_history(rng, practice_area, difficulty_level, used_prompts)
+		_learning_prompt_history[history_key] = used_prompts
 	pipes.append({
 		"x": x,
 		"upper_y": upper_y,
