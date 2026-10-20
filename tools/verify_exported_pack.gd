@@ -19,6 +19,7 @@ func _run() -> void:
 		root.add_child(main)
 		await process_frame
 		await process_frame
+		var i18n: Node = root.get_node("I18n")
 		_check(bool((main.get("_title_screen") as Control).visible), "pack opens at practice-area selection")
 		_check(not main.has_method("_open_tuning"), "release tuning entry point excluded")
 		_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
@@ -36,7 +37,7 @@ func _run() -> void:
 				var sample: Dictionary = MathQuestion.generate(content_rng, level, [group])
 				var choices: Array[String] = [str(sample.upper_answer), str(sample.lower_answer)]
 				_check(str(sample.topic_group) == group and choices[0] != choices[1] and choices.count(str(sample.answer)) == 1, "packed curriculum serves " + group + " at level " + str(level))
-				_check(I18n.t(str(sample.hint_key)) != str(sample.hint_key), "packed topic has a learner hint: " + group)
+				_check(str(i18n.call("t", str(sample.hint_key))) != str(sample.hint_key), "packed topic has a learner hint: " + group)
 		var advanced_contracts: Array[Dictionary] = [
 			{"level": 4, "group": "decimals", "kind": "decimal_operation_advanced"},
 			{"level": 5, "group": "percentages", "kind": "percentage_reverse"},
@@ -62,8 +63,8 @@ func _run() -> void:
 					var topic_key := "topic." + str(template.get("topic", ""))
 					var hint_key := str(template.get("hint_key", ""))
 					_check(not bank_answers[0].is_empty() and bank_answers[0] != bank_answers[1], "%s choices are distinct at level %d" % [area, level])
-					_check(I18n.t(topic_key) != topic_key, "%s topic label is packed" % area)
-					_check(not hint_key.is_empty() and I18n.t(hint_key) != hint_key, "%s teaching hint is packed" % area)
+					_check(str(i18n.call("t", topic_key)) != topic_key, "%s topic label is packed" % area)
+					_check(not hint_key.is_empty() and str(i18n.call("t", hint_key)) != hint_key, "%s teaching hint is packed" % area)
 				var generated: Dictionary = LearningQuestion.generate(content_rng, area, level)
 				var gate_answers: Array[String] = [str(generated.get("upper_answer", "")), str(generated.get("lower_answer", ""))]
 				_check(str(generated.get("practice_area", "")) == area and gate_answers[0] != gate_answers[1] and gate_answers.count(str(generated.get("answer", ""))) == 1, "%s generates one correct answer gate at level %d" % [area, level])
