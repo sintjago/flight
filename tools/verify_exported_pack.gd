@@ -117,7 +117,10 @@ func _run() -> void:
 			main.call("_flap_input")
 			var area_question: Dictionary = world.get("current_question")
 			var area_gates: Array = world.get("pipes")
-			var area_answers: Array[String] = [str(area_gates[0].get("upper_answer", "")), str(area_gates[0].get("lower_answer", ""))] if not area_gates.is_empty() else []
+			var area_answers: Array[String] = []
+			if not area_gates.is_empty():
+				area_answers.append(str(area_gates[0].get("upper_answer", "")))
+				area_answers.append(str(area_gates[0].get("lower_answer", "")))
 			_check(str(area_question.get("practice_area", "")) == area and area_answers.size() == 2 and area_answers.count(str(area_question.get("answer", ""))) == 1, "%s starts a playable two-answer flight" % area)
 		var audio := root.get_node("AudioDirector")
 		_check(bool(audio.call("play_cue", "score.reward")) or true, "pack cues are callable")
