@@ -2,6 +2,7 @@ extends SceneTree
 
 var _failures := PackedStringArray()
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
+const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 
 
 func _initialize() -> void:
@@ -22,41 +23,56 @@ func _run() -> void:
 		_check(not main.has_method("_open_tuning"), "release tuning entry point excluded")
 		_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
 		_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
+		_check(ResourceLoader.exists("res://scripts/flight/learning_question.gd"), "non-math question generator is packed")
 		var practice_buttons: Dictionary = main.get("_practice_buttons")
-		_check(practice_buttons.size() == 5 and not (practice_buttons["math"] as Button).disabled, "pack offers Math plus future practice areas")
-			for area: String in ["reading", "russian", "spanish", "science"]:
-				var future_button: Button = practice_buttons[area]
-				_check(future_button.disabled and future_button.text.contains("COMING SOON"), "future pack is clearly marked: " + area)
-			var content_rng := RandomNumberGenerator.new()
-			content_rng.seed = 20261020
+		_check(practice_buttons.size() == 5 and not (practice_buttons["math"] as Button).disabled, "pack offers five practice areas")
+		for area: String in ["reading", "russian", "spanish", "science"]:
+			var pack_button: Button = practice_buttons[area]
+			_check(not pack_button.disabled and not pack_button.text.contains("COMING SOON"), "learning pack is enabled: " + area)
+		var content_rng := RandomNumberGenerator.new()
+		content_rng.seed = 20261020
+		for level: int in range(1, 6):
+			for group: String in MathQuestion.available_topic_groups(level):
+				var sample: Dictionary = MathQuestion.generate(content_rng, level, [group])
+				var choices: Array[String] = [str(sample.upper_answer), str(sample.lower_answer)]
+				_check(str(sample.topic_group) == group and choices[0] != choices[1] and choices.count(str(sample.answer)) == 1, "packed curriculum serves " + group + " at level " + str(level))
+				_check(I18n.t(str(sample.hint_key)) != str(sample.hint_key), "packed topic has a learner hint: " + group)
+		var advanced_contracts: Array[Dictionary] = [
+			{"level": 4, "group": "decimals", "kind": "decimal_operation_advanced"},
+			{"level": 5, "group": "percentages", "kind": "percentage_reverse"},
+			{"level": 4, "group": "ratios", "kind": "unit_rate"},
+			{"level": 5, "group": "ratios", "kind": "ratio_proportion"},
+			{"level": 4, "group": "order_of_operations", "kind": "order_operations_extended"},
+			{"level": 5, "group": "order_of_operations", "kind": "order_operations_extended"},
+		]
+		for contract: Dictionary in advanced_contracts:
+			var found_form := false
+			for _sample_index in 64:
+				var advanced_sample: Dictionary = MathQuestion.generate(content_rng, int(contract.level), [str(contract.group)])
+				if str(advanced_sample.kind) == str(contract.kind):
+					found_form = true
+					break
+			_check(found_form, "packed generator includes " + str(contract.group) + " advanced form")
+		for area: String in LearningQuestion.PRACTICE_AREAS:
 			for level: int in range(1, 6):
-				for group: String in MathQuestion.available_topic_groups(level):
-					var sample: Dictionary = MathQuestion.generate(content_rng, level, [group])
-					var choices: Array[String] = [str(sample.upper_answer), str(sample.lower_answer)]
-					_check(str(sample.topic_group) == group and choices[0] != choices[1] and choices.count(str(sample.answer)) == 1, "packed curriculum serves " + group + " at level " + str(level))
-					_check(I18n.t(str(sample.hint_key)) != str(sample.hint_key), "packed topic has a learner hint: " + group)
-			var advanced_contracts: Array[Dictionary] = [
-				{"level": 4, "group": "decimals", "kind": "decimal_operation_advanced"},
-				{"level": 5, "group": "percentages", "kind": "percentage_reverse"},
-				{"level": 4, "group": "ratios", "kind": "unit_rate"},
-				{"level": 5, "group": "ratios", "kind": "ratio_proportion"},
-				{"level": 4, "group": "order_of_operations", "kind": "order_operations_extended"},
-				{"level": 5, "group": "order_of_operations", "kind": "order_operations_extended"},
-			]
-			for contract: Dictionary in advanced_contracts:
-				var found_form := false
-				for _sample_index in 64:
-					var advanced_sample: Dictionary = MathQuestion.generate(content_rng, int(contract.level), [str(contract.group)])
-					if str(advanced_sample.kind) == str(contract.kind):
-						found_form = true
-						break
-				_check(found_form, "packed generator includes " + str(contract.group) + " advanced form")
-			var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
+				var bank: Array = LearningQuestion.questions_for(area, level)
+				_check(not bank.is_empty(), "%s has content at level %d" % [area, level])
+				for template: Dictionary in bank:
+					var bank_answers: Array[String] = [str(template.get("answer", "")), str(template.get("distractor", ""))]
+					var topic_key := "topic." + str(template.get("topic", ""))
+					var hint_key := str(template.get("hint_key", ""))
+					_check(not bank_answers[0].is_empty() and bank_answers[0] != bank_answers[1], "%s choices are distinct at level %d" % [area, level])
+					_check(I18n.t(topic_key) != topic_key, "%s topic label is packed" % area)
+					_check(not hint_key.is_empty() and I18n.t(hint_key) != hint_key, "%s teaching hint is packed" % area)
+				var generated: Dictionary = LearningQuestion.generate(content_rng, area, level)
+				var gate_answers: Array[String] = [str(generated.get("upper_answer", "")), str(generated.get("lower_answer", ""))]
+				_check(str(generated.get("practice_area", "")) == area and gate_answers[0] != gate_answers[1] and gate_answers.count(str(generated.get("answer", ""))) == 1, "%s generates one correct answer gate at level %d" % [area, level])
+		var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
 		_check(topic_checkboxes.size() == MathQuestion.TOPIC_GROUPS.size(), "pack includes all selectable math subjects")
 		_check(topic_checkboxes.has("addition") and topic_checkboxes.has("subtraction") and topic_checkboxes.has("multiplication") and topic_checkboxes.has("division"), "core operations have separate checkboxes")
 		var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
 		var speed_buttons: Dictionary = main.get("_speed_buttons")
-		_check(difficulty_buttons.size() == 5 and speed_buttons.size() == 5, "pack has separate five-choice math challenge and flight pace steps")
+		_check(difficulty_buttons.size() == 5 and speed_buttons.size() == 5, "pack has separate five-choice challenge and flight pace steps")
 		_check(int(main.get("_selected_level")) == 1 and int(main.get("_selected_speed")) == 1, "pack defaults to level one and the calmest pace")
 		_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
 		for path: String in [
@@ -82,7 +98,7 @@ func _run() -> void:
 		_check(float(world.get("base_speed")) < 193.0 and float(world.get("pipe_spacing")) > 532.0, "default flight is slower with more distance between gates")
 		main.call("_flap_input")
 		_check(world.get("state") == "playing", "pack launches on the first in-game tap")
-		_check(bool((main.get("_question_bar") as Control).visible), "pack shows the equation bar")
+		_check(bool((main.get("_question_bar") as Control).visible), "pack shows the learning prompt bar")
 		_check(str((main.get("_question_label") as Label).text).contains("?"), "pack generates a math question")
 		_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "pack shows a learning hint")
 		var active_question: Dictionary = world.get("current_question")
@@ -90,6 +106,18 @@ func _run() -> void:
 		_check(str(active_question.topic_group) in main.call("_selected_topic_groups"), "generated question respects selected checkboxes")
 		var gates: Array = world.get("pipes")
 		_check(not gates.is_empty() and gates[0].has("upper_answer") and gates[0].has("lower_answer"), "pack includes two answer choices")
+		for area: String in LearningQuestion.PRACTICE_AREAS:
+			main.call("_return_to_home")
+			main.call("_begin_from_title", area)
+			_check(main.get("_state") == "difficulty", "%s opens its challenge step" % area)
+			main.call("_continue_to_speed")
+			_check(main.get("_state") == "speed", "%s reaches the independent pace step" % area)
+			main.call("_start_from_setup")
+			main.call("_flap_input")
+			var area_question: Dictionary = world.get("current_question")
+			var area_gates: Array = world.get("pipes")
+			var area_answers: Array[String] = [str(area_gates[0].get("upper_answer", "")), str(area_gates[0].get("lower_answer", ""))] if not area_gates.is_empty() else []
+			_check(str(area_question.get("practice_area", "")) == area and area_answers.size() == 2 and area_answers.count(str(area_question.get("answer", ""))) == 1, "%s starts a playable two-answer flight" % area)
 		var audio := root.get_node("AudioDirector")
 		_check(bool(audio.call("play_cue", "score.reward")) or true, "pack cues are callable")
 		audio.call("release_streams")
