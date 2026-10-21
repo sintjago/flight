@@ -708,7 +708,7 @@ static func _statistics_question(rng: RandomNumberGenerator, level: int) -> Dict
 	if level >= 4:
 		choices.append("mode")
 	var statistic: String = choices[rng.randi_range(0, choices.size() - 1)]
-	var center := rng.randi_range(5, 20 if level == 3 else 60)
+	var center := rng.randi_range(8, 20 if level == 3 else 60)
 	var values: Array[int] = []
 	var answer := center
 	match statistic:

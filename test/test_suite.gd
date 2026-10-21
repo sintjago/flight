@@ -171,13 +171,22 @@ func _test_learning_questions() -> void:
 			var history: Array = []
 			var generated_prompts: Dictionary = {}
 			var procedural_count := 0
+			var advanced_language_kinds: Dictionary = {}
+			var high_school_science_topics: Dictionary = {}
 			for _sample in 160:
 				var question: Dictionary = LearningQuestion.generate_with_history(rng, area, level, history)
 				var answers: Array[String] = [str(question.upper_answer), str(question.lower_answer)]
 				var correct_option := str(question.upper_answer) if question.correct_lane == "upper" else str(question.lower_answer)
 				var generated_prompt := str(question.expression)
-				if str(question.get("generator_kind", "")).begins_with("generated_"):
+				var generator_kind := str(question.get("generator_kind", ""))
+				if generator_kind.begins_with("generated_"):
 					procedural_count += 1
+				if generator_kind in ["generated_russian_aspect", "generated_russian_conditional", "generated_spanish_subjunctive", "generated_spanish_conditional"]:
+					advanced_language_kinds[generator_kind] = true
+				if area == "science" and level == 5 and generator_kind.begins_with("generated_science_"):
+					var science_topic := str(question.get("topic", ""))
+					_check(science_topic in ["science_biology", "science_chemistry", "science_physics", "science_earth"], "Level 5 Science generated content stays in advanced topics")
+					high_school_science_topics[science_topic] = true
 				_check(not generated_prompts.has(generated_prompt), "%s level %d does not repeat generated prompts during a run" % [area, level])
 				generated_prompts[generated_prompt] = true
 				_check(str(question.practice_area) == area and int(question.difficulty_level) == level, "%s generated question keeps its pack and selected level" % area)
@@ -205,10 +214,30 @@ func _test_learning_questions() -> void:
 					"generated_spanish_conjugation":
 						var forms: Array = question.get("conjugation_forms", [])
 						_check(forms.has(str(question.answer)) and forms.has(str(question.distractor)) and question.answer != question.distractor, "Spanish conjugation choices are distinct valid verb forms")
+					"generated_spanish_subjunctive", "generated_spanish_conditional":
+						var forms: Array = question.get("conjugation_forms", [])
+						var indicative_forms: Array = question.get("indicative_forms", [])
+						var subject_index := int(question.get("subject_index", -1))
+						_check(subject_index >= 0 and subject_index < forms.size() and subject_index < indicative_forms.size(), "Spanish advanced question records a valid subject index")
+						if subject_index >= 0 and subject_index < forms.size() and subject_index < indicative_forms.size():
+							_check(str(forms[subject_index]) == str(question.answer), "Spanish answer matches the selected subject and target tense")
+							_check(str(indicative_forms[subject_index]) == str(question.distractor), "Spanish distractor matches the same subject in the indicative")
+						if generator_kind == "generated_spanish_subjunctive":
+							_check(str(question.get("tense", "")) == "subjunctive", "Spanish wish clauses use the subjunctive metadata")
+						elif generator_kind == "generated_spanish_conditional":
+							_check(str(question.get("tense", "")) == "conditional", "Spanish would-forms use conditional metadata")
+					"generated_russian_aspect":
+						_check(str(question.answer) == str(question.perfective) and str(question.distractor) == str(question.imperfective), "Russian aspect choices match the completed and ongoing verb forms")
+					"generated_russian_conditional":
+						_check(str(question.get("hint_key", "")) == "hint.russian.conditional", "Russian conditional questions provide the correct teaching hint")
 					"generated_reading_detail":
 						for story_name: String in ["Mia", "Leo", "Ava", "Noah", "Ivy", "Max", "Zoe", "Ben"]:
 							for past_verb: String in ["found", "drew", "carried", "opened", "packed", "planted", "borrowed", "painted", "chose", "fixed"]:
 								_check(not generated_prompt.contains("did %s %s" % [story_name, past_verb]), "Reading comprehension uses a base verb after did")
+								_check(not generated_prompt.contains("%s What did %s" % [story_name, story_name]), "Reading comprehension avoids duplicated-name question stems")
+					"generated_reading_prefix":
+						_check(generated_prompt.contains("prefix ") or generated_prompt.contains("In '"), "Reading prefix prompts identify the prefix or its example word")
+						_check(not generated_prompt.to_lower().contains("matches re at the start"), "Reading prefix prompts use natural wording")
 					"generated_science_plant_part":
 						_check(str(question.answer) == str(question.plant_part) and generated_prompt.contains(str(question.plant_job)), "Science plant question and answer match the plant function")
 					"generated_science_state":
@@ -221,6 +250,12 @@ func _test_learning_questions() -> void:
 						_check(not generated_prompt.to_lower().contains(advanced_word), "beginner Reading excludes advanced vocabulary: %s" % advanced_word)
 			_check(history.size() == 160 and generated_prompts.size() == 160, "%s level %d maintains a large no-repeat generated run" % [area, level])
 			_check(procedural_count >= 100, "%s level %d relies on procedural questions rather than only the starter bank" % [area, level])
+			if area == "russian" and level == 5:
+				_check(advanced_language_kinds.has("generated_russian_aspect") and advanced_language_kinds.has("generated_russian_conditional"), "Level 5 Russian practices verb aspect and conditional meaning")
+			if area == "spanish" and level == 5:
+				_check(advanced_language_kinds.has("generated_spanish_subjunctive") and advanced_language_kinds.has("generated_spanish_conditional"), "Level 5 Spanish practices the subjunctive and conditional forms")
+			if area == "science" and level == 5:
+				_check(high_school_science_topics.has("science_biology") and high_school_science_topics.has("science_chemistry") and high_school_science_topics.has("science_physics"), "Level 5 Science samples biology, chemistry, and physics")
 
 
 func _test_question_rotation() -> void:
@@ -291,6 +326,9 @@ func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:
 				seen_operations[str(question.get("operator", question.get("trig_function", "")))] = true
 				seen_statistics[str(question.get("statistic", ""))] = true
 				seen_measurements[str(question.get("conversion", ""))] = true
+				if group == "statistics" and level == 3:
+					for data_value: Variant in question.get("values", []):
+						_check(int(data_value) >= 0, "level three statistics stay nonnegative before integers unlock")
 			if group == "measurement" and level == 1:
 				_check(seen_kinds.has("money_sum") and seen_kinds.has("unit_conversion") and seen_kinds.has("measurement_sum"), "level one measurement includes money, time, and length practice")
 			if group == "measurement" and level == 2:

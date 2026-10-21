@@ -96,11 +96,26 @@ const SPANISH_PRESENT: Array = [
 	{"verb":"abrir","forms":["abro","abres","abre","abrimos","abren"]},
 	{"verb":"ser","forms":["soy","eres","es","somos","son"]},
 	{"verb":"tener","forms":["tengo","tienes","tiene","tenemos","tienen"]},
+	{"verb":"venir","forms":["vengo","vienes","viene","venimos","vienen"]},
 ]
 const SPANISH_PRETERITE: Array = [
 	{"verb":"hablar","forms":["hablé","hablaste","habló","hablamos","hablaron"]},
 	{"verb":"comer","forms":["comí","comiste","comió","comimos","comieron"]},
 	{"verb":"vivir","forms":["viví","viviste","vivió","vivimos","vivieron"]},
+]
+const SPANISH_SUBJUNCTIVE: Array = [
+	{"verb":"hablar","forms":["hable","hables","hable","hablemos","hablen"]},
+	{"verb":"comer","forms":["coma","comas","coma","comamos","coman"]},
+	{"verb":"vivir","forms":["viva","vivas","viva","vivamos","vivan"]},
+	{"verb":"tener","forms":["tenga","tengas","tenga","tengamos","tengan"]},
+	{"verb":"venir","forms":["venga","vengas","venga","vengamos","vengan"]},
+]
+const SPANISH_CONDITIONAL: Array = [
+	{"verb":"hablar","forms":["hablaría","hablarías","hablaría","hablaríamos","hablarían"]},
+	{"verb":"comer","forms":["comería","comerías","comería","comeríamos","comerían"]},
+	{"verb":"vivir","forms":["viviría","vivirías","viviría","viviríamos","vivirían"]},
+	{"verb":"tener","forms":["tendría","tendrías","tendría","tendríamos","tendrían"]},
+	{"verb":"venir","forms":["vendría","vendrías","vendría","vendríamos","vendrían"]},
 ]
 const SPANISH_SUBJECTS: Array[String] = ["yo", "tú", "él/ella", "nosotros", "ellos/ellas"]
 const SPANISH_NOUNS: Array = [
@@ -141,6 +156,13 @@ const RUSSIAN_PAST: Array = [
 	{"verb":"работать","forms":["работал","работала","работало","работали"]},
 ]
 const RUSSIAN_PAST_SUBJECTS: Array[String] = ["он", "она", "оно", "они"]
+const RUSSIAN_ASPECT_PAIRS: Array = [
+	{"imperfective":"читать","perfective":"прочитать","meaning":"read to completion"},
+	{"imperfective":"писать","perfective":"написать","meaning":"write to completion"},
+	{"imperfective":"делать","perfective":"сделать","meaning":"finish doing"},
+	{"imperfective":"покупать","perfective":"купить","meaning":"complete a purchase"},
+	{"imperfective":"смотреть","perfective":"посмотреть","meaning":"watch to the end"},
+]
 
 const SCIENCE_ANIMALS: Array = [
 	{"animal":"whale","class":"mammal"},{"animal":"dolphin","class":"mammal"},{"animal":"bat","class":"mammal"},
@@ -268,7 +290,7 @@ static func _reading_story(rng: RandomNumberGenerator, _level: int = 1) -> Dicti
 	if form == 1:
 		expression = "Read '%s' — what did %s %s?" % [scene, name, base_verb]
 	elif form == 2:
-		expression = "%s What did %s %s?" % [scene, name, base_verb]
+		expression = "What did %s %s in the sentence '%s'?" % [name, base_verb, scene]
 	elif form == 3:
 		expression = "Which thing did %s %s? '%s'" % [name, base_verb, scene]
 	var distractor := str(_pick(rng, READING_OBJECTS))
@@ -326,7 +348,7 @@ static func _reading_prefix(rng: RandomNumberGenerator) -> Dictionary:
 	if form == 1:
 		expression = "In '%s', %s means..." % [str(entry.prefix) + str(entry.word), str(entry.prefix)]
 	elif form == 2:
-		expression = "Which meaning matches %s- at the start of a word?" % str(entry.prefix).trim_suffix("-")
+		expression = "Which meaning matches the prefix %s?" % str(entry.prefix)
 	var meanings: Array[String] = ["again", "not", "before", "wrongly", "opposite of", "too much", "under", "between"]
 	var distractor := str(_pick(rng, meanings))
 	while distractor == str(entry.meaning):
@@ -352,7 +374,11 @@ static func _reading_literature(rng: RandomNumberGenerator) -> Dictionary:
 
 
 static func _language_question(rng: RandomNumberGenerator, area: String, level: int) -> Dictionary:
-	var use_grammar := level >= 2 and rng.randi_range(0, 4) == 0
+	var use_grammar := false
+	if level >= 5:
+		use_grammar = rng.randi_range(0, 1) == 0
+	elif level >= 2:
+		use_grammar = rng.randi_range(0, 4) == 0
 	if use_grammar:
 		if area == "spanish":
 			return _spanish_grammar(rng, level)
@@ -411,6 +437,12 @@ static func _language_vocabulary(rng: RandomNumberGenerator, area: String, level
 
 
 static func _spanish_grammar(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level >= 5:
+		var advanced_form := rng.randi_range(0, 2)
+		if advanced_form == 0:
+			return _spanish_subjunctive(rng)
+		if advanced_form == 1:
+			return _spanish_conditional(rng)
 	if level >= 2 and rng.randi_range(0, 2) == 0:
 		return _spanish_agreement(rng)
 	var tense := "present"
@@ -429,6 +461,46 @@ static func _spanish_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 	return _question(expression, answer, distractor, "spanish_grammar", "hint.spanish.grammar", "generated_spanish_conjugation", {
 		"verb": str(verb_data.verb), "subject_index": subject_index, "tense": tense, "conjugation_forms": forms,
 	})
+
+
+static func _spanish_subjunctive(rng: RandomNumberGenerator) -> Dictionary:
+	var verb_data: Dictionary = _pick(rng, SPANISH_SUBJUNCTIVE)
+	var subject_index := rng.randi_range(0, 4)
+	var subjects: Array[String] = ["yo", "tú", "él", "nosotros", "ellos"]
+	var forms: Array = verb_data.forms
+	var indicative_forms: Array = _spanish_present_forms(str(verb_data.verb))
+	var answer := str(forms[subject_index])
+	var distractor := str(indicative_forms[subject_index])
+	var expression := "Subjunctive: es posible que %s ___ (%s)." % [subjects[subject_index], str(verb_data.verb)]
+	if subject_index > 0 and rng.randi_range(0, 1) == 1:
+		var triggers: Array[String] = ["quiero que", "es importante que", "espero que"]
+		expression = "Subjunctive: %s %s ___ (%s)." % [str(_pick(rng, triggers)), subjects[subject_index], str(verb_data.verb)]
+	return _question(expression, answer, distractor, "spanish_grammar", "hint.spanish.subjunctive", "generated_spanish_subjunctive", {
+		"verb": str(verb_data.verb), "subject_index": subject_index, "tense": "subjunctive",
+		"conjugation_forms": forms, "indicative_forms": indicative_forms,
+	})
+
+
+static func _spanish_conditional(rng: RandomNumberGenerator) -> Dictionary:
+	var verb_data: Dictionary = _pick(rng, SPANISH_CONDITIONAL)
+	var subject_index := rng.randi_range(0, 4)
+	var subjects: Array[String] = ["yo", "tú", "él", "nosotros", "ellos"]
+	var forms: Array = verb_data.forms
+	var indicative_forms: Array = _spanish_present_forms(str(verb_data.verb))
+	var answer := str(forms[subject_index])
+	var distractor := str(indicative_forms[subject_index])
+	var expression := "Conditional ('would'): %s ___ (%s)." % [subjects[subject_index], str(verb_data.verb)]
+	return _question(expression, answer, distractor, "spanish_grammar", "hint.spanish.conditional", "generated_spanish_conditional", {
+		"verb": str(verb_data.verb), "subject_index": subject_index, "tense": "conditional",
+		"conjugation_forms": forms, "indicative_forms": indicative_forms,
+	})
+
+
+static func _spanish_present_forms(verb: String) -> Array:
+	for verb_data: Dictionary in SPANISH_PRESENT:
+		if str(verb_data.verb) == verb:
+			return verb_data.forms
+	return []
 
 
 static func _spanish_agreement(rng: RandomNumberGenerator) -> Dictionary:
@@ -451,6 +523,12 @@ static func _spanish_agreement(rng: RandomNumberGenerator) -> Dictionary:
 
 
 static func _russian_grammar(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level >= 5:
+		var advanced_form := rng.randi_range(0, 3)
+		if advanced_form == 0:
+			return _russian_aspect(rng)
+		if advanced_form == 1:
+			return _russian_conditional(rng)
 	var form := rng.randi_range(0, 3)
 	if form == 0:
 		var verb_data: Dictionary = _pick(rng, RUSSIAN_PRESENT)
@@ -494,6 +572,24 @@ static func _russian_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 	return _language_vocabulary(rng, "russian", level)
 
 
+static func _russian_aspect(rng: RandomNumberGenerator) -> Dictionary:
+	var pair: Dictionary = _pick(rng, RUSSIAN_ASPECT_PAIRS)
+	var expression := "Russian verb aspect: which means '%s'?" % str(pair.meaning)
+	return _question(expression, str(pair.perfective), str(pair.imperfective), "russian_grammar", "hint.russian.aspect", "generated_russian_aspect", {
+		"imperfective": str(pair.imperfective), "perfective": str(pair.perfective),
+	})
+
+
+static func _russian_conditional(rng: RandomNumberGenerator) -> Dictionary:
+	var examples: Array[Dictionary] = [
+		{"expression":"Я бы прочитал книгу. What does бы add?", "answer":"hypothetical", "distractor":"definite past"},
+		{"expression":"Она бы написала письмо. What does бы signal?", "answer":"conditional", "distractor":"present action"},
+		{"expression":"Мы бы посмотрели фильм. This expresses...", "answer":"hypothetical", "distractor":"completed fact"},
+	]
+	var item: Dictionary = _pick(rng, examples)
+	return _question(str(item.expression), str(item.answer), str(item.distractor), "russian_grammar", "hint.russian.conditional", "generated_russian_conditional")
+
+
 static func _science_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	if level <= 1:
 		match rng.randi_range(0, 2):
@@ -533,6 +629,7 @@ static func _science_question(rng: RandomNumberGenerator, level: int) -> Diction
 				return _science_advanced_fact(rng, level)
 			_:
 				return _science_speed(rng)
+	if level >= 5:
 		match rng.randi_range(0, 3):
 			0:
 				return _science_voltage(rng)
@@ -643,7 +740,7 @@ static func _science_method(rng: RandomNumberGenerator) -> Dictionary:
 static func _science_advanced_fact(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	var eligible: Array[Dictionary] = []
 	for item: Dictionary in SCIENCE_ADVANCED_FACTS:
-		if int(item.level) <= level:
+		if int(item.level) == level:
 			eligible.append(item)
 	var item: Dictionary = _pick(rng, eligible)
 	var expression := str(item.expression)

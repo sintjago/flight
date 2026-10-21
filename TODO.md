@@ -37,5 +37,8 @@
 ## Fair question and Math-topic rotation — complete
 - [x] During a run, use per-pack/topic-and-level prompt history and adaptive search to avoid repeats while fresh variants can be found; if none is found, begin a new randomized cycle without an immediate repeat. In Math, rotate through the selected topics unlocked at the chosen challenge level before repeating a topic. Reset all prompt and topic histories for each new run.
 
+## Engine accuracy and advertised progression — complete
+- [x] Keep every generated question accurate, natural, and appropriate to its selected pack and challenge level. Level 3 Math statistics must not introduce negative values before the integers topic unlocks. Level 5 Science must use its promised high-school biology, chemistry, and physics content rather than falling back to basic classification. Level 5 Russian must practice conditional meaning and verb aspect, and Level 5 Spanish must practice subjunctive and conditional forms as described on the setup screen. Keep generated Reading wording grammatical.
+
 ## Subject-specific best scores — complete
 - [x] Keep local best scores separate by learning area and Easy/Medium/Hard challenge band. Migrate earlier Math scores into the Math pack and preserve the overall-best record and games-played count.
