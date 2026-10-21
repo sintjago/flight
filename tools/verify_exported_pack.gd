@@ -135,32 +135,32 @@ func _run() -> void:
 		_check(main.get("_state") == "speed", "challenge leads to the independent pace step")
 		main.call("_start_from_setup")
 		var world: Node2D = main.get("_world")
-			_check(main.get("_state") == "playing" and world.get("state") == "ready", "practice starts ready for the learner's first tap")
-			_check(float(world.get("base_speed")) < 193.0 and float(world.get("pipe_spacing")) > 532.0, "default flight is slower with more distance between gates")
-			main.call("_flap_input")
-			_check(world.get("state") == "playing", "pack launches on the first in-game tap")
-			_check(bool((main.get("_question_bar") as Control).visible), "pack shows the learning prompt bar")
-			_check(str((main.get("_question_label") as Label).text).contains("?"), "pack generates a math question")
-			_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "pack shows a learning hint")
-			var reward_gates: Array = world.get("pipes")
-			_check(not reward_gates.is_empty(), "pack run exposes a real answer gate to pass")
-			if not reward_gates.is_empty():
-				var reward_gate: Dictionary = reward_gates[0].duplicate(true)
-				reward_gate.x = FlightWorld.PLANE_X - 22.0
-				reward_gates.clear()
-				reward_gates.append(reward_gate)
-				var reward_y := float(reward_gate.upper_y) if str(reward_gate.correct_lane) == "upper" else float(reward_gate.lower_y)
-				world.set("gravity", 0.0)
-				world.set("plane_y", reward_y)
-				world.set("plane_vy", 0.0)
-				for _attempt in range(120):
-					if int(world.get("score")) > 0:
-						break
-					world.call("step", 1.0 / 60.0)
-				_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the packed correct answer gate earns one saved gameplay coin")
+		_check(main.get("_state") == "playing" and world.get("state") == "ready", "practice starts ready for the learner's first tap")
+		_check(float(world.get("base_speed")) < 193.0 and float(world.get("pipe_spacing")) > 532.0, "default flight is slower with more distance between gates")
+		main.call("_flap_input")
+		_check(world.get("state") == "playing", "pack launches on the first in-game tap")
+		_check(bool((main.get("_question_bar") as Control).visible), "pack shows the learning prompt bar")
+		_check(str((main.get("_question_label") as Label).text).contains("?"), "pack generates a math question")
+		_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "pack shows a learning hint")
+		var reward_gates: Array = world.get("pipes")
+		_check(not reward_gates.is_empty(), "pack run exposes a real answer gate to pass")
+		if not reward_gates.is_empty():
+			var reward_gate: Dictionary = reward_gates[0].duplicate(true)
+			reward_gate.x = FlightWorld.PLANE_X - 22.0
+			reward_gates.clear()
+			reward_gates.append(reward_gate)
+			var reward_y := float(reward_gate.upper_y) if str(reward_gate.correct_lane) == "upper" else float(reward_gate.lower_y)
+			world.set("gravity", 0.0)
+			world.set("plane_y", reward_y)
+			world.set("plane_vy", 0.0)
+			for _attempt in range(120):
+				if int(world.get("score")) > 0:
+					break
 				world.call("step", 1.0 / 60.0)
-				_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "one packed gate cannot award the same coin twice")
-			var active_question: Dictionary = world.get("current_question")
+			_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the packed correct answer gate earns one saved gameplay coin")
+			world.call("step", 1.0 / 60.0)
+			_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "one packed gate cannot award the same coin twice")
+		var active_question: Dictionary = world.get("current_question")
 		_check(active_question.has("topic") and active_question.has("topic_group") and active_question.has("hint_key"), "pack question includes selected subject and teaching metadata")
 		_check(str(active_question.topic_group) in main.call("_selected_topic_groups"), "generated question respects the selected Math track")
 		var gates: Array = world.get("pipes")
