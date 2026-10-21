@@ -1,6 +1,13 @@
 extends SceneTree
 
 var _failures := PackedStringArray()
+var _saved_save_data: Dictionary = {}
+var _saved_save_bytes: Variant = null
+var _had_saved_save_file := false
+var _save_store: Node
+const SAVE_PATH := "user://paper_glide_save.json"
+const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold"]
+const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 
@@ -10,6 +17,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_save_store = root.get_node("SaveStore")
+	_had_saved_save_file = FileAccess.file_exists(SAVE_PATH)
+	_saved_save_bytes = FileAccess.get_file_as_bytes(SAVE_PATH) if _had_saved_save_file else null
+	var current_save_data: Dictionary = _save_store.get("_data")
+	_saved_save_data = current_save_data.duplicate(true)
+	_save_store.set("_data", _save_store.call("_default_data"))
 	var catalog_path := "res://localization/en.json"
 	_check(FileAccess.file_exists(catalog_path), "exported locale catalog")
 	var packed := load("res://scenes/main.tscn") as PackedScene
@@ -30,6 +43,26 @@ func _run() -> void:
 		for area: String in ["reading", "russian", "spanish", "science"]:
 			var pack_button: Button = practice_buttons[area]
 			_check(not pack_button.disabled and not pack_button.text.contains("COMING SOON"), "learning pack is enabled: " + area)
+		var title_hangar_button: Button = main.get("_title_hangar_button")
+		_check(title_hangar_button != null and title_hangar_button.text.contains("0 COINS"), "pack title screen shows the zero-balance Hangar entry")
+		if title_hangar_button != null:
+			title_hangar_button.emit_signal("pressed")
+			var hangar_buttons: Dictionary = main.get("_hangar_buttons")
+			_check(main.get("_state") == "hangar" and hangar_buttons.size() == PLANE_IDS.size(), "pack Hangar opens with every cosmetic plane")
+			_save_store.call("add_coins", 10)
+			main.call("_update_hangar")
+			var sky_entry: Dictionary = hangar_buttons.get("sky", {})
+			var sky_button := sky_entry.get("button") as Button
+			_check(sky_button != null, "pack includes the purchasable Blue Sketch plane")
+			if sky_button != null:
+				sky_button.emit_signal("pressed")
+				_check(int(_save_store.call("get_coins")) == 0 and bool(_save_store.call("owns_plane", "sky")) and str(_save_store.call("get_selected_plane")) == "sky", "packed purchase deducts coins and equips an owned plane")
+				_check(main.get("_world").get("selected_plane_id") == "sky", "packed plane selection reaches the flight renderer")
+			var hangar_screen: Control = main.get("_hangar_screen")
+			var hangar_back := hangar_screen.find_child("HangarBackButton", true, false) as Button
+			_check(hangar_back != null, "pack Hangar provides a return-to-Home action")
+			if hangar_back != null:
+				hangar_back.emit_signal("pressed")
 		var content_rng := RandomNumberGenerator.new()
 		content_rng.seed = 20261020
 		for level: int in range(1, 6):
@@ -102,14 +135,32 @@ func _run() -> void:
 		_check(main.get("_state") == "speed", "challenge leads to the independent pace step")
 		main.call("_start_from_setup")
 		var world: Node2D = main.get("_world")
-		_check(main.get("_state") == "playing" and world.get("state") == "ready", "practice starts ready for the learner's first tap")
-		_check(float(world.get("base_speed")) < 193.0 and float(world.get("pipe_spacing")) > 532.0, "default flight is slower with more distance between gates")
-		main.call("_flap_input")
-		_check(world.get("state") == "playing", "pack launches on the first in-game tap")
-		_check(bool((main.get("_question_bar") as Control).visible), "pack shows the learning prompt bar")
-		_check(str((main.get("_question_label") as Label).text).contains("?"), "pack generates a math question")
-		_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "pack shows a learning hint")
-		var active_question: Dictionary = world.get("current_question")
+			_check(main.get("_state") == "playing" and world.get("state") == "ready", "practice starts ready for the learner's first tap")
+			_check(float(world.get("base_speed")) < 193.0 and float(world.get("pipe_spacing")) > 532.0, "default flight is slower with more distance between gates")
+			main.call("_flap_input")
+			_check(world.get("state") == "playing", "pack launches on the first in-game tap")
+			_check(bool((main.get("_question_bar") as Control).visible), "pack shows the learning prompt bar")
+			_check(str((main.get("_question_label") as Label).text).contains("?"), "pack generates a math question")
+			_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "pack shows a learning hint")
+			var reward_gates: Array = world.get("pipes")
+			_check(not reward_gates.is_empty(), "pack run exposes a real answer gate to pass")
+			if not reward_gates.is_empty():
+				var reward_gate: Dictionary = reward_gates[0].duplicate(true)
+				reward_gate.x = FlightWorld.PLANE_X - 22.0
+				reward_gates.clear()
+				reward_gates.append(reward_gate)
+				var reward_y := float(reward_gate.upper_y) if str(reward_gate.correct_lane) == "upper" else float(reward_gate.lower_y)
+				world.set("gravity", 0.0)
+				world.set("plane_y", reward_y)
+				world.set("plane_vy", 0.0)
+				for _attempt in range(120):
+					if int(world.get("score")) > 0:
+						break
+					world.call("step", 1.0 / 60.0)
+				_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the packed correct answer gate earns one saved gameplay coin")
+				world.call("step", 1.0 / 60.0)
+				_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "one packed gate cannot award the same coin twice")
+			var active_question: Dictionary = world.get("current_question")
 		_check(active_question.has("topic") and active_question.has("topic_group") and active_question.has("hint_key"), "pack question includes selected subject and teaching metadata")
 		_check(str(active_question.topic_group) in main.call("_selected_topic_groups"), "generated question respects the selected Math track")
 		var gates: Array = world.get("pipes")
@@ -134,6 +185,7 @@ func _run() -> void:
 		audio.call("release_streams")
 		main.queue_free()
 		await process_frame
+	_restore_user_save()
 	if _failures.is_empty():
 		print("[exported-pack] PASS: Paper Glide staged math pack boots")
 		quit(0)
@@ -141,6 +193,17 @@ func _run() -> void:
 	for failure: String in _failures:
 		push_error("[exported-pack] " + failure)
 	quit(1)
+
+
+func _restore_user_save() -> void:
+	_save_store.set("_data", _saved_save_data)
+	if _had_saved_save_file:
+		var save_file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+		if save_file != null:
+			save_file.store_buffer(_saved_save_bytes)
+			save_file.close()
+	elif FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
 
 
 func _check(condition: bool, context: String) -> void:

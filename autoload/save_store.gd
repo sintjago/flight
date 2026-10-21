@@ -3,10 +3,13 @@ extends Node
 
 const SAVE_PATH := "user://paper_glide_save.json"
 const TEMP_PATH := "user://paper_glide_save.tmp"
-const SAVE_VERSION := 5
+const SAVE_VERSION := 6
 const MAX_SCORE := 999999
+const MAX_COINS := 999999
 const DIFFICULTIES: Array[String] = ["easy", "medium", "hard"]
 const PRACTICE_AREAS: Array[String] = ["math", "reading", "russian", "spanish", "science"]
+const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold"]
+const PLANE_COSTS := {"paper": 0, "sky": 10, "coral": 20, "gold": 35}
 
 var _data: Dictionary = {}
 
@@ -30,6 +33,9 @@ func _default_data() -> Dictionary:
 		"best_scores": {"easy": 0, "medium": 0, "hard": 0},
 		"best_scores_by_area": _empty_area_scores(),
 		"games_played": 0,
+		"coins": 0,
+		"owned_planes": ["paper"],
+		"selected_plane": "paper",
 	}
 
 
@@ -81,6 +87,18 @@ func _load() -> void:
 			highest = maxi(highest, int(_data.best_scores_by_area[area][mode]))
 	_data.best_score = highest
 	_data.games_played = clampi(int(candidate.get("games_played", 0)), 0, 99999999)
+	_data.coins = clampi(int(candidate.get("coins", 0)), 0, MAX_COINS)
+	var owned_planes: Array[String] = ["paper"]
+	var saved_planes: Variant = candidate.get("owned_planes", [])
+	if saved_planes is Array:
+		for value: Variant in saved_planes:
+			var plane_id := str(value)
+			if plane_id in PLANE_IDS and plane_id not in owned_planes:
+				owned_planes.append(plane_id)
+	_data.owned_planes = owned_planes
+	var saved_selected_plane := str(candidate.get("selected_plane", "paper"))
+	_data.selected_plane = saved_selected_plane if saved_selected_plane in owned_planes else "paper"
+	_data.version = SAVE_VERSION
 
 
 func save() -> bool:
@@ -116,6 +134,86 @@ func get_best_score(difficulty: String = "", practice_area: String = "math") -> 
 
 func get_games_played() -> int:
 	return int(_data.get("games_played", 0))
+
+
+func get_coins() -> int:
+	return clampi(int(_data.get("coins", 0)), 0, MAX_COINS)
+
+
+## Add gameplay-earned coins and persist the new wallet balance.
+func add_coins(amount: int) -> int:
+	var previous := get_coins()
+	if amount <= 0:
+		return previous
+	var updated := mini(MAX_COINS, previous + amount)
+	if updated == previous:
+		return previous
+	_data.coins = updated
+	if not save():
+		_data.coins = previous
+	return get_coins()
+
+
+func get_owned_planes() -> Array[String]:
+	var owned: Array[String] = []
+	var saved_planes: Variant = _data.get("owned_planes", ["paper"])
+	if saved_planes is Array:
+		for value: Variant in saved_planes:
+			var plane_id := str(value)
+			if plane_id in PLANE_IDS and plane_id not in owned:
+				owned.append(plane_id)
+	if "paper" not in owned:
+		owned.push_front("paper")
+	return owned
+
+
+func owns_plane(plane_id: String) -> bool:
+	return plane_id in PLANE_IDS and plane_id in get_owned_planes()
+
+
+func get_plane_cost(plane_id: String) -> int:
+	return int(PLANE_COSTS.get(plane_id, -1))
+
+
+func get_selected_plane() -> String:
+	var selected := str(_data.get("selected_plane", "paper"))
+	return selected if owns_plane(selected) else "paper"
+
+
+func select_plane(plane_id: String) -> bool:
+	if not owns_plane(plane_id):
+		return false
+	var previous := get_selected_plane()
+	if previous == plane_id:
+		return true
+	_data.selected_plane = plane_id
+	if not save():
+		_data.selected_plane = previous
+		return false
+	return true
+
+
+## Buying a skin immediately equips it; all plane variants remain cosmetic.
+func purchase_plane(plane_id: String) -> bool:
+	if plane_id not in PLANE_IDS or owns_plane(plane_id):
+		return false
+	var cost := get_plane_cost(plane_id)
+	var previous_coins := get_coins()
+	if cost < 0 or previous_coins < cost:
+		return false
+	var previous_owned := get_owned_planes()
+	var previous_selected := get_selected_plane()
+	_data.coins = previous_coins - cost
+	var owned := previous_owned.duplicate()
+	owned.append(plane_id)
+	_data.owned_planes = owned
+	_data.selected_plane = plane_id
+	if not save():
+		_data.coins = previous_coins
+		_data.owned_planes = previous_owned
+		_data.selected_plane = previous_selected
+		return false
+	return true
 
 
 ## Records a finished run. Practice runs count as played but never set any best score.

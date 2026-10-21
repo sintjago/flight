@@ -361,6 +361,37 @@ func _test_question_rotation() -> void:
 	remove_child(science_world)
 	science_world.free()
 
+	var rotation_cases: Array[Dictionary] = [
+		{"area": "reading", "level": 3},
+		{"area": "russian", "level": 3},
+		{"area": "spanish", "level": 4},
+		{"area": "science", "level": 1},
+	]
+	var seed_value := 41000
+	for item: Dictionary in rotation_cases:
+		var world := FlightWorld.new()
+		add_child(world)
+		world.rng.seed = seed_value
+		seed_value += 1
+		world.call("set_practice_area", str(item.area))
+		world.call("set_difficulty", int(item.level))
+		var seen_categories: Dictionary = {}
+		var previous_category := ""
+		for index in 24:
+			world.call("_spawn_gate", 2000.0 + float(index) * 500.0)
+			var question: Dictionary = world.get("current_question")
+			var category := str(world.call("_learning_rotation_category", question))
+			if not previous_category.is_empty():
+				_check(category != previous_category, "%s rotates question categories when alternatives exist" % str(item.area))
+			seen_categories[category] = true
+			previous_category = category
+		_check(seen_categories.size() > 1, "%s learning engine exposes multiple categories at the sampled challenge" % str(item.area))
+		world.call("_start_run")
+		var category_state: Dictionary = world.get("_last_learning_category_by_key")
+		_check(category_state.size() == 1, "starting a new %s run resets question-category history" % str(item.area))
+		remove_child(world)
+		world.free()
+
 
 func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:
 	for level: int in range(1, 6):
@@ -828,6 +859,31 @@ func _test_save_store() -> void:
 	_check(not SaveStore.record_run(3, true, "medium", "reading"), "a lower reading score is not a new subject best")
 	_check(SaveStore.get_best_score() == 7, "overall best persists across modes")
 	_check(SaveStore.get_games_played() == 6, "every run is counted")
+	var legacy_save := {
+		"version": 5,
+		"best_score": 9,
+		"best_scores": {"easy": 0, "medium": 9, "hard": 0},
+		"games_played": 3,
+	}
+	var legacy_file := FileAccess.open(SaveStore.SAVE_PATH, FileAccess.WRITE)
+	_check(legacy_file != null, "legacy-save migration test can write its isolated fixture")
+	if legacy_file != null:
+		legacy_file.store_string(JSON.stringify(legacy_save))
+		legacy_file.close()
+		SaveStore.call("_load")
+		_check(SaveStore.get_best_score() == 9 and SaveStore.get_games_played() == 3, "new economy fields preserve a version-five save's scores and run count")
+		_check(SaveStore.get_coins() == 0 and SaveStore.get_selected_plane() == "paper" and SaveStore.owns_plane("paper"), "older saves safely receive a zero wallet and the free starter plane")
+		_check(int(SaveStore.get("_data").get("version", 0)) == SaveStore.SAVE_VERSION, "loaded saves adopt the current schema version")
+	SaveStore.set("_data", SaveStore.call("_default_data"))
+	_check(not SaveStore.purchase_plane("sky"), "an unaffordable plane cannot be purchased")
+	_check(SaveStore.add_coins(9) == 9 and not SaveStore.purchase_plane("sky"), "coins persist while an insufficient wallet cannot unlock a plane")
+	_check(SaveStore.add_coins(1) == 10 and SaveStore.purchase_plane("sky"), "ten earned coins unlock the ten-coin plane")
+	_check(SaveStore.get_coins() == 0 and SaveStore.owns_plane("sky") and SaveStore.get_selected_plane() == "sky", "buying a plane deducts its price, records ownership, and equips it")
+	_check(not SaveStore.purchase_plane("sky") and not SaveStore.select_plane("coral"), "owned planes are not charged twice and locked planes cannot be selected")
+	_check(SaveStore.select_plane("paper"), "the free starter plane remains selectable after buying another skin")
+	SaveStore.call("_load")
+	_check(SaveStore.owns_plane("sky") and SaveStore.get_selected_plane() == "paper" and SaveStore.get_coins() == 0, "wallet, plane ownership, and selection survive a save reload")
+	SaveStore.set("_data", SaveStore.call("_default_data"))
 
 
 func _test_runtime_scene() -> void:
@@ -843,6 +899,28 @@ func _test_runtime_scene() -> void:
 	await get_tree().process_frame
 	_check(bool((main.get("_title_screen") as Control).visible), "practice-area screen shows on boot")
 	_check(main.get("_state") == "title", "game boots into the first practice-choice step")
+	var hangar_button: Button = main.get("_title_hangar_button")
+	_check(hangar_button != null and hangar_button.text.contains("0 COINS"), "title screen shows the gameplay wallet and Hangar entry")
+	if hangar_button != null:
+		hangar_button.emit_signal("pressed")
+		var hangar_screen: Control = main.get("_hangar_screen")
+		var hangar_buttons: Dictionary = main.get("_hangar_buttons")
+		_check(main.get("_state") == "hangar" and hangar_screen.visible and hangar_buttons.size() == 4, "Hangar opens from Home with all four plane colorways")
+		var sky_entry: Dictionary = hangar_buttons.get("sky", {})
+		(sky_entry.get("button") as Button).emit_signal("pressed")
+		_check(SaveStore.get_coins() == 0 and not SaveStore.owns_plane("sky") and str((main.get("_hangar_status_label") as Label).text).contains("10 more coins"), "Hangar explains an insufficient wallet without charging it")
+		SaveStore.add_coins(10)
+		main.call("_update_hangar")
+		(sky_entry.get("button") as Button).emit_signal("pressed")
+		_check(SaveStore.owns_plane("sky") and SaveStore.get_selected_plane() == "sky" and main.get("_world").get("selected_plane_id") == "sky", "buying in Hangar equips the saved cosmetic plane in flight")
+		var paper_entry: Dictionary = hangar_buttons.get("paper", {})
+		(paper_entry.get("button") as Button).emit_signal("pressed")
+		_check(SaveStore.get_selected_plane() == "paper" and main.get("_world").get("selected_plane_id") == "paper", "Hangar can re-equip the free starter plane")
+		var back_button := hangar_screen.find_child("HangarBackButton", true, false) as Button
+		_check(back_button != null, "Hangar provides a return-to-Home action")
+		if back_button != null:
+			back_button.emit_signal("pressed")
+		_check(main.get("_state") == "title" and (main.get("_title_screen") as Control).visible, "leaving Hangar returns to the practice selector")
 	var practice_buttons: Dictionary = main.get("_practice_buttons")
 	_check(practice_buttons.size() == 5, "first setup step offers math, reading, Russian, Spanish, and science")
 	_check(not (practice_buttons["math"] as Button).disabled, "math knowledge pack is available")
@@ -900,6 +978,26 @@ func _test_runtime_scene() -> void:
 	_check(bool((main.get("_question_bar") as Control).visible), "equation bar appears during flight")
 	_check(str((main.get("_question_label") as Label).text).contains("?"), "equation bar shows the active question")
 	_check(not str((main.get("_question_hint_label") as Label).text).is_empty(), "equation bar shows a learning hint")
+	var reward_gates: Array = world.get("pipes")
+	_check(not reward_gates.is_empty(), "active run exposes a real answer gate to pass")
+	if not reward_gates.is_empty():
+		var reward_gate: Dictionary = reward_gates[0].duplicate(true)
+		reward_gate.x = FlightWorld.PLANE_X - 22.0
+		_set_pipes(world, [reward_gate])
+		var reward_y := float(reward_gate.upper_y) if str(reward_gate.correct_lane) == "upper" else float(reward_gate.lower_y)
+		world.set("gravity", 0.0)
+		world.set("plane_y", reward_y)
+		world.set("plane_vy", 0.0)
+		for _attempt in range(120):
+			if int(world.get("score")) > 0:
+				break
+			world.call("step", 1.0 / 60.0)
+		var after_pass_gates: Array = world.get("pipes")
+		var gate_detail := "score=%d state=%s reason=%s plane_y=%.1f gate_count=%d" % [int(world.get("score")), str(world.get("state")), str(world.get("failure_reason")), float(world.get("plane_y")), after_pass_gates.size()]
+		_check(int(world.get("score")) == 1 and SaveStore.get_coins() == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the correct answer gate adds one saved gameplay coin (" + gate_detail + ")")
+		world.call("step", 1.0 / 60.0)
+		_check(int(world.get("score")) == 1 and SaveStore.get_coins() == 1 and int(main.get("_coins_earned_this_run")) == 1, "one passed gate cannot award the same coin twice")
+	_check(str((main.get("_coin_label") as Label).text).contains("COINS · 1"), "in-flight HUD shows the updated wallet balance")
 	var hud_mode_text := str((main.get("_question_difficulty_label") as Label).text)
 	_check(hud_mode_text.begins_with("LEVEL 5/5") and hud_mode_text.contains("HARD") and hud_mode_text.contains("MATH") and hud_mode_text.contains("LEISURELY") and hud_mode_text.split("·").size() == 5, "question bar identifies challenge level, learning area, topic, and pace")
 	main.call("_set_paused", true)
@@ -911,6 +1009,7 @@ func _test_runtime_scene() -> void:
 	_check(main.get("_state") == "over", "crash moves the game to the over state")
 	await get_tree().create_timer(0.8).timeout
 	_check(bool((main.get("_over_screen") as Control).visible), "crash screen presents the recovery choices")
+	_check(str((main.get("_over_coins_label") as Label).text).contains("+1") and str((main.get("_over_coins_label") as Label).text).contains("WALLET: 1"), "crash screen reports this flight's earned coins and wallet total")
 	_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "crash screen has Try Again, Lower Difficulty, and Home actions")
 	(main.get("_over_easier_button") as Button).emit_signal("pressed")
 	await get_tree().process_frame

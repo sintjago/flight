@@ -32,6 +32,12 @@ const YELLOW_PENCIL := Color(0.93, 0.78, 0.25)
 
 const T_PAPER: Texture2D = preload("res://assets/paperglide/notebook.jpg")
 const T_PLANE: Texture2D = preload("res://assets/paperglide/plane.png")
+const PLANE_TINTS := {
+	"paper": Color(1.0, 1.0, 1.0, 1.0),
+	"sky": Color(0.72, 0.88, 1.0, 1.0),
+	"coral": Color(1.0, 0.79, 0.72, 1.0),
+	"gold": Color(1.0, 0.87, 0.5, 1.0),
+}
 const T_PIPE_CAP: Texture2D = preload("res://assets/paperglide/pipe_cap.png")
 const T_PIPE_BODY: Texture2D = preload("res://assets/paperglide/pipe_body.png")
 const T_CLOUDS: Array[Texture2D] = [
@@ -53,6 +59,7 @@ const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 ## "ready" (waiting for the first tap), "playing" or "dead".
 var state := "ready"
 var score := 0
+var selected_plane_id := "paper"
 var plane_y := READY_Y
 var plane_vy := 0.0
 var plane_rot := 0.0
@@ -69,6 +76,8 @@ var failure_answer := ""
 var failure_question := ""
 var failure_hint_key := ""
 var _learning_prompt_history: Dictionary = {}
+var _last_learning_category_by_key: Dictionary = {}
+var _learning_category_alternates_by_key: Dictionary = {}
 var _math_prompt_history: Dictionary = {}
 var _math_topic_bag: Array[String] = []
 var _math_topic_bag_key := ""
@@ -183,6 +192,11 @@ func set_practice_area(value: String) -> void:
 	practice_area = value if value == "math" or value in LearningQuestion.PRACTICE_AREAS else "math"
 
 
+func set_selected_plane(value: String) -> void:
+	selected_plane_id = value if PLANE_TINTS.has(value) else "paper"
+	queue_redraw()
+
+
 func set_speed_level(value: Variant) -> void:
 	speed_level = clampi(roundi(float(value)), 1, 5)
 	load_tuning()
@@ -212,6 +226,8 @@ func _start_run() -> void:
 	pipes.clear()
 	current_question.clear()
 	_learning_prompt_history.clear()
+	_last_learning_category_by_key.clear()
+	_learning_category_alternates_by_key.clear()
 	_math_prompt_history.clear()
 	_math_topic_bag.clear()
 	_math_topic_bag_key = ""
@@ -261,6 +277,50 @@ func _next_math_topic_group() -> String:
 	return next_group
 
 
+func _learning_rotation_category(question: Dictionary) -> String:
+	var generator_kind := str(question.get("generator_kind", ""))
+	if not generator_kind.is_empty() and generator_kind != "knowledge_choice":
+		return generator_kind
+	return str(question.get("topic", ""))
+
+
+func _next_learning_question() -> Dictionary:
+	var history_key := "%s:%d" % [practice_area, difficulty_level]
+	var previous_category := str(_last_learning_category_by_key.get(history_key, ""))
+	var history: Array = _learning_prompt_history.get(history_key, []).duplicate()
+	var fallback_question: Dictionary = {}
+	var fallback_history: Array = []
+	var chosen_question: Dictionary = {}
+	var chosen_history: Array = []
+	var attempt_limit := 1
+	if not previous_category.is_empty() and bool(_learning_category_alternates_by_key.get(history_key, true)):
+		attempt_limit = 64
+	for _attempt in attempt_limit:
+		var attempt_history: Array = history.duplicate()
+		var candidate: Dictionary = LearningQuestion.generate_with_history(rng, practice_area, difficulty_level, attempt_history)
+		if candidate.is_empty():
+			continue
+		if fallback_question.is_empty():
+			fallback_question = candidate
+			fallback_history = attempt_history
+		if previous_category.is_empty() or _learning_rotation_category(candidate) != previous_category:
+			chosen_question = candidate
+			chosen_history = attempt_history
+			if not previous_category.is_empty():
+				_learning_category_alternates_by_key[history_key] = true
+			break
+	if chosen_question.is_empty():
+		chosen_question = fallback_question
+		chosen_history = fallback_history
+		if not previous_category.is_empty():
+			_learning_category_alternates_by_key[history_key] = false
+	if chosen_question.is_empty():
+		return LearningQuestion.generate_with_history(rng, practice_area, difficulty_level, history)
+	_learning_prompt_history[history_key] = chosen_history
+	_last_learning_category_by_key[history_key] = _learning_rotation_category(chosen_question)
+	return chosen_question
+
+
 func _spawn_gate(x: float) -> void:
 	var gap := current_gap(spawned)
 	var upper_y := rng.randf_range(235.0, 250.0)
@@ -273,10 +333,7 @@ func _spawn_gate(x: float) -> void:
 		question = MathQuestion.generate_with_history(rng, difficulty_level, [group], used_prompts)
 		_math_prompt_history[history_key] = used_prompts
 	else:
-		var history_key := "%s:%d" % [practice_area, difficulty_level]
-		var used_prompts: Array = _learning_prompt_history.get(history_key, [])
-		question = LearningQuestion.generate_with_history(rng, practice_area, difficulty_level, used_prompts)
-		_learning_prompt_history[history_key] = used_prompts
+		question = _next_learning_question()
 	pipes.append({
 		"x": x,
 		"upper_y": upper_y,
@@ -723,8 +780,9 @@ func _draw_plane() -> void:
 	var size := PLANE_SIZE * visual_scale
 	var squash := Vector2(1.0 + _plane_squash * 0.06, 1.0 - _plane_squash * 0.1)
 	var at := Vector2(PLANE_X, plane_y)
+	var plane_tint: Color = PLANE_TINTS.get(selected_plane_id, Color.WHITE)
 	draw_set_transform(at + Vector2(5.0, 9.0), plane_rot, squash)
 	draw_texture_rect(T_PLANE, Rect2(-size * 0.5, size), false, Color(0.14, 0.15, 0.22, 0.2))
 	draw_set_transform(at, plane_rot, squash)
-	draw_texture_rect(T_PLANE, Rect2(-size * 0.5, size), false)
+	draw_texture_rect(T_PLANE, Rect2(-size * 0.5, size), false, plane_tint)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

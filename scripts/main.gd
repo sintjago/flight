@@ -21,6 +21,7 @@ var _world: Node2D
 var _hud: Control
 var _score_label: Label
 var _best_label: Label
+var _coin_label: Label
 var _practice_label: Label
 var _question_bar: PanelContainer
 var _question_label: Label
@@ -31,6 +32,7 @@ var _title_screen: Control
 var _title_card: PanelContainer
 var _title_prompt: Label
 var _title_best: Label
+var _title_hangar_button: Button
 var _difficulty_description: Label
 var _difficulty_value_label: Label
 var _track_buttons: Dictionary = {}
@@ -64,12 +66,18 @@ var _over_note: Label
 var _over_again_button: Button
 var _over_easier_button: Button
 var _over_home_button: Button
+var _over_coins_label: Label
 var _pause_screen: Control
+var _hangar_screen: Control
+var _hangar_balance_label: Label
+var _hangar_status_label: Label
+var _hangar_buttons: Dictionary = {}
 var _sound_button: Button
 var _over_unlock_ms := 0
 var _score_tween: Tween
 var _prompt_time := 0.0
 var _last_run_practice := false
+var _coins_earned_this_run := 0
 
 
 func _ready() -> void:
@@ -79,6 +87,7 @@ func _ready() -> void:
 	_build_world()
 	_build_hud()
 	_build_title()
+	_build_hangar()
 	_build_topic_screen()
 	_build_difficulty_screen()
 	_build_speed_screen()
@@ -226,6 +235,17 @@ func _build_hud() -> void:
 	_practice_label.offset_bottom = 180
 	_practice_label.visible = false
 	_hud.add_child(_practice_label)
+	_coin_label = _make_label("", 18, GRAPHITE, true)
+	_coin_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_coin_label.offset_left = -218
+	_coin_label.offset_right = -82
+	_coin_label.offset_top = 28
+	_coin_label.offset_bottom = 60
+	_coin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_coin_label.add_theme_color_override("font_outline_color", PAPER)
+	_coin_label.add_theme_constant_override("outline_size", 6)
+	_coin_label.visible = false
+	_hud.add_child(_coin_label)
 	_build_question_bar()
 	_pause_button = Button.new()
 	_pause_button.name = "PauseButton"
@@ -356,8 +376,72 @@ func _build_title() -> void:
 		_practice_buttons[area] = button
 	_title_prompt = _make_label(I18n.t("practice.pack_note"), 14, Color(BLUE_PENCIL.darkened(0.15), 0.86), true)
 	box.add_child(_title_prompt)
+	var footer := HBoxContainer.new()
+	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	footer.alignment = BoxContainer.ALIGNMENT_CENTER
+	footer.add_theme_constant_override("separation", 12)
 	_title_best = _make_label("", 18, Color(GRAPHITE, 0.8))
-	box.add_child(_title_best)
+	_title_best.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_title_best.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	footer.add_child(_title_best)
+	_title_hangar_button = _make_button("", 17, Color(0.78, 0.86, 0.96))
+	_title_hangar_button.name = "HangarButton"
+	_title_hangar_button.custom_minimum_size = Vector2(300, 48)
+	_title_hangar_button.pressed.connect(_show_hangar)
+	footer.add_child(_title_hangar_button)
+	box.add_child(footer)
+	_update_wallet_labels()
+
+
+func _build_hangar() -> void:
+	var page := _make_setup_page("PlaneHangarScreen", I18n.t("hangar.title"), I18n.t("hangar.subtitle"))
+	_hangar_screen = page.screen
+	var box: VBoxContainer = page.box
+	_hangar_balance_label = _make_label("", 22, BLUE_PENCIL.darkened(0.15), true)
+	box.add_child(_hangar_balance_label)
+	var row := HBoxContainer.new()
+	row.name = "HangarPlaneChoices"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 10)
+	box.add_child(row)
+	for plane_id: String in SaveStore.PLANE_IDS:
+		var button := _make_button("", 16, CARD)
+		button.name = "HangarPlane_" + plane_id
+		button.custom_minimum_size = Vector2(232, 224)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var content := VBoxContainer.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.alignment = BoxContainer.ALIGNMENT_CENTER
+		content.add_theme_constant_override("separation", 8)
+		var preview := TextureRect.new()
+		preview.texture = FlightWorld.T_PLANE
+		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		preview.custom_minimum_size = Vector2(150, 74)
+		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		preview.modulate = FlightWorld.PLANE_TINTS.get(plane_id, Color.WHITE)
+		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(preview)
+		var name_label := _make_label(I18n.t("hangar.plane." + plane_id), 19, GRAPHITE, true)
+		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(name_label)
+		var status_label := _make_label("", 15, BLUE_PENCIL.darkened(0.1))
+		content.add_child(status_label)
+		button.add_child(content)
+		button.pressed.connect(_on_hangar_plane_pressed.bind(plane_id))
+		_hangar_buttons[plane_id] = {"button": button, "status": status_label}
+		row.add_child(button)
+	_hangar_status_label = _make_label(I18n.t("hangar.earn_tip"), 16, Color(GRAPHITE, 0.75))
+	_hangar_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_hangar_status_label)
+	var back := _make_button(I18n.t("hangar.back"), 20, Color(0.78, 0.86, 0.96))
+	back.name = "HangarBackButton"
+	back.custom_minimum_size = Vector2(280, 54)
+	back.pressed.connect(_show_title)
+	box.add_child(back)
+	_update_hangar()
 
 
 func _build_topic_screen() -> void:
@@ -463,7 +547,7 @@ func _build_speed_screen() -> void:
 func _show_setup_page(target: Control, page_state: String) -> void:
 	_state = page_state
 	get_tree().paused = false
-	for screen: Control in [_title_screen, _topic_screen, _difficulty_screen, _speed_screen]:
+	for screen: Control in [_title_screen, _hangar_screen, _topic_screen, _difficulty_screen, _speed_screen]:
 		screen.visible = screen == target
 	_over_screen.visible = false
 	_pause_screen.visible = false
@@ -472,6 +556,7 @@ func _show_setup_page(target: Control, page_state: String) -> void:
 	_score_label.visible = false
 	_best_label.visible = false
 	_practice_label.visible = false
+	_coin_label.visible = false
 
 
 func _set_difficulty_level(level: int) -> void:
@@ -632,6 +717,8 @@ func _build_over() -> void:
 	box.add_child(_make_label(I18n.t("over.score"), 20, Color(GRAPHITE, 0.8)))
 	_over_score = _make_label("0", 82, GRAPHITE, true)
 	box.add_child(_over_score)
+	_over_coins_label = _make_label("", 19, BLUE_PENCIL.darkened(0.1), true)
+	box.add_child(_over_coins_label)
 	_over_feedback = _make_label("", 22, RED_PENCIL)
 	_over_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_over_feedback)
@@ -714,6 +801,72 @@ func _save() -> Node:
 	return get_node_or_null("/root/SaveStore")
 
 
+func _update_wallet_labels() -> void:
+	var save := _save()
+	var coins := int(save.call("get_coins")) if save != null else 0
+	if _coin_label != null:
+		_coin_label.text = I18n.t("hud.coins", {"amount": coins})
+	if _title_hangar_button != null:
+		_title_hangar_button.text = I18n.t("hangar.open", {"amount": coins})
+	if _hangar_balance_label != null:
+		_hangar_balance_label.text = I18n.t("hangar.balance", {"amount": coins})
+
+
+func _update_hangar() -> void:
+	var save := _save()
+	if save == null:
+		return
+	_update_wallet_labels()
+	var selected_plane := str(save.call("get_selected_plane"))
+	for plane_id: String in SaveStore.PLANE_IDS:
+		if not _hangar_buttons.has(plane_id):
+			continue
+		var entry: Dictionary = _hangar_buttons[plane_id]
+		var button: Button = entry.button
+		var status: Label = entry.status
+		var owned := bool(save.call("owns_plane", plane_id))
+		var selected := selected_plane == plane_id
+		if selected:
+			status.text = I18n.t("hangar.equipped")
+		elif owned:
+			status.text = I18n.t("hangar.equip")
+		else:
+			status.text = I18n.t("hangar.buy", {"cost": int(save.call("get_plane_cost", plane_id))})
+		button.tooltip_text = status.text
+		_style_choice_button(button, selected, SAGE)
+
+
+func _show_hangar() -> void:
+	if _state != "title":
+		return
+	_hangar_status_label.text = I18n.t("hangar.earn_tip")
+	_update_hangar()
+	_show_setup_page(_hangar_screen, "hangar")
+
+
+func _on_hangar_plane_pressed(plane_id: String) -> void:
+	var save := _save()
+	if save == null or plane_id not in SaveStore.PLANE_IDS:
+		return
+	var plane_name := I18n.t("hangar.plane." + plane_id)
+	if bool(save.call("owns_plane", plane_id)):
+		if bool(save.call("select_plane", plane_id)):
+			_hangar_status_label.text = I18n.t("hangar.selected", {"plane": plane_name})
+		else:
+			_hangar_status_label.text = I18n.t("hangar.save_failed")
+	else:
+		var cost := int(save.call("get_plane_cost", plane_id))
+		var balance := int(save.call("get_coins"))
+		if balance < cost:
+			_hangar_status_label.text = I18n.t("hangar.need_coins", {"amount": cost - balance})
+		elif bool(save.call("purchase_plane", plane_id)):
+			_hangar_status_label.text = I18n.t("hangar.purchase_success", {"plane": plane_name})
+		else:
+			_hangar_status_label.text = I18n.t("hangar.save_failed")
+	_world.call("set_selected_plane", str(save.call("get_selected_plane")))
+	_update_hangar()
+
+
 func _best_score(difficulty: String = "") -> int:
 	var save := _save()
 	if save == null:
@@ -726,9 +879,12 @@ func _show_title() -> void:
 	_world.call("set_practice_area", _selected_practice_area)
 	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("set_speed_level", _selected_speed)
+	var save := _save()
+	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
 	_world.call("reset_ready")
 	_show_setup_page(_title_screen, "title")
 	_update_title_best()
+	_update_wallet_labels()
 
 
 ## Starts a fresh run in the "ready" pose; the first flap launches it.
@@ -737,6 +893,9 @@ func _start_new_run() -> void:
 	_world.call("set_practice_area", _selected_practice_area)
 	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("set_speed_level", _selected_speed)
+	_coins_earned_this_run = 0
+	var save := _save()
+	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
 	_world.call("reset_ready")
 	_title_screen.visible = false
 	_topic_screen.visible = false
@@ -767,6 +926,8 @@ func _start_new_run() -> void:
 	})
 	_best_label.visible = best > 0
 	_practice_label.visible = false
+	_coin_label.visible = true
+	_update_wallet_labels()
 	_state = "playing"
 func _restart() -> void:
 	_start_new_run()
@@ -885,6 +1046,12 @@ func _on_question_changed(question: Dictionary) -> void:
 
 func _on_scored(total: int) -> void:
 	_score_label.text = I18n.t("hud.score", {"score": total})
+	var save := _save()
+	if save != null:
+		var before := int(save.call("get_coins"))
+		var after := int(save.call("add_coins", 1))
+		_coins_earned_this_run += maxi(0, after - before)
+		_update_wallet_labels()
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
 		audio.call("play_cue", "score.reward", 1.0 + minf(float(total % 10) * 0.012, 0.1))
@@ -916,11 +1083,16 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	_pause_button.visible = false
 	_question_bar.visible = false
 	_score_label.visible = false
+	_coin_label.visible = false
 	_best_label.visible = false
 	_practice_label.visible = false
 	var wrong_answer := str(_world.get("failure_reason")) == "wrong_answer"
 	_over_title_label.text = I18n.t("over.wrong_title" if wrong_answer else "over.title").to_upper()
 	_over_score.text = str(total)
+	_over_coins_label.text = I18n.t("over.coins_earned", {
+		"earned": _coins_earned_this_run,
+		"balance": int(save.call("get_coins")) if save != null else 0,
+	})
 	var best := _best_score(_selected_difficulty)
 	_over_best.text = I18n.t("over.best", {
 		"area": I18n.t("practice." + _selected_practice_area).to_upper(),
