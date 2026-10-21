@@ -33,7 +33,7 @@ var _title_prompt: Label
 var _title_best: Label
 var _difficulty_description: Label
 var _difficulty_value_label: Label
-var _topic_checkboxes: Dictionary = {}
+var _track_buttons: Dictionary = {}
 var _practice_buttons: Dictionary = {}
 var _difficulty_buttons: Dictionary = {}
 var _speed_buttons: Dictionary = {}
@@ -48,18 +48,11 @@ var _speed_value_label: Label
 var _speed_description: Label
 var _speed_start_button: Button
 var _speed_subtitle_label: Label
-var _topic_selection: Dictionary = {
-	"addition": true,
-	"subtraction": true,
-	"multiplication": true,
-	"division": true,
-	"fractions": true,
-	"number_sense": true,
-}
 var _selected_level := 1
 var _selected_speed := 1
 var _selected_difficulty := "easy"
 var _selected_practice_area := "math"
+var _selected_math_track := "math_1"
 var _over_screen: Control
 var _over_card: PanelContainer
 var _over_title_label: Label
@@ -368,37 +361,44 @@ func _build_title() -> void:
 
 
 func _build_topic_screen() -> void:
-	var page := _make_setup_page("MathTopicsScreen", I18n.t("topics.title"), I18n.t("topics.subtitle"))
+	var page := _make_setup_page("MathTrackScreen", I18n.t("topics.title"), I18n.t("topics.subtitle"))
 	_topic_screen = page.screen
 	var box: VBoxContainer = page.box
-	var grid := GridContainer.new()
-	grid.name = "TopicCheckboxes"
-	grid.columns = 2
-	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	grid.add_theme_constant_override("h_separation", 20)
-	grid.add_theme_constant_override("v_separation", 1)
-	box.add_child(grid)
-	for group: String in MathQuestion.TOPIC_GROUPS:
-		var checkbox := CheckBox.new()
-		checkbox.name = "Topic_" + group
-		var unlock_level := MathQuestion.topic_unlock_level(group)
-		checkbox.text = I18n.t("topic_filter." + group)
-		if unlock_level > 1:
-			checkbox.text += I18n.t("topics.unlock_suffix", {"level": unlock_level})
-		checkbox.custom_minimum_size = Vector2(470, 39)
-		checkbox.add_theme_font_size_override("font_size", 18)
-		checkbox.add_theme_color_override("font_color", GRAPHITE)
-		checkbox.add_theme_color_override("font_hover_color", GRAPHITE)
-		checkbox.add_theme_color_override("font_pressed_color", GRAPHITE)
-		checkbox.add_theme_color_override("font_focus_color", GRAPHITE)
-		checkbox.focus_mode = Control.FOCUS_ALL
-		checkbox.set_pressed_no_signal(bool(_topic_selection.get(group, false)))
-		checkbox.toggled.connect(_on_topic_toggled.bind(group))
-		_topic_checkboxes[group] = checkbox
-		grid.add_child(checkbox)
+	var row := HBoxContainer.new()
+	row.name = "MathTrackChoices"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
+	for track_id: String in MathQuestion.TRACK_IDS:
+		var track_button := _make_button("", 18, CARD)
+		track_button.name = "MathTrack_" + track_id
+		track_button.custom_minimum_size = Vector2(300, 230)
+		track_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var margin := MarginContainer.new()
+		margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		for side: String in ["left", "right", "top", "bottom"]:
+			margin.add_theme_constant_override("margin_" + side, 18)
+		var content := VBoxContainer.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.alignment = BoxContainer.ALIGNMENT_CENTER
+		content.add_theme_constant_override("separation", 12)
+		var title := _make_label(I18n.t("topics.track." + track_id + ".title"), 25, GRAPHITE, true)
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(title)
+		var description := _make_label(I18n.t("topics.track." + track_id + ".description"), 16, Color(GRAPHITE, 0.82))
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(description)
+		margin.add_child(content)
+		track_button.add_child(margin)
+		track_button.pressed.connect(_select_math_track.bind(track_id))
+		_track_buttons[track_id] = track_button
+		row.add_child(track_button)
 	var nav := _make_setup_nav(box, I18n.t("setup.back_home"), _show_title, I18n.t("setup.continue"), _continue_to_difficulty)
 	_topic_next_button = nav.next
-	_update_topic_selection()
+	_update_track_selection()
 
 
 func _build_difficulty_screen() -> void:
@@ -505,22 +505,21 @@ func _update_difficulty_summary() -> void:
 		})
 		_difficulty_next_button.disabled = false
 		return
-	var active_count := 0
-	var selected_count := 0
-	for group: String in MathQuestion.TOPIC_GROUPS:
-		if not bool(_topic_selection.get(group, false)):
-			continue
-		selected_count += 1
-		if group in MathQuestion.available_topic_groups(_selected_level):
-			active_count += 1
-	if active_count == 0:
+	var track_groups := _selected_topic_groups()
+	var active_groups := MathQuestion.available_topic_groups_for_track(_selected_math_track, _selected_level)
+	var track_name := I18n.t("topics.track." + _selected_math_track + ".title")
+	if active_groups.is_empty():
 		_difficulty_summary.text = I18n.t("difficulty.no_topics")
 		_difficulty_next_button.disabled = true
-	elif active_count < selected_count:
-		_difficulty_summary.text = I18n.t("difficulty.some_topics_locked", {"active": active_count, "selected": selected_count})
+	elif active_groups.size() < track_groups.size():
+		_difficulty_summary.text = I18n.t("difficulty.track_some_topics", {
+			"track": track_name, "active": active_groups.size(), "total": track_groups.size(),
+		})
 		_difficulty_next_button.disabled = false
 	else:
-		_difficulty_summary.text = I18n.t("difficulty.all_topics_ready", {"active": active_count})
+		_difficulty_summary.text = I18n.t("difficulty.track_all_topics", {
+			"track": track_name, "active": active_groups.size(),
+		})
 		_difficulty_next_button.disabled = false
 
 
@@ -539,39 +538,29 @@ func _set_speed_level(level: int) -> void:
 	for selected_level: int in _speed_buttons:
 		_style_choice_button(_speed_buttons[selected_level], selected_level == _selected_speed, Color(0.78, 0.86, 0.96))
 
-func _update_topic_selection() -> void:
-	var selected_count := 0
-	for group: String in MathQuestion.TOPIC_GROUPS:
-		if bool(_topic_selection.get(group, false)):
-			selected_count += 1
+func _update_track_selection() -> void:
+	for track_id: String in MathQuestion.TRACK_IDS:
+		if _track_buttons.has(track_id):
+			_style_choice_button(_track_buttons[track_id], track_id == _selected_math_track, SAGE)
 	if _topic_next_button != null:
-		_topic_next_button.disabled = selected_count == 0
+		_topic_next_button.disabled = _selected_math_track not in MathQuestion.TRACK_IDS
 
 
-func _on_topic_toggled(checked: bool, group: String) -> void:
-	_topic_selection[group] = checked
-	if not checked and _selected_topic_groups().is_empty():
-		_topic_selection[group] = true
-		(_topic_checkboxes[group] as CheckBox).set_pressed_no_signal(true)
-	_update_topic_selection()
+func _select_math_track(track_id: String) -> void:
+	if track_id not in MathQuestion.TRACK_IDS:
+		return
+	_selected_math_track = track_id
+	_update_track_selection()
 
 
 func _selected_topic_groups() -> Array[String]:
-	var selected: Array[String] = []
-	for group: String in MathQuestion.TOPIC_GROUPS:
-		if bool(_topic_selection.get(group, false)):
-			selected.append(group)
-	return selected
+	return MathQuestion.topic_groups_for_track(_selected_math_track)
 
 
 func _has_selected_topic_at_level(level: int) -> bool:
 	if _selected_practice_area != "math":
 		return true
-	var available := MathQuestion.available_topic_groups(level)
-	for group: String in _selected_topic_groups():
-		if group in available:
-			return true
-	return false
+	return not MathQuestion.available_topic_groups_for_track(_selected_math_track, level).is_empty()
 
 
 func _continue_to_difficulty() -> void:

@@ -16,9 +16,9 @@ const READING_WORD_PAIRS: Array = [
 	{"level":2,"word":"bright", "synonym":"shiny", "opposite":"dim"}, {"level":2,"word":"ancient", "synonym":"old", "opposite":"new"},
 	{"level":3,"word":"generous", "synonym":"giving", "opposite":"selfish"}, {"level":4,"word":"reluctant", "synonym":"unwilling", "opposite":"eager"},
 	{"level":4,"word":"arduous", "synonym":"difficult", "opposite":"easy"}, {"level":4,"word":"scarce", "synonym":"rare", "opposite":"plentiful"},
-	{"level":3,"word":"assist", "synonym":"help", "opposite":"hinder"}, {"level":3,"word":"predict", "synonym":"forecast", "opposite":"remember"},
-	{"level":3,"word":"protect", "synonym":"guard", "opposite":"harm"}, {"level":3,"word":"observe", "synonym":"notice", "opposite":"ignore"},
-	{"level":3,"word":"expand", "synonym":"grow", "opposite":"shrink"}, {"level":4,"word":"precise", "synonym":"exact", "opposite":"vague"},
+		{"level":3,"word":"assist", "synonym":"help", "opposite":"hinder"}, {"level":3,"word":"include", "synonym":"contain", "opposite":"exclude"},
+		{"level":3,"word":"protect", "synonym":"guard", "opposite":"harm"}, {"level":3,"word":"observe", "synonym":"notice", "opposite":"ignore"},
+		{"level":3,"word":"expand", "synonym":"grow", "opposite":"shrink"}, {"level":4,"word":"precise", "synonym":"exact", "opposite":"vague"},
 ]
 const READING_NOUNS: Array[String] = ["rabbit", "robot", "teacher", "sailor", "puppy", "baker", "dragon", "squirrel", "neighbor", "artist", "captain", "kitten"]
 const READING_ADJECTIVES: Array[String] = ["curious", "gentle", "sleepy", "cheerful", "muddy", "brave", "tiny", "clever", "quiet", "silver", "ancient", "nervous"]
@@ -45,6 +45,40 @@ const READING_PREFIXES: Array = [
 	{"prefix":"pre-", "meaning":"before", "word":"view"}, {"prefix":"mis-", "meaning":"wrongly", "word":"place"},
 	{"prefix":"dis-", "meaning":"opposite of", "word":"agree"}, {"prefix":"over-", "meaning":"too much", "word":"cook"},
 	{"prefix":"sub-", "meaning":"under", "word":"marine"}, {"prefix":"inter-", "meaning":"between", "word":"act"},
+]
+const READING_INFERENCE_CASES: Array = [
+	{"prompt":"Dark clouds gathered; Mia opened her umbrella. Why?", "answer":"Rain might fall", "distractor":"The sky was clear"},
+	{"prompt":"Leo packed a map before the hike. Why bring it?", "answer":"To find the trail", "distractor":"To bake a cake"},
+	{"prompt":"A puppy hid when thunder boomed. How might it feel?", "answer":"Scared", "distractor":"Sleepy"},
+	{"prompt":"Ava watered the drooping plant. Why?", "answer":"It needed water", "distractor":"It needed music"},
+	{"prompt":"Ivy read the sign twice before turning. Why?", "answer":"To check the way", "distractor":"To pick food"},
+	{"prompt":"Max wore a coat; the wind was cold. Why?", "answer":"To stay warm", "distractor":"To make a kite"},
+	{"prompt":"Ben turned on a lamp in the dark room. Why?", "answer":"To see better", "distractor":"To cool the room"},
+	{"prompt":"The floor was wet; Zoe walked slowly. Why?", "answer":"To avoid a fall", "distractor":"To make it wet"},
+]
+const READING_MAIN_IDEA_CASES: Array = [
+	{"prompt":"Bees visit flowers and carry pollen. Main idea?", "answer":"Bees help plants", "distractor":"Bees build boats"},
+	{"prompt":"A seed needs water and light to grow. Main idea?", "answer":"Water and light", "distractor":"Metal and glue"},
+	{"prompt":"The class reused paper and bottles. Main idea?", "answer":"They recycled", "distractor":"They cooked"},
+	{"prompt":"A turtle has a shell that protects its body. Main idea?", "answer":"Shells protect", "distractor":"Turtles fly"},
+	{"prompt":"Mia read each day and learned new words. Main idea?", "answer":"Read to learn", "distractor":"Words grow"},
+	{"prompt":"Clouds form when water droplets gather in the sky. Main idea?", "answer":"Clouds form", "distractor":"Rocks form"},
+]
+const READING_EVIDENCE_CASES: Array = [
+	{"prompt":"Mud covered Jay's boots after the walk. Which clue shows mud?", "answer":"Muddy boots", "distractor":"An early start"},
+	{"prompt":"Ava's umbrella dripped; her book stayed dry. What shows rain?", "answer":"Wet umbrella", "distractor":"Dry book"},
+	{"prompt":"Noah watered a drooping plant; its leaves rose. What changed?", "answer":"Leaves stood tall", "distractor":"Noah wore shoes"},
+	{"prompt":"The ice cube shrank in a warm room. What shows melting?", "answer":"It got smaller", "distractor":"It grew colder"},
+	{"prompt":"Sam practiced daily and played well. What shows practice helped?", "answer":"He played well", "distractor":"He found a map"},
+	{"prompt":"The river rose after days of rain. What supports this?", "answer":"Days of rain", "distractor":"A bright hat"},
+]
+const READING_AUTHOR_PURPOSE_CASES: Array = [
+	{"prompt":"Poster: 'Save water; turn off taps!' Its purpose?", "answer":"Persuade", "distractor":"Entertain"},
+	{"prompt":"Article: 'A bat uses sound to find food.' Its purpose?", "answer":"Inform", "distractor":"Sell"},
+	{"prompt":"Sam practiced and mastered the song. Which theme fits?", "answer":"Keep trying", "distractor":"Quit quickly"},
+	{"prompt":"Neighbors shared tools in the story. Which theme fits?", "answer":"Help each other", "distractor":"Hide your tools"},
+	{"prompt":"The author describes a rainforest in detail. Purpose?", "answer":"Create a picture", "distractor":"Teach a formula"},
+	{"prompt":"A recipe lists steps to make soup. Purpose?", "answer":"Give instructions", "distractor":"Tell a joke"},
 ]
 
 const SPANISH_WORDS: Array = [
@@ -81,7 +115,7 @@ const RUSSIAN_WORDS: Array = [
 	{"level":3,"en":"to see","word":"видеть"},{"level":3,"en":"beautiful","word":"красивый"},{"level":3,"en":"we","word":"мы"},
 	{"level":3,"en":"they","word":"они"},{"level":3,"en":"today","word":"сегодня"},{"level":3,"en":"tomorrow","word":"завтра"},
 	{"level":3,"en":"where?","word":"где?"},{"level":4,"en":"because","word":"потому что"},{"level":4,"en":"although","word":"хотя"},
-	{"level":4,"en":"to understand","word":"понимать"},{"level":4,"en":"to go","word":"ехать"},{"level":4,"en":"city","word":"город"},
+	{"level":4,"en":"to understand","word":"понимать"},{"level":4,"en":"go by vehicle","word":"ехать"},{"level":4,"en":"city","word":"город"},
 	{"level":4,"en":"language","word":"язык"},{"level":4,"en":"interesting","word":"интересный"},{"level":4,"en":"careful","word":"осторожный"},
 	{"level":5,"en":"chance","word":"шанс"},{"level":5,"en":"to explain","word":"объяснять"},{"level":5,"en":"nevertheless","word":"тем не менее"},
 	{"level":5,"en":"nature","word":"природа"},{"level":5,"en":"to improve","word":"улучшать"},{"level":5,"en":"study","word":"изучение"},
@@ -187,6 +221,12 @@ const SCIENCE_STATES: Array = [
 	{"thing":"a stone","state":"solid"},{"thing":"milk","state":"liquid"},{"thing":"air","state":"gas"},
 	{"thing":"juice","state":"liquid"},{"thing":"a wooden block","state":"solid"},
 ]
+const SCIENCE_BEGINNER_STATES: Array = [
+	{"thing":"an ice cube","state":"solid"},{"thing":"water in a glass","state":"liquid"},
+	{"thing":"a rock","state":"solid"},{"thing":"milk in a cup","state":"liquid"},
+	{"thing":"a wooden block","state":"solid"},{"thing":"air in a balloon","state":"gas"},
+	{"thing":"juice in a cup","state":"liquid"},{"thing":"a metal spoon","state":"solid"},
+]
 const SCIENCE_METHODS: Array = [
 	{"test":"whether sunlight changes plant growth","change":"light level","wrong":"plant height"},
 	{"test":"which paper plane shape flies farthest","change":"wing shape","wrong":"flight range"},
@@ -256,6 +296,10 @@ static func _reading_question(rng: RandomNumberGenerator, level: int) -> Diction
 		return _reading_literature(rng)
 	if family == 3 and level >= 3:
 		return _reading_prefix(rng)
+	if level == 3 and family in [2, 4]:
+		return _reading_higher_order_question(rng, level)
+	if level >= 4 and family == 4:
+		return _reading_higher_order_question(rng, level)
 	return _reading_story(rng)
 
 
@@ -319,9 +363,10 @@ static func _reading_vocabulary(rng: RandomNumberGenerator, level: int) -> Dicti
 		expression = "In vocabulary, %s means something close to..." % word if use_synonym else "Which choice contrasts with %s?" % word
 	var topic := "reading_vocabulary"
 	var hint := "hint.reading.vocabulary"
-	if level == 1 and use_synonym:
-		topic = "reading_vocabulary"
-	return _question(expression, answer, distractor, topic, hint, "generated_reading_vocabulary")
+	var relation := "synonym" if use_synonym else "antonym"
+	return _question(expression, answer, distractor, topic, hint, "generated_reading_vocabulary", {
+		"source_word": word, "relation": relation, "synonym": str(entry.synonym), "opposite": str(entry.opposite),
+	})
 
 
 static func _reading_grammar(rng: RandomNumberGenerator) -> Dictionary:
@@ -344,9 +389,10 @@ static func _reading_grammar(rng: RandomNumberGenerator) -> Dictionary:
 static func _reading_prefix(rng: RandomNumberGenerator) -> Dictionary:
 	var entry: Dictionary = _pick(rng, READING_PREFIXES)
 	var form := rng.randi_range(0, 2)
+	var combined_word := str(entry.prefix).trim_suffix("-") + str(entry.word)
 	var expression := "What does the prefix %s mean?" % str(entry.prefix)
 	if form == 1:
-		expression = "In '%s', %s means..." % [str(entry.prefix) + str(entry.word), str(entry.prefix)]
+		expression = "In '%s', %s means..." % [combined_word, str(entry.prefix)]
 	elif form == 2:
 		expression = "Which meaning matches the prefix %s?" % str(entry.prefix)
 	var meanings: Array[String] = ["again", "not", "before", "wrongly", "opposite of", "too much", "under", "between"]
@@ -373,11 +419,38 @@ static func _reading_literature(rng: RandomNumberGenerator) -> Dictionary:
 	return _question("The %s was %s. This direct comparison is a..." % [object, role], "metaphor", "simile", "reading_literature", "hint.reading.literature", "generated_reading_figure")
 
 
+static func _reading_higher_order_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	var items: Array = READING_INFERENCE_CASES
+	var topic := "reading_comprehension"
+	var hint := "hint.reading.comprehension"
+	var kind := "generated_reading_inference"
+	if level == 3 and rng.randi_range(0, 1) == 1:
+		items = READING_MAIN_IDEA_CASES
+		kind = "generated_reading_main_idea"
+	elif level == 4:
+		items = READING_EVIDENCE_CASES
+		kind = "generated_reading_evidence"
+	elif level >= 5:
+		items = READING_AUTHOR_PURPOSE_CASES
+		topic = "reading_literature"
+		hint = "hint.reading.literature"
+		kind = "generated_reading_author_purpose"
+	var item: Dictionary = _pick(rng, items)
+	var expression := str(item.prompt)
+	if rng.randi_range(0, 1) == 1:
+		expression = "Read: %s" % expression
+	return _question(expression, str(item.answer), str(item.distractor), topic, hint, kind)
+
+
 static func _language_question(rng: RandomNumberGenerator, area: String, level: int) -> Dictionary:
 	var use_grammar := false
 	if level >= 5:
 		use_grammar = rng.randi_range(0, 1) == 0
-	elif level >= 2:
+	elif area == "spanish" and level >= 4:
+		use_grammar = rng.randi_range(0, 2) == 0
+	elif area == "spanish" and level >= 2:
+		use_grammar = rng.randi_range(0, 4) == 0
+	elif area == "russian" and level >= 3:
 		use_grammar = rng.randi_range(0, 4) == 0
 	if use_grammar:
 		if area == "spanish":
@@ -428,12 +501,15 @@ static func _language_vocabulary(rng: RandomNumberGenerator, area: String, level
 				expression = "In English, '%s' means..." % str(target.word)
 			5:
 				expression = "Pick the English translation of '%s'." % str(target.word)
-	var topic := area + "_vocabulary"
-	var hint := "hint." + area + ".vocabulary"
-	if style == 3 or style == 4:
-		topic = area + "_phrases"
-		hint = "hint." + area + ".phrases"
-	return _question(expression, answer, distractor, topic, hint, "generated_%s_translation" % area)
+	var target_word := str(target.word)
+	var english_text := str(target.en)
+	var is_phrase := target_word.contains(" ")
+	var lexical_type := "phrase" if is_phrase else "vocabulary"
+	var topic := area + "_phrases" if is_phrase else area + "_vocabulary"
+	var hint := "hint." + area + ".phrases" if is_phrase else "hint." + area + ".vocabulary"
+	return _question(expression, answer, distractor, topic, hint, "generated_%s_translation" % area, {
+		"source_word": target_word, "english_text": english_text, "lexical_type": lexical_type,
+	})
 
 
 static func _spanish_grammar(rng: RandomNumberGenerator, level: int) -> Dictionary:
@@ -443,6 +519,12 @@ static func _spanish_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 			return _spanish_subjunctive(rng)
 		if advanced_form == 1:
 			return _spanish_conditional(rng)
+	elif level >= 4:
+		var level_four_form := rng.randi_range(0, 3)
+		if level_four_form == 0:
+			return _spanish_conditional(rng)
+		if level_four_form == 1:
+			return _spanish_formal_address(rng)
 	if level >= 2 and rng.randi_range(0, 2) == 0:
 		return _spanish_agreement(rng)
 	var tense := "present"
@@ -501,6 +583,20 @@ static func _spanish_present_forms(verb: String) -> Array:
 		if str(verb_data.verb) == verb:
 			return verb_data.forms
 	return []
+
+
+static func _spanish_formal_address(rng: RandomNumberGenerator) -> Dictionary:
+	var verb_data: Dictionary = _pick(rng, SPANISH_PRESENT)
+	var forms: Array = verb_data.forms
+	var answer := str(forms[2])
+	var distractor := str(forms[1])
+	var expression := "Formal address: usted ___ (%s)." % str(verb_data.verb)
+	if rng.randi_range(0, 1) == 1:
+		expression = "For usted, choose the verb form of %s." % str(verb_data.verb)
+	return _question(expression, answer, distractor, "spanish_grammar", "hint.spanish.grammar", "generated_spanish_formal_address", {
+		"verb": str(verb_data.verb), "pronoun": "usted", "subject_index": 2, "tense": "present",
+		"conjugation_forms": forms,
+	})
 
 
 static func _spanish_agreement(rng: RandomNumberGenerator) -> Dictionary:
@@ -592,17 +688,19 @@ static func _russian_conditional(rng: RandomNumberGenerator) -> Dictionary:
 
 static func _science_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	if level <= 1:
-		match rng.randi_range(0, 2):
+		match rng.randi_range(0, 3):
 			0:
 				return _science_animal(rng)
 			1:
 				return _science_plant(rng)
+			2:
+				return _science_state(rng, SCIENCE_BEGINNER_STATES)
 			_:
 				return _science_sense(rng)
 	if level == 2:
 		match rng.randi_range(0, 3):
 			0:
-				return _science_state(rng)
+				return _science_state(rng, SCIENCE_STATES)
 			1:
 				return _science_animal(rng)
 			2:
@@ -616,7 +714,7 @@ static func _science_question(rng: RandomNumberGenerator, level: int) -> Diction
 			1:
 				return _science_speed(rng)
 			2:
-				return _science_state(rng)
+				return _science_state(rng, SCIENCE_STATES)
 			_:
 				return _science_advanced_fact(rng, level)
 	if level == 4:
@@ -661,11 +759,11 @@ static func _science_plant(rng: RandomNumberGenerator) -> Dictionary:
 	var item: Dictionary = _pick(rng, SCIENCE_PLANT_PARTS)
 	var name := str(_pick(rng, NAMES))
 	var form := rng.randi_range(0, 2)
-	var expression := "%s investigates a plant. Which part %s?" % [name, str(item.job)]
+	var expression := "%s investigates a plant. Which part can %s?" % [name, str(item.job)]
 	if form == 1:
-		expression = "Which plant part helps %s %s?" % [name, str(item.job)]
+		expression = "Which plant part is used to %s?" % str(item.job)
 	elif form == 2:
-		expression = "%s labels the part that will %s. Which part?" % [name, str(item.job)]
+		expression = "%s labels the part that will %s. Which plant part?" % [name, str(item.job)]
 	var other: Dictionary = _pick(rng, SCIENCE_PLANT_PARTS)
 	while str(other.part) == str(item.part):
 		other = _pick(rng, SCIENCE_PLANT_PARTS)
@@ -686,8 +784,8 @@ static func _science_sense(rng: RandomNumberGenerator) -> Dictionary:
 	return _question(expression, str(item.organ), str(other.organ), "science_life", "hint.science.life", "generated_science_sense")
 
 
-static func _science_state(rng: RandomNumberGenerator) -> Dictionary:
-	var item: Dictionary = _pick(rng, SCIENCE_STATES)
+static func _science_state(rng: RandomNumberGenerator, state_pool: Array) -> Dictionary:
+	var item: Dictionary = _pick(rng, state_pool)
 	var name := str(_pick(rng, NAMES))
 	var other_states: Array[String] = ["solid", "liquid", "gas"]
 	var distractor := str(_pick(rng, other_states))

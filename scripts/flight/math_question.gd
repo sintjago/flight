@@ -3,6 +3,12 @@ extends RefCounted
 
 const DIFFICULTIES := ["easy", "medium", "hard"]
 const TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics", "integers", "algebra", "quadratics", "exponents", "roots", "trigonometry"]
+const TRACK_IDS := ["math_1", "math_2", "math_3"]
+const TRACK_TOPIC_GROUPS := {
+	"math_1": ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"],
+	"math_2": ["fractions", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics", "integers", "algebra"],
+	"math_3": ["geometry", "probability", "statistics", "integers", "algebra", "quadratics", "exponents", "roots", "trigonometry"],
+}
 const EASY_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability"]
 const MEDIUM_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics"]
 const HARD_TOPIC_GROUPS := ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense", "measurement", "geometry", "probability", "decimals", "percentages", "ratios", "order_of_operations", "statistics", "integers", "algebra", "exponents", "roots"]
@@ -42,6 +48,22 @@ static func available_topic_groups(level: int) -> Array[String]:
 		source = LEVEL_FIVE_TOPIC_GROUPS
 	for group: Variant in source:
 		groups.append(str(group))
+	return groups
+
+
+static func topic_groups_for_track(track_id: String) -> Array[String]:
+	var groups: Array[String] = []
+	for group: Variant in TRACK_TOPIC_GROUPS.get(track_id, []):
+		groups.append(str(group))
+	return groups
+
+
+static func available_topic_groups_for_track(track_id: String, level: int) -> Array[String]:
+	var groups: Array[String] = []
+	var available := available_topic_groups(level)
+	for group: String in topic_groups_for_track(track_id):
+		if group in available:
+			groups.append(group)
 	return groups
 
 
@@ -136,10 +158,12 @@ static func _generate_for_group(rng: RandomNumberGenerator, mode: String, level:
 			return _hard_signed_operation(rng, "division", level)
 		"fractions":
 			if mode == "easy":
+				if level == 1:
+					return _easy_fraction_of(rng, level)
 				return _easy_fraction_of(rng, level) if rng.randi_range(0, 1) == 0 else _easy_fraction_compare(rng)
 			return _fraction_operation(rng, level == 5, level)
 		"number_sense":
-			return _easy_place_value(rng) if rng.randi_range(0, 1) == 0 else _easy_pattern(rng, 20 if level == 1 else 100)
+			return _number_sense_question(rng, level)
 		"measurement":
 			return _measurement_question(rng, level)
 		"geometry":
@@ -171,7 +195,7 @@ static func _generate_for_group(rng: RandomNumberGenerator, mode: String, level:
 	return _easy_add(rng)
 
 
-static func _generate_easy(rng: RandomNumberGenerator) -> Dictionary:
+static func _generate_easy(rng: RandomNumberGenerator, level: int = 2) -> Dictionary:
 	match rng.randi_range(0, 7):
 		0:
 			return _easy_add(rng)
@@ -182,9 +206,9 @@ static func _generate_easy(rng: RandomNumberGenerator) -> Dictionary:
 		3:
 			return _easy_divide(rng)
 		4:
-			return _easy_fraction_of(rng)
+			return _easy_fraction_of(rng, level)
 		5:
-			return _easy_fraction_compare(rng)
+			return _easy_fraction_compare(rng) if level >= 2 else _easy_fraction_of(rng, level)
 		6:
 			return _easy_place_value(rng)
 		_:
@@ -300,6 +324,55 @@ static func _easy_pattern(rng: RandomNumberGenerator, max_value: int = 100) -> D
 	var answer := start + step_size * 3
 	var expression := "%d, %d, %d, ?" % [start, start + step_size, start + step_size * 2]
 	return _integer_problem(expression, answer, "number_patterns", "hint.number_patterns", "number_pattern", start, step_size, "+")
+
+
+static func _number_sense_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level <= 2:
+		return _easy_place_value(rng) if rng.randi_range(0, 1) == 0 else _easy_pattern(rng, 20 if level == 1 else 100)
+	if level == 3:
+		return _place_value_at(rng, 100, 1000, 9999, "hundreds") if rng.randi_range(0, 1) == 0 else _larger_number_pattern(rng)
+	if level == 4:
+		return _rounding_question(rng)
+	return _scientific_notation_question(rng)
+
+
+static func _place_value_at(rng: RandomNumberGenerator, place: int, minimum: int, maximum: int, place_name: String) -> Dictionary:
+	var number := rng.randi_range(minimum, maximum)
+	var digit := int(number / place) % 10
+	var expression := "%s digit of %d = ?" % [place_name.capitalize(), number]
+	return _integer_problem(expression, digit, "place_value", "hint.place_value", "place_value", number, place, "digit", {
+		"place_name": place_name,
+	})
+
+
+static func _larger_number_pattern(rng: RandomNumberGenerator) -> Dictionary:
+	var step_size := rng.randi_range(10, 100)
+	var start := rng.randi_range(100, 700)
+	var answer := start + step_size * 3
+	var expression := "%d, %d, %d, ?" % [start, start + step_size, start + step_size * 2]
+	return _integer_problem(expression, answer, "number_patterns", "hint.number_patterns", "number_pattern", start, step_size, "+")
+
+
+static func _rounding_question(rng: RandomNumberGenerator) -> Dictionary:
+	var place := 100 if rng.randi_range(0, 1) == 0 else 1000
+	var place_name := "hundred" if place == 100 else "thousand"
+	var number := rng.randi_range(1000, 9999)
+	var answer := roundi(float(number) / float(place)) * place
+	return _integer_problem("Round %d to the nearest %s = ?" % [number, place_name], answer, "rounding", "hint.rounding", "rounding", number, place, "round", {
+		"rounded_value": answer, "rounding_place": place, "distractor_pool": [answer - place, answer + place],
+	})
+
+
+static func _scientific_notation_question(rng: RandomNumberGenerator) -> Dictionary:
+	var coefficient_tenths := rng.randi_range(11, 99)
+	var exponent := rng.randi_range(3, 6)
+	var answer := coefficient_tenths * int(pow(10.0, float(exponent - 1)))
+	var coefficient_text := "%d.%d" % [int(coefficient_tenths / 10), coefficient_tenths % 10]
+	var expression := "%s × 10^%d in standard form = ?" % [coefficient_text, exponent]
+	return _integer_problem(expression, answer, "scientific_notation", "hint.scientific_notation", "scientific_notation", coefficient_tenths, exponent, "×10^", {
+		"coefficient_tenths": coefficient_tenths, "exponent": exponent, "standard_value": answer,
+		"distractor_pool": [int(answer / 10), answer * 10],
+	})
 
 
 static func _medium_add(rng: RandomNumberGenerator) -> Dictionary:

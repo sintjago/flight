@@ -95,7 +95,7 @@ func _test_math_questions() -> void:
 			_check(seen_groups.has(required_group), "level %d curriculum includes %s" % [level, required_group])
 		for group: String in MathQuestion.available_topic_groups(level):
 			var filtered: Dictionary = MathQuestion.generate(rng, level, [group])
-			_check(str(filtered.topic_group) == group, "level %d question follows the selected %s checkbox" % [level, group])
+			_check(str(filtered.topic_group) == group, "level %d question follows the selected %s topic" % [level, group])
 			_check(int(filtered.difficulty_level) == level, "question keeps the exact selected level")
 		var math_history: Array = []
 		var math_prompts: Dictionary = {}
@@ -135,6 +135,14 @@ func _test_math_questions() -> void:
 	_check(str(next_shape.expression) != "Sides in a hexagon = ?", "a fresh Math cycle does not immediately repeat its last prompt")
 	for level: int in range(1, 6):
 		_check(MathQuestion.topic_unlock_level("quadratics") == 5 or level < 5, "high-school topics have a level-five unlock")
+	_check(MathQuestion.TRACK_IDS == ["math_1", "math_2", "math_3"], "Math offers exactly three ordered tracks")
+	_check("addition" in MathQuestion.topic_groups_for_track("math_1") and "number_sense" in MathQuestion.topic_groups_for_track("math_1") and "algebra" not in MathQuestion.topic_groups_for_track("math_1"), "Math 1 bundles foundational arithmetic and number sense")
+	_check("decimals" in MathQuestion.topic_groups_for_track("math_2") and "algebra" in MathQuestion.topic_groups_for_track("math_2") and "quadratics" not in MathQuestion.topic_groups_for_track("math_2"), "Math 2 bundles middle-school topics and introductory algebra")
+	_check("quadratics" in MathQuestion.topic_groups_for_track("math_3") and "trigonometry" in MathQuestion.topic_groups_for_track("math_3"), "Math 3 bundles high-school algebra and trigonometry")
+	for track_id: String in MathQuestion.TRACK_IDS:
+		for level: int in range(1, 6):
+			_check(not MathQuestion.available_topic_groups_for_track(track_id, level).is_empty(), "%s remains playable at challenge level %d" % [track_id, level])
+	_check("trigonometry" not in MathQuestion.available_topic_groups_for_track("math_3", 4) and "trigonometry" in MathQuestion.available_topic_groups_for_track("math_3", 5), "Math 3 trigonometry unlocks at the stretch challenge")
 	_test_extended_question_forms(rng)
 
 
@@ -161,6 +169,14 @@ func _test_learning_questions() -> void:
 				_check(str(template.get("answer", "")) != str(template.get("distractor", "")), "%s level %d curated choices are distinct" % [area, level])
 				_check(I18n.t(topic_key) != topic_key, "%s prompt topic is labeled" % area)
 				_check(not hint_key.is_empty() and I18n.t(hint_key) != hint_key, "%s prompt has a translated learning hint" % area)
+				if area in ["russian", "spanish"]:
+					var language_topic := str(template.get("topic", ""))
+					if language_topic.ends_with("_vocabulary"):
+						_check(hint_key == "hint." + area + ".vocabulary", "single-word starter content uses its vocabulary hint")
+					elif language_topic.ends_with("_phrases"):
+						_check(hint_key == "hint." + area + ".phrases", "multiword starter content uses its phrase hint")
+					if area == "russian" and level == 2:
+						_check(language_topic in ["russian_vocabulary", "russian_phrases"], "Russian Level 2 starter content stays at the beginner scope")
 				for text_value: String in [prompt, str(template.get("answer", "")), str(template.get("distractor", ""))]:
 					for char_index: int in text_value.length():
 						_check(ThemeDB.fallback_font.has_char(text_value.unicode_at(char_index)), "%s curated lesson characters are supported" % area)
@@ -172,6 +188,8 @@ func _test_learning_questions() -> void:
 			var generated_prompts: Dictionary = {}
 			var procedural_count := 0
 			var advanced_language_kinds: Dictionary = {}
+			var reading_skill_kinds: Dictionary = {}
+			var beginner_science_kinds: Dictionary = {}
 			var high_school_science_topics: Dictionary = {}
 			for _sample in 160:
 				var question: Dictionary = LearningQuestion.generate_with_history(rng, area, level, history)
@@ -179,10 +197,18 @@ func _test_learning_questions() -> void:
 				var correct_option := str(question.upper_answer) if question.correct_lane == "upper" else str(question.lower_answer)
 				var generated_prompt := str(question.expression)
 				var generator_kind := str(question.get("generator_kind", ""))
+				if area == "russian" and level == 2 and generator_kind.begins_with("generated_"):
+					_check(generator_kind == "generated_russian_translation", "Russian Level 2 generated practice stays with beginner translations")
 				if generator_kind.begins_with("generated_"):
 					procedural_count += 1
-				if generator_kind in ["generated_russian_aspect", "generated_russian_conditional", "generated_spanish_subjunctive", "generated_spanish_conditional"]:
+				if generator_kind in ["generated_russian_aspect", "generated_russian_conditional", "generated_spanish_subjunctive", "generated_spanish_conditional", "generated_spanish_formal_address"]:
 					advanced_language_kinds[generator_kind] = true
+				if area == "reading" and generator_kind in ["generated_reading_inference", "generated_reading_main_idea", "generated_reading_evidence", "generated_reading_author_purpose"]:
+					reading_skill_kinds[generator_kind] = true
+				if area == "science" and level == 1 and generator_kind in ["generated_science_state", "generated_science_plant_part"]:
+					beginner_science_kinds[generator_kind] = true
+				if area == "russian" and str(question.get("source_word", "")) == "ехать":
+					_check(str(question.answer) == "go by vehicle" or generated_prompt.contains("go by vehicle"), "Russian ехать is cued as travel by vehicle")
 				if area == "science" and level == 5 and generator_kind.begins_with("generated_science_"):
 					var science_topic := str(question.get("topic", ""))
 					_check(science_topic in ["science_biology", "science_chemistry", "science_physics", "science_earth"], "Level 5 Science generated content stays in advanced topics")
@@ -214,6 +240,17 @@ func _test_learning_questions() -> void:
 					"generated_spanish_conjugation":
 						var forms: Array = question.get("conjugation_forms", [])
 						_check(forms.has(str(question.answer)) and forms.has(str(question.distractor)) and question.answer != question.distractor, "Spanish conjugation choices are distinct valid verb forms")
+					"generated_spanish_formal_address":
+						var forms: Array = question.get("conjugation_forms", [])
+						_check(str(question.get("pronoun", "")) == "usted" and int(question.get("subject_index", -1)) == 2 and str(forms[2]) == str(question.answer) and str(forms[1]) == str(question.distractor), "Spanish formal usted uses the él/ella verb form")
+					"generated_russian_translation", "generated_spanish_translation":
+						var source_text := str(question.get("source_word", ""))
+						var lexical_type := "phrase" if source_text.contains(" ") else "vocabulary"
+						var language_category := "phrases" if lexical_type == "phrase" else "vocabulary"
+						_check(str(question.get("lexical_type", "")) == lexical_type and str(question.topic) == area + "_" + language_category and str(question.hint_key) == "hint." + area + "." + language_category, "Language topic and hint follow the target-language word or phrase")
+						if area == "russian" and level == 2:
+							var beginner_words: Array[String] = ["привет", "пока", "да", "нет", "мама", "папа", "кот", "собака", "вода", "хлеб", "дом", "книга", "пожалуйста", "спасибо", "один", "два", "красный", "синий", "яблоко", "молоко", "школа", "друг", "маленький", "большой"]
+							_check(beginner_words.has(source_text), "Russian Level 2 uses only familiar beginner vocabulary")
 					"generated_spanish_subjunctive", "generated_spanish_conditional":
 						var forms: Array = question.get("conjugation_forms", [])
 						var indicative_forms: Array = question.get("indicative_forms", [])
@@ -235,11 +272,17 @@ func _test_learning_questions() -> void:
 							for past_verb: String in ["found", "drew", "carried", "opened", "packed", "planted", "borrowed", "painted", "chose", "fixed"]:
 								_check(not generated_prompt.contains("did %s %s" % [story_name, past_verb]), "Reading comprehension uses a base verb after did")
 								_check(not generated_prompt.contains("%s What did %s" % [story_name, story_name]), "Reading comprehension avoids duplicated-name question stems")
+					"generated_reading_vocabulary":
+						var relation := str(question.get("relation", ""))
+						var expected_answer := str(question.synonym) if relation == "synonym" else str(question.opposite)
+						var expected_distractor := str(question.opposite) if relation == "synonym" else str(question.synonym)
+						_check(relation in ["synonym", "antonym"] and str(question.answer) == expected_answer and str(question.distractor) == expected_distractor, "Reading synonym and antonym answers match their selected relation")
 					"generated_reading_prefix":
 						_check(generated_prompt.contains("prefix ") or generated_prompt.contains("In '"), "Reading prefix prompts identify the prefix or its example word")
 						_check(not generated_prompt.to_lower().contains("matches re at the start"), "Reading prefix prompts use natural wording")
 					"generated_science_plant_part":
 						_check(str(question.answer) == str(question.plant_part) and generated_prompt.contains(str(question.plant_job)), "Science plant question and answer match the plant function")
+						_check(generated_prompt.contains("can ") or generated_prompt.contains("is used to") or generated_prompt.contains("will "), "Science plant question stem is grammatical")
 					"generated_science_state":
 						_check(str(question.answer) == str(question.science_state) and not generated_prompt.to_lower().contains("room temperature"), "Science state question avoids an incorrect ice-at-room-temperature claim")
 				if area == "science" and level <= 2:
@@ -254,6 +297,16 @@ func _test_learning_questions() -> void:
 				_check(advanced_language_kinds.has("generated_russian_aspect") and advanced_language_kinds.has("generated_russian_conditional"), "Level 5 Russian practices verb aspect and conditional meaning")
 			if area == "spanish" and level == 5:
 				_check(advanced_language_kinds.has("generated_spanish_subjunctive") and advanced_language_kinds.has("generated_spanish_conditional"), "Level 5 Spanish practices the subjunctive and conditional forms")
+			if area == "spanish" and level == 4:
+				_check(advanced_language_kinds.has("generated_spanish_conditional") and advanced_language_kinds.has("generated_spanish_formal_address"), "Level 4 Spanish practices conditional forms and formal address")
+			if area == "reading" and level == 3:
+				_check(reading_skill_kinds.has("generated_reading_inference") and reading_skill_kinds.has("generated_reading_main_idea"), "Level 3 Reading practices inference and main idea")
+			if area == "reading" and level == 4:
+				_check(reading_skill_kinds.has("generated_reading_evidence"), "Level 4 Reading practices text evidence")
+			if area == "reading" and level == 5:
+				_check(reading_skill_kinds.has("generated_reading_author_purpose"), "Level 5 Reading practices author purpose and theme")
+			if area == "science" and level == 1:
+				_check(beginner_science_kinds.has("generated_science_state") and beginner_science_kinds.has("generated_science_plant_part"), "Level 1 Science includes everyday matter and plant-part questions")
 			if area == "science" and level == 5:
 				_check(high_school_science_topics.has("science_biology") and high_school_science_topics.has("science_chemistry") and high_school_science_topics.has("science_physics"), "Level 5 Science samples biology, chemistry, and physics")
 
@@ -345,6 +398,14 @@ func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:
 				_check(seen_operations.has("×"), "level four fractions include multiplication")
 			if group == "fractions" and level == 5:
 				_check(seen_operations.has("×") and seen_operations.has("÷"), "level five fractions include multiplication and division")
+			if group == "fractions" and level == 1:
+				_check(seen_kinds.has("fraction_of") and not seen_kinds.has("fraction_compare"), "level one fractions stay with simple halves")
+			if group == "number_sense" and level <= 3:
+				_check(seen_kinds.has("place_value") and seen_kinds.has("number_pattern"), "level %d number sense includes place value and patterns" % level)
+			if group == "number_sense" and level == 4:
+				_check(seen_kinds.has("rounding"), "level four number sense teaches rounding")
+			if group == "number_sense" and level == 5:
+				_check(seen_kinds.has("scientific_notation"), "level five number sense teaches scientific notation")
 			if group == "statistics" and level == 3:
 				_check(seen_statistics.has("mean") and seen_statistics.has("median") and seen_statistics.has("range"), "level three statistics include mean, median, and range")
 			if group == "statistics" and level >= 4:
@@ -419,10 +480,24 @@ func _validate_math_question(question: Dictionary, mode: String, level: int) -> 
 			_check(answer_text == expected_fraction, "fraction comparison selects the larger value")
 			_check(maxi(left_den, right_den) <= 4, "Easy fraction comparison uses small denominators")
 		"place_value":
-			_check(int(question.a) >= 10 and int(question.a) <= 99 and answer_text == str(int(int(question.a) / 10)), "place-value prompt identifies the tens digit")
+			if str(question.get("place_name", "")) == "hundreds":
+				var hundreds_place := int(question.b)
+				var digit := int(int(question.a) / hundreds_place) % 10
+				_check(int(question.a) >= 1000 and answer_text == str(digit), "higher place-value prompt identifies the hundreds digit")
+			else:
+				_check(int(question.a) >= 10 and int(question.a) <= 99 and answer_text == str(int(int(question.a) / 10)), "place-value prompt identifies the tens digit")
 		"number_pattern":
-			var limit := 20 if level == 1 else 100
+			var limit := 20 if level == 1 else (100 if level == 2 else 1000)
 			_check(int(question.a) + 3 * int(question.b) == int(answer_text) and int(answer_text) <= limit, "number pattern fits its selected easy level")
+		"rounding":
+			var rounding_step := int(question.rounding_place)
+			var rounded_value := roundi(float(question.a) / float(rounding_step)) * rounding_step
+			_check(rounding_step in [100, 1000] and int(question.rounded_value) == rounded_value and answer_text == str(rounded_value), "rounding question uses the nearest requested place")
+		"scientific_notation":
+			var coefficient_tenths := int(question.coefficient_tenths)
+			var exponent := int(question.exponent)
+			var standard_value := coefficient_tenths * int(pow(10.0, float(exponent - 1)))
+			_check(coefficient_tenths >= 11 and coefficient_tenths <= 99 and exponent >= 3 and exponent <= 6 and int(question.standard_value) == standard_value and answer_text == str(standard_value), "scientific notation expands the coefficient and power correctly")
 		"fraction_operation":
 			var numerator := 0
 			var denominator := 1
@@ -780,36 +855,30 @@ func _test_runtime_scene() -> void:
 	main.call("_unhandled_input", tap)
 	_check(main.get("_state") == "title", "tapping the practice chooser does not accidentally start flight")
 	main.call("_begin_from_title")
-	_check(main.get("_state") == "topics" and bool((main.get("_topic_screen") as Control).visible), "choosing Math opens its own subject step")
-	var topic_checkboxes: Dictionary = main.get("_topic_checkboxes")
-	_check(topic_checkboxes.size() == MathQuestion.TOPIC_GROUPS.size(), "math subject step shows checkboxes for every selectable topic")
-	_check(topic_checkboxes.has("addition") and topic_checkboxes.has("subtraction") and topic_checkboxes.has("multiplication") and topic_checkboxes.has("division"), "addition, subtraction, multiplication, and division are separate choices")
-	var algebra_checkbox: CheckBox = topic_checkboxes["algebra"]
-	_check(not algebra_checkbox.disabled, "all math topics can be chosen before the challenge step")
-	main.call("_on_topic_toggled", true, "algebra")
-	algebra_checkbox.set_pressed_no_signal(true)
+	_check(main.get("_state") == "topics" and bool((main.get("_topic_screen") as Control).visible), "choosing Math opens its own track step")
+	var track_buttons: Dictionary = main.get("_track_buttons")
+	_check(track_buttons.size() == 3 and track_buttons.has("math_1") and track_buttons.has("math_2") and track_buttons.has("math_3"), "Math replaces the long checklist with three track cards")
+	_check(str(main.get("_selected_math_track")) == "math_1", "Math 1 Foundations is the default track")
+	(track_buttons["math_2"] as Button).emit_signal("pressed")
+	_check(str(main.get("_selected_math_track")) == "math_2", "choosing a Math 2 card selects one track")
 	var selected_groups: Array = main.call("_selected_topic_groups")
-	_check("algebra" in selected_groups and "fractions" in selected_groups, "multiple math topics can be selected together")
+	_check("decimals" in selected_groups and "algebra" in selected_groups and "fractions" in selected_groups and "addition" not in selected_groups, "Math 2 selects its bundled middle-school topics without a checkbox list")
 	main.call("_continue_to_difficulty")
-	_check(main.get("_state") == "difficulty" and bool((main.get("_difficulty_screen") as Control).visible), "math topics lead to a separate challenge step")
+	_check(main.get("_state") == "difficulty" and bool((main.get("_difficulty_screen") as Control).visible), "the selected Math track leads to a separate challenge step")
 	var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
 	_check(difficulty_buttons.size() == 5, "challenge step offers exactly five difficulty choices")
 	main.call("_set_difficulty_level", 1)
 	_check(int(main.get("_selected_level")) == 1 and str(main.get("_selected_difficulty")) == "easy", "level one is the gentlest, age-friendly math band")
-	_check(str((main.get("_difficulty_summary") as Label).text).contains("unlock at higher levels"), "difficulty step explains when selected advanced topics are unlocked")
+	_check(str((main.get("_difficulty_summary") as Label).text).contains("more unlock as your challenge rises"), "difficulty step explains track topics unlock with challenge")
 	main.call("_show_topic_selection")
-	_check(bool(algebra_checkbox.button_pressed), "going back preserves math subject choices")
+	_check(str(main.get("_selected_math_track")) == "math_2", "going back preserves the selected Math track")
+	(track_buttons["math_3"] as Button).emit_signal("pressed")
 	main.call("_continue_to_difficulty")
 	main.call("_set_difficulty_level", 5)
-	_check(int(main.get("_selected_level")) == 5 and str(main.get("_selected_difficulty")) == "hard", "level five selects the high-school challenge band")
-	var topic_selection: Dictionary = main.get("_topic_selection")
-	var saved_topic_selection: Dictionary = topic_selection.duplicate()
-	topic_selection.clear()
-	topic_selection["trigonometry"] = true
-	_check(bool(main.call("_has_selected_topic_at_level", 5)) and not bool(main.call("_has_selected_topic_at_level", 4)), "lowering cannot silently replace a learner's only selected high-school subject")
-	topic_selection.clear()
-	for group: Variant in saved_topic_selection:
-		topic_selection[group] = saved_topic_selection[group]
+	_check(int(main.get("_selected_level")) == 5 and str(main.get("_selected_difficulty")) == "hard" and str(main.get("_selected_math_track")) == "math_3", "Math 3 keeps the independent level-five challenge selection")
+	selected_groups = main.call("_selected_topic_groups")
+	_check("trigonometry" in selected_groups and "quadratics" in selected_groups and "addition" not in selected_groups, "Math 3 selects high-school subjects as one bundled track")
+	_check(bool(main.call("_has_selected_topic_at_level", 5)) and bool(main.call("_has_selected_topic_at_level", 4)), "lowering Math 3 challenge preserves its track and uses topics available at that level")
 	main.call("_continue_to_speed")
 	_check(main.get("_state") == "speed" and bool((main.get("_speed_screen") as Control).visible), "challenge selection leads to its own flight-pace step")
 	var speed_buttons: Dictionary = main.get("_speed_buttons")
@@ -825,7 +894,7 @@ func _test_runtime_scene() -> void:
 	_check(world.get("state") == "ready", "Start Practice leaves the plane waiting for the learner's first tap")
 	_check(world.get("difficulty") == "hard" and int(world.get("difficulty_level")) == 5, "five-point math challenge reaches the flight world")
 	_check(int(world.get("speed_level")) == 2, "chosen flight pace reaches the flight world")
-	_check("algebra" in world.get("selected_topic_groups"), "selected math topics reach the question generator")
+	_check("algebra" in world.get("selected_topic_groups") and "trigonometry" in world.get("selected_topic_groups") and "addition" not in world.get("selected_topic_groups"), "the selected Math 3 track reaches the question generator")
 	main.call("_flap_input")
 	_check(world.get("state") == "playing", "the first tap after setup launches the paper plane")
 	_check(bool((main.get("_question_bar") as Control).visible), "equation bar appears during flight")
@@ -853,7 +922,7 @@ func _test_runtime_scene() -> void:
 	(main.get("_over_home_button") as Button).emit_signal("pressed")
 	await get_tree().process_frame
 	_check(main.get("_state") == "title" and bool((main.get("_title_screen") as Control).visible), "Home returns to practice-area selection")
-	_check(bool(algebra_checkbox.button_pressed), "Home preserves checked content for later selection")
+	_check(str(main.get("_selected_math_track")) == "math_3", "Home preserves the selected Math track for later practice")
 	main.call("_begin_from_title")
 	main.call("_continue_to_difficulty")
 	main.call("_set_difficulty_level", 1)
@@ -894,7 +963,7 @@ func _test_runtime_scene() -> void:
 	main.call("_show_title")
 	(practice_buttons["math"] as Button).emit_signal("pressed")
 	main.call("_continue_to_difficulty")
-	_check(str((main.get("_difficulty_subtitle_label") as Label).text).contains("STEP 3 OF 4") and str((main.get("_difficulty_description") as Label).text).contains("Build confidence"), "returning to Math restores its four-step flow and math description")
+	_check(str((main.get("_difficulty_subtitle_label") as Label).text).contains("STEP 3 OF 4") and str((main.get("_difficulty_description") as Label).text).contains("Gentle questions"), "returning to Math restores its four-step flow and challenge description")
 	get_tree().paused = false
 	main.queue_free()
 	await get_tree().process_frame
