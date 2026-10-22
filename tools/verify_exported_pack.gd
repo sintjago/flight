@@ -79,7 +79,7 @@ func _run() -> void:
 					plane_button.emit_signal("pressed")
 					_check(bool(_save_store.call("owns_plane", plane_id)) and str(_save_store.call("get_selected_plane")) == plane_id and main.get("_world").get("selected_plane_id") == plane_id and FlightWorld.plane_texture_for(plane_id) != null, "packed Hangar unlocks, equips, and loads " + plane_id)
 			var cheers_tab := (main.get("_hangar_screen") as Control).find_child("HangarCheersTab", true, false) as Button
-				if cheers_tab != null:
+			if cheers_tab != null:
 				cheers_tab.emit_signal("pressed")
 			_save_store.call("add_coins", 10)
 			main.call("_update_hangar")
@@ -144,11 +144,11 @@ func _run() -> void:
 		var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
 		var speed_buttons: Dictionary = main.get("_speed_buttons")
 		_check(difficulty_buttons.size() == 5 and speed_buttons.size() == 5, "pack has separate five-choice challenge and flight pace steps")
-			_check(int(main.get("_selected_level")) == 1 and int(main.get("_selected_speed")) == 1, "pack defaults to level one and the calmest pace")
-			_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
-			for path: String in [
-				"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
-				"res://assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2",
+		_check(int(main.get("_selected_level")) == 1 and int(main.get("_selected_speed")) == 1, "pack defaults to level one and the calmest pace")
+		_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
+		for path: String in [
+			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
+			"res://assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2",
 			"res://assets/paperglide/ships/kite_glider_refined.png", "res://assets/paperglide/ships/sailwing_refined.png",
 			"res://assets/paperglide/ships/comet_dart_refined.png",
 			"res://assets/paperglide/ships/albatross_glider.png", "res://assets/paperglide/ships/double_fold.png",
