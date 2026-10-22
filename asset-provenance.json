@@ -332,6 +332,50 @@
       "used": true,
       "usedBy": []
     },
+    "assets/paperglide/ships/albatross_glider.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:bbb110f6ea2ca099978b2858e25b03ca092ebc1957a69a25d797856b22f90b10",
+      "shipped": true,
+      "size": 113509,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/boomerang_kite.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:dd2de206b9eb11d5d12bfde792b1875a09b42175d80d2b9fac544b85c08ffccb",
+      "shipped": true,
+      "size": 96442,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
     "assets/paperglide/ships/comet_cruiser_game.png": {
       "declaredUseEvidence": [],
       "generator": {},
@@ -363,6 +407,28 @@
       "sha256": "sha256:1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44",
       "shipped": true,
       "size": 135699,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/double_fold.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:360c93598159bed684c8098dc0fa88862341fdd968324e4b7172144cec3c29e8",
+      "shipped": true,
+      "size": 175460,
       "source": {},
       "status": "present",
       "transformations": [],
@@ -868,9 +934,9 @@
         ]
       }
     ],
-    "pckSha256": "sha256:5d051b0605b2687e809cbde28f77183b341d6a2487f0abde1dbff93a2295911b",
+    "pckSha256": "sha256:0727b8097d8ae816b3931b39ea3de5e7c790a4eef03733117488b6bd2956d668",
     "profile": "release",
-    "sourceFingerprint": "sha256:653feca66929cf81c76d75abc406b11a437afdb1f9f16adde617f51dbe60e7fa"
+    "sourceFingerprint": "sha256:67b7388d04ae7e51327397fb6551b7ecbdba527f6abe1d593a42dc49188f4e3e"
   },
   "procedures": {},
   "summary": {
@@ -903,9 +969,9 @@
     },
     "files": {
       "downloaded": 0,
-      "retained": 38,
-      "shipped": 38,
-      "used": 22
+      "retained": 41,
+      "shipped": 41,
+      "used": 25
     },
     "origins": {
       "ai": {
@@ -939,9 +1005,9 @@
         "used": 3
       },
       "unknown": {
-        "retained": 23,
-        "shipped": 23,
-        "used": 19
+        "retained": 26,
+        "shipped": 26,
+        "used": 22
       }
     },
     "packs": {

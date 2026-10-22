@@ -911,11 +911,15 @@ func _test_save_store() -> void:
 	_check(SaveStore.select_plane("paper"), "the free starter plane remains selectable after buying another skin")
 	_check(SaveStore.add_coins(15) == 15 and SaveStore.purchase_plane("kite_glider"), "a distinct paper-aircraft design can be bought with earned coins")
 	_check(SaveStore.get_coins() == 0 and SaveStore.owns_plane("kite_glider") and SaveStore.get_selected_plane() == "kite_glider", "new aircraft purchase deducts its cost and equips the saved design")
+	for plane_id: String in ["albatross_glider", "double_fold", "boomerang_kite"]:
+		var cost := SaveStore.get_plane_cost(plane_id)
+		_check(cost > 0 and SaveStore.add_coins(cost) == cost and SaveStore.purchase_plane(plane_id), "%s unlocks for its coin cost" % plane_id)
+		_check(SaveStore.owns_plane(plane_id) and SaveStore.get_selected_plane() == plane_id, "%s is equipped after purchase" % plane_id)
 	_check(SaveStore.add_coins(10) == 10 and SaveStore.purchase_cheer("banzai"), "the Banzai celebration is an earnable coin unlock")
 	_check(SaveStore.get_coins() == 0 and SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai", "purchasing a cheer deducts its price and selects it")
 	_check(not SaveStore.purchase_cheer("banzai") and not SaveStore.select_cheer("excelente"), "owned cheers cannot be charged twice and locked cheers cannot be selected")
 	SaveStore.call("_load")
-	_check(SaveStore.owns_plane("sky") and SaveStore.owns_plane("kite_glider") and SaveStore.get_selected_plane() == "kite_glider" and SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai" and SaveStore.get_coins() == 0, "wallet, distinct plane and cheer ownership, and selections survive a save reload")
+	_check(SaveStore.owns_plane("sky") and SaveStore.owns_plane("kite_glider") and SaveStore.owns_plane("albatross_glider") and SaveStore.owns_plane("double_fold") and SaveStore.owns_plane("boomerang_kite") and SaveStore.get_selected_plane() == "boomerang_kite" and SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai" and SaveStore.get_coins() == 0, "wallet, all added plane ownership and selected aircraft survive a save reload")
 	SaveStore.set("_data", SaveStore.call("_default_data"))
 
 
@@ -939,7 +943,7 @@ func _test_runtime_scene() -> void:
 		var hangar_screen: Control = main.get("_hangar_screen")
 		var hangar_buttons: Dictionary = main.get("_hangar_buttons")
 		var hangar_cheer_buttons: Dictionary = main.get("_hangar_cheer_buttons")
-		_check(main.get("_state") == "hangar" and hangar_screen.visible and hangar_buttons.size() == SaveStore.PLANE_IDS.size() and hangar_buttons.size() == 7, "Hangar opens with seven aircraft, including three distinct new silhouettes")
+		_check(main.get("_state") == "hangar" and hangar_screen.visible and hangar_buttons.size() == SaveStore.PLANE_IDS.size() and hangar_buttons.size() == 10, "Hangar opens with ten aircraft, including three new silhouette designs")
 		_check(hangar_cheer_buttons.size() == SaveStore.CHEER_IDS.size() and hangar_cheer_buttons.size() == 3, "Hangar includes the default, Banzai, and Spanish celebration cards")
 		var sky_entry: Dictionary = hangar_buttons.get("sky", {})
 		(sky_entry.get("button") as Button).emit_signal("pressed")
@@ -976,6 +980,18 @@ func _test_runtime_scene() -> void:
 		var kite_entry: Dictionary = hangar_buttons.get("kite_glider", {})
 		(kite_entry.get("button") as Button).emit_signal("pressed")
 		_check(SaveStore.owns_plane("kite_glider") and SaveStore.get_selected_plane() == "kite_glider" and main.get("_world").get("selected_plane_id") == "kite_glider", "buying a new Hangar design selects its distinct sprite without changing gameplay state")
+		for plane_id: String in ["albatross_glider", "double_fold", "boomerang_kite"]:
+			var plane_entry: Dictionary = hangar_buttons.get(plane_id, {})
+			var plane_button := plane_entry.get("button") as Button
+			var plane_cost := SaveStore.get_plane_cost(plane_id)
+			_check(plane_button != null and plane_cost > 0, "%s has an unlockable Hangar card" % plane_id)
+			if plane_button != null:
+				var plane_preview := plane_button.find_child("HangarPlanePreview_" + plane_id, true, false) as TextureRect
+				_check(plane_preview != null and plane_preview.texture == FlightWorld.plane_texture_for(plane_id) and I18n.t("hangar.plane." + plane_id) != "hangar.plane." + plane_id, "%s shows its own labeled aircraft preview" % plane_id)
+				SaveStore.add_coins(plane_cost)
+				main.call("_update_hangar")
+				plane_button.emit_signal("pressed")
+				_check(SaveStore.owns_plane(plane_id) and SaveStore.get_selected_plane() == plane_id and main.get("_world").get("selected_plane_id") == plane_id and FlightWorld.plane_texture_for(plane_id) != null, "%s purchases, equips, and reaches the renderer" % plane_id)
 		(paper_entry.get("button") as Button).emit_signal("pressed")
 		var back_button := hangar_screen.find_child("HangarBackButton", true, false) as Button
 		_check(back_button != null, "Hangar provides a return-to-Home action")

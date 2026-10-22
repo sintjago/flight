@@ -35,6 +35,9 @@ const T_PLANE: Texture2D = preload("res://assets/paperglide/plane.png")
 const T_KITE_GLIDER: Texture2D = preload("res://assets/paperglide/ships/kite_glider_refined.png")
 const T_SAILWING: Texture2D = preload("res://assets/paperglide/ships/sailwing_refined.png")
 const T_COMET_DART: Texture2D = preload("res://assets/paperglide/ships/comet_dart_refined.png")
+const T_ALBATROSS_GLIDER: Texture2D = preload("res://assets/paperglide/ships/albatross_glider.png")
+const T_DOUBLE_FOLD: Texture2D = preload("res://assets/paperglide/ships/double_fold.png")
+const T_BOOMERANG_KITE: Texture2D = preload("res://assets/paperglide/ships/boomerang_kite.png")
 const PLANE_TEXTURES := {
 	"paper": T_PLANE,
 	"sky": T_PLANE,
@@ -43,6 +46,9 @@ const PLANE_TEXTURES := {
 	"kite_glider": T_KITE_GLIDER,
 	"sailwing": T_SAILWING,
 	"comet_cruiser": T_COMET_DART,
+	"albatross_glider": T_ALBATROSS_GLIDER,
+	"double_fold": T_DOUBLE_FOLD,
+	"boomerang_kite": T_BOOMERANG_KITE,
 }
 const PLANE_TINTS := {
 	"paper": Color(1.0, 1.0, 1.0, 1.0),
@@ -52,6 +58,9 @@ const PLANE_TINTS := {
 	"kite_glider": Color.WHITE,
 	"sailwing": Color.WHITE,
 	"comet_cruiser": Color.WHITE,
+	"albatross_glider": Color.WHITE,
+	"double_fold": Color.WHITE,
+	"boomerang_kite": Color.WHITE,
 }
 const T_PIPE_CAP: Texture2D = preload("res://assets/paperglide/pipe_cap.png")
 const T_PIPE_BODY: Texture2D = preload("res://assets/paperglide/pipe_body.png")

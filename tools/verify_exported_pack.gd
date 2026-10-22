@@ -6,7 +6,7 @@ var _saved_save_bytes: Variant = null
 var _had_saved_save_file := false
 var _save_store: Node
 const SAVE_PATH := "user://paper_glide_save.json"
-const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold", "kite_glider", "sailwing", "comet_cruiser"]
+const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold", "kite_glider", "sailwing", "comet_cruiser", "albatross_glider", "double_fold", "boomerang_kite"]
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
@@ -66,8 +66,17 @@ func _run() -> void:
 			var kite_entry: Dictionary = hangar_buttons.get("kite_glider", {})
 			var kite_button := kite_entry.get("button") as Button
 			if kite_button != null:
-				kite_button.emit_signal("pressed")
-				_check(bool(_save_store.call("owns_plane", "kite_glider")) and main.get("_world").get("selected_plane_id") == "kite_glider", "packed new paper-craft design equips its own renderer sprite")
+					kite_button.emit_signal("pressed")
+					_check(bool(_save_store.call("owns_plane", "kite_glider")) and main.get("_world").get("selected_plane_id") == "kite_glider", "packed new paper-craft design equips its own renderer sprite")
+				for plane_id: String in ["albatross_glider", "double_fold", "boomerang_kite"]:
+					var plane_cost := int(_save_store.call("get_plane_cost", plane_id))
+					_save_store.call("add_coins", plane_cost)
+					main.call("_update_hangar")
+					var plane_entry: Dictionary = hangar_buttons.get(plane_id, {})
+					var plane_button := plane_entry.get("button") as Button
+					if plane_button != null:
+						plane_button.emit_signal("pressed")
+						_check(bool(_save_store.call("owns_plane", plane_id)) and str(_save_store.call("get_selected_plane")) == plane_id and main.get("_world").get("selected_plane_id") == plane_id, "packed Hangar unlocks and equips " + plane_id)
 			var cheers_tab := (main.get("_hangar_screen") as Control).find_child("HangarCheersTab", true, false) as Button
 			if cheers_tab != null:
 				cheers_tab.emit_signal("pressed")
@@ -134,16 +143,18 @@ func _run() -> void:
 		var difficulty_buttons: Dictionary = main.get("_difficulty_buttons")
 		var speed_buttons: Dictionary = main.get("_speed_buttons")
 		_check(difficulty_buttons.size() == 5 and speed_buttons.size() == 5, "pack has separate five-choice challenge and flight pace steps")
-		_check(int(main.get("_selected_level")) == 1 and int(main.get("_selected_speed")) == 1, "pack defaults to level one and the calmest pace")
-		_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
-		for path: String in [
-			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
-			"res://assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2",
+			_check(int(main.get("_selected_level")) == 1 and int(main.get("_selected_speed")) == 1, "pack defaults to level one and the calmest pace")
+			_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
+			for path: String in [
+				"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
+				"res://assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2",
 			"res://assets/paperglide/ships/kite_glider_refined.png", "res://assets/paperglide/ships/sailwing_refined.png",
 			"res://assets/paperglide/ships/comet_dart_refined.png",
+			"res://assets/paperglide/ships/albatross_glider.png", "res://assets/paperglide/ships/double_fold.png",
+			"res://assets/paperglide/ships/boomerang_kite.png",
 			"res://assets/paperglide/pipe_body.png", "res://assets/paperglide/notebook.jpg",
 			"res://assets/paperglide/cloud0.png",
-		]:
+			]:
 			_check(ResourceLoader.exists(path), "exported art: " + path)
 		var tap := InputEventMouseButton.new()
 		tap.button_index = MOUSE_BUTTON_LEFT

@@ -148,6 +148,22 @@
       "groupId": "sprites",
       "used": true
     },
+    "assets/paperglide/ships/albatross_glider.png": {
+      "path": "/manus-storage/game/sha256/bbb110f6ea2ca099978b2858e25b03ca092ebc1957a69a25d797856b22f90b10.png",
+      "sha256": "sha256:bbb110f6ea2ca099978b2858e25b03ca092ebc1957a69a25d797856b22f90b10",
+      "size": 113509,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": true
+    },
+    "assets/paperglide/ships/boomerang_kite.png": {
+      "path": "/manus-storage/game/sha256/dd2de206b9eb11d5d12bfde792b1875a09b42175d80d2b9fac544b85c08ffccb.png",
+      "sha256": "sha256:dd2de206b9eb11d5d12bfde792b1875a09b42175d80d2b9fac544b85c08ffccb",
+      "size": 96442,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": true
+    },
     "assets/paperglide/ships/comet_cruiser_game.png": {
       "path": "/manus-storage/game/sha256/56a1626ab3c777ade375ac2470e2078ddd6d5413689c921c185127f6de94713a.png",
       "sha256": "sha256:56a1626ab3c777ade375ac2470e2078ddd6d5413689c921c185127f6de94713a",
@@ -160,6 +176,14 @@
       "path": "/manus-storage/game/sha256/1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44.png",
       "sha256": "sha256:1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44",
       "size": 135699,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": true
+    },
+    "assets/paperglide/ships/double_fold.png": {
+      "path": "/manus-storage/game/sha256/360c93598159bed684c8098dc0fa88862341fdd968324e4b7172144cec3c29e8.png",
+      "sha256": "sha256:360c93598159bed684c8098dc0fa88862341fdd968324e4b7172144cec3c29e8",
+      "size": 175460,
       "assetType": "image",
       "groupId": "aircraft",
       "used": true

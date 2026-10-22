@@ -8,8 +8,8 @@ const MAX_SCORE := 999999
 const MAX_COINS := 999999
 const DIFFICULTIES: Array[String] = ["easy", "medium", "hard"]
 const PRACTICE_AREAS: Array[String] = ["math", "reading", "russian", "spanish", "science"]
-const PLANE_IDS: Array[String] = ["paper", "kite_glider", "sailwing", "comet_cruiser", "sky", "coral", "gold"]
-const PLANE_COSTS := {"paper": 0, "sky": 10, "coral": 20, "gold": 35, "kite_glider": 15, "sailwing": 30, "comet_cruiser": 50}
+const PLANE_IDS: Array[String] = ["paper", "kite_glider", "sailwing", "comet_cruiser", "sky", "coral", "gold", "albatross_glider", "double_fold", "boomerang_kite"]
+const PLANE_COSTS := {"paper": 0, "sky": 10, "coral": 20, "gold": 35, "kite_glider": 15, "sailwing": 30, "comet_cruiser": 50, "albatross_glider": 65, "double_fold": 80, "boomerang_kite": 100}
 const CHEER_IDS: Array[String] = ["nice_work", "banzai", "excelente"]
 const CHEER_COSTS := {"nice_work": 0, "banzai": 10, "excelente": 15}
 
