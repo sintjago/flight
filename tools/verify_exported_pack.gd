@@ -66,19 +66,20 @@ func _run() -> void:
 			var kite_entry: Dictionary = hangar_buttons.get("kite_glider", {})
 			var kite_button := kite_entry.get("button") as Button
 			if kite_button != null:
-					kite_button.emit_signal("pressed")
-					_check(bool(_save_store.call("owns_plane", "kite_glider")) and main.get("_world").get("selected_plane_id") == "kite_glider", "packed new paper-craft design equips its own renderer sprite")
-				for plane_id: String in ["albatross_glider", "double_fold", "boomerang_kite"]:
-					var plane_cost := int(_save_store.call("get_plane_cost", plane_id))
-					_save_store.call("add_coins", plane_cost)
-					main.call("_update_hangar")
-					var plane_entry: Dictionary = hangar_buttons.get(plane_id, {})
-					var plane_button := plane_entry.get("button") as Button
-					if plane_button != null:
-						plane_button.emit_signal("pressed")
-						_check(bool(_save_store.call("owns_plane", plane_id)) and str(_save_store.call("get_selected_plane")) == plane_id and main.get("_world").get("selected_plane_id") == plane_id, "packed Hangar unlocks and equips " + plane_id)
+				kite_button.emit_signal("pressed")
+				_check(bool(_save_store.call("owns_plane", "kite_glider")) and main.get("_world").get("selected_plane_id") == "kite_glider", "packed new paper-craft design equips its own renderer sprite")
+			for plane_id: String in ["albatross_glider", "double_fold", "boomerang_kite"]:
+				var plane_cost := int(_save_store.call("get_plane_cost", plane_id))
+				_save_store.call("add_coins", plane_cost)
+				main.call("_update_hangar")
+				var plane_entry: Dictionary = hangar_buttons.get(plane_id, {})
+				var plane_button := plane_entry.get("button") as Button
+				_check(plane_button != null, "packed Hangar shows the " + plane_id + " card")
+				if plane_button != null:
+					plane_button.emit_signal("pressed")
+					_check(bool(_save_store.call("owns_plane", plane_id)) and str(_save_store.call("get_selected_plane")) == plane_id and main.get("_world").get("selected_plane_id") == plane_id and FlightWorld.plane_texture_for(plane_id) != null, "packed Hangar unlocks, equips, and loads " + plane_id)
 			var cheers_tab := (main.get("_hangar_screen") as Control).find_child("HangarCheersTab", true, false) as Button
-			if cheers_tab != null:
+				if cheers_tab != null:
 				cheers_tab.emit_signal("pressed")
 			_save_store.call("add_coins", 10)
 			main.call("_update_hangar")
