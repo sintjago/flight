@@ -237,7 +237,7 @@ const BANK := {
 			{"expression": "Covalent bonds ___ electrons.", "answer": "share", "distractor": "transfer", "topic": "science_chemistry", "hint_key": "hint.science.chemistry"},
 			{"expression": "Photosynthesis takes in which gas?", "answer": "carbon dioxide", "distractor": "oxygen", "topic": "science_biology", "hint_key": "hint.science.biology"},
 			{"expression": "Water leaving leaves as vapor is...", "answer": "transpiration", "distractor": "condensation", "topic": "science_biology", "hint_key": "hint.science.biology"},
-			{"expression": "A cell's DNA is mainly stored in its...", "answer": "nucleus", "distractor": "membrane", "topic": "science_biology", "hint_key": "hint.science.biology"},
+			{"expression": "In a typical plant or animal cell, most DNA is stored in its...", "answer": "nucleus", "distractor": "membrane", "topic": "science_biology", "hint_key": "hint.science.biology"},
 			{"expression": "A broken circuit is an...", "answer": "open circuit", "distractor": "closed circuit", "topic": "science_physics", "hint_key": "hint.science.physics"},
 			{"expression": "A sedimentary rock forms from...", "answer": "compacted layers", "distractor": "cooled metal", "topic": "science_earth", "hint_key": "hint.science.earth"},
 		],

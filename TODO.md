@@ -92,3 +92,16 @@
 - [x] Align generated Level 3 questions with promised ecosystems, cycles, energy, and fair-test learning; bound travel scenarios to credible age-appropriate values; provide hints suited to classification, senses, and density; and ensure stems fit the two displayed answer choices.
 
 Across these engine updates, preserve procedural variety, age appropriateness, accurate prompts, distinct answer choices with exactly one correct lane, useful localized topic/hint metadata, the staged setup, and the existing flight, score, coin, and save behavior.
+
+
+## Math probability and signed-division refinement — complete
+- [x] State equal-likelihood assumptions for spinner questions, make signed division reachable with a localized sign-rule hint, and preserve exact answers, level bands, and two-answer gates.
+
+## Reading distractor and skill-label refinement — complete
+- [x] Replace off-topic higher-order distractors, distinguish theme from author-purpose metadata/hints, and keep generated answer choices within the 104-pixel gate budget.
+
+## Russian and Spanish calibration refinement — complete
+- [x] Enable Russian Level 3 present-tense grammar, prioritize level-matched vocabulary with explicit review turns, and add Spanish imperfect practice with correct regular and irregular preterite contrasts at Levels 4–5.
+
+## Science fact-scope and beginner coverage refinement — complete
+- [x] Scope the DNA/nucleus fact to typical plant/animal cells in curated and generated content, and balance beginner solid/liquid/gas coverage while keeping questions procedural and offline.

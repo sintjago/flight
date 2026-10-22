@@ -692,7 +692,7 @@ static func _probability_question(rng: RandomNumberGenerator, level: int) -> Dic
 		favorable = rng.randi_range(1, sections - 1)
 		total = sections
 		event = "blue sections"
-		expression = "Spinner: %d of %d blue; P(blue) = ?" % [favorable, total]
+		expression = "Fair spinner with %d equal sections; %d are blue. P(blue) = ?" % [total, favorable]
 	elif level == 3:
 		total = rng.randi_range(8, 40)
 		favorable = rng.randi_range(1, total - 1)
@@ -723,7 +723,7 @@ static func _probability_question(rng: RandomNumberGenerator, level: int) -> Dic
 			favorable = rng.randi_range(1, total - 1)
 			event = colour + " outcomes"
 			if rng.randi_range(0, 1) == 0:
-				expression = "Spinner: %d of %d slices are %s; P(%s) = ?" % [favorable, total, colour, colour]
+				expression = "Fair spinner with %d equal slices; %d are %s. P(%s) = ?" % [total, favorable, colour, colour]
 			else:
 				expression = "Bag: %d %s counters among %d; P(%s) = ?" % [favorable, colour, total, colour]
 	else:
@@ -755,7 +755,7 @@ static func _probability_question(rng: RandomNumberGenerator, level: int) -> Dic
 			event = colour + " outcomes"
 			var container := "spinner" if rng.randi_range(0, 1) == 0 else "bag"
 			if container == "spinner":
-				expression = "A spinner has %d %s sections of %d; P(%s) = ?" % [favorable, colour, total, colour]
+				expression = "A fair spinner has %d equal sections; %d are %s. P(%s) = ?" % [total, favorable, colour, colour]
 			else:
 				expression = "A bag has %d %s counters out of %d; P(%s) = ?" % [favorable, colour, total, colour]
 	var answer := _format_fraction(favorable, total)
@@ -893,7 +893,8 @@ static func _hard_signed_operation(rng: RandomNumberGenerator, operation_group: 
 		var divisor := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 		var quotient := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 		var dividend := divisor * quotient
-		return _integer_problem("%d ÷ (%d) = ?" % [dividend, divisor], quotient, "division", "hint.division", "integer_operation", dividend, divisor, "÷")
+		var division_hint := "hint.signed_division" if dividend < 0 or divisor < 0 else "hint.division"
+		return _integer_problem("%d ÷ (%d) = ?" % [dividend, divisor], quotient, "division", division_hint, "integer_operation", dividend, divisor, "÷")
 	var operators: Array[String] = []
 	if operation_group == "addition":
 		operators.append("+")

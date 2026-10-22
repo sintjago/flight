@@ -49,38 +49,42 @@ const READING_PREFIXES: Array = [
 	{"prefix":"sub-", "meaning":"under", "word":"marine"}, {"prefix":"inter-", "meaning":"between", "word":"act"},
 ]
 const READING_INFERENCE_CASES: Array = [
-	{"prompt":"Dark clouds gathered; Mia opened her umbrella. Why?", "answer":"Rain might fall", "distractor":"The sky was clear"},
-	{"prompt":"Leo packed a map before the hike. Why bring it?", "answer":"To find the trail", "distractor":"To bake a cake"},
-	{"prompt":"A puppy hid when thunder boomed. How might it feel?", "answer":"Scared", "distractor":"Sleepy"},
-	{"prompt":"Ava watered the drooping plant. Why?", "answer":"It needed water", "distractor":"It needed music"},
-	{"prompt":"Ivy read the sign twice before turning. Why?", "answer":"To check the way", "distractor":"To pick food"},
-	{"prompt":"Max wore a coat; the wind was cold. Why?", "answer":"To stay warm", "distractor":"To make a kite"},
-	{"prompt":"Ben turned on a lamp in the dark room. Why?", "answer":"To see better", "distractor":"To cool the room"},
-	{"prompt":"The floor was wet; Zoe walked slowly. Why?", "answer":"To avoid a fall", "distractor":"To make it wet"},
+	{"prompt":"Dark clouds gathered; Mia opened her umbrella. Why?", "answer":"Rain might fall", "distractor":"To block the wind"},
+	{"prompt":"Leo checked a trail map before hiking in an unfamiliar park. Why?", "answer":"Follow the map", "distractor":"Pick a meal"},
+	{"prompt":"A puppy hid when thunder boomed. How might it feel?", "answer":"Scared", "distractor":"Curious"},
+	{"prompt":"Ava saw dry soil, so she watered the drooping plant. Why?", "answer":"Give it water", "distractor":"Clean its leaves"},
+	{"prompt":"Ivy read the sign twice before turning. Why?", "answer":"Check route", "distractor":"Check time"},
+	{"prompt":"Max wore a coat because the dry wind was cold. Why?", "answer":"To stay warm", "distractor":"To block the sun"},
+	{"prompt":"Ben turned on a lamp in a dark room. Why?", "answer":"See better", "distractor":"Signal outside"},
+	{"prompt":"The floor was wet; Zoe walked slowly. Why?", "answer":"Avoid a fall", "distractor":"Keep shoes dry"},
 ]
 const READING_MAIN_IDEA_CASES: Array = [
-	{"prompt":"Bees visit flowers and carry pollen. Main idea?", "answer":"Bees help plants", "distractor":"Bees build boats"},
-	{"prompt":"A seed needs water and light to grow. Main idea?", "answer":"Water and light", "distractor":"Metal and glue"},
-	{"prompt":"The class reused paper and bottles. Main idea?", "answer":"They recycled", "distractor":"They cooked"},
-	{"prompt":"A turtle has a shell that protects its body. Main idea?", "answer":"Shells protect", "distractor":"Turtles fly"},
-	{"prompt":"Mia read each day and learned new words. Main idea?", "answer":"Read to learn", "distractor":"Words grow"},
-	{"prompt":"Clouds form when water droplets gather in the sky. Main idea?", "answer":"Clouds form", "distractor":"Rocks form"},
+	{"prompt":"Bees visit flowers and carry pollen between them. Main idea?", "answer":"Bees help plants", "distractor":"Bees visit blooms"},
+	{"prompt":"A seed needs water and light to grow into a plant. Main idea?", "answer":"Seeds need both", "distractor":"Seeds are small"},
+	{"prompt":"The class reused paper and bottles instead of throwing them away. Main idea?", "answer":"Reuse materials", "distractor":"Sort supplies"},
+	{"prompt":"A turtle's shell protects its body from harm. Main idea?", "answer":"Shell protects", "distractor":"Turtles have legs"},
+	{"prompt":"Mia read each day and learned new words from her books. Main idea?", "answer":"Reading helps", "distractor":"Mia likes books"},
+	{"prompt":"Clouds form when tiny water droplets gather in the sky. Main idea?", "answer":"Droplets gather", "distractor":"Clouds move"},
 ]
 const READING_EVIDENCE_CASES: Array = [
-	{"prompt":"Mud covered Jay's boots after the walk. Which clue shows mud?", "answer":"Muddy boots", "distractor":"An early start"},
-	{"prompt":"Ava's umbrella dripped; her book stayed dry. What shows rain?", "answer":"Wet umbrella", "distractor":"Dry book"},
-	{"prompt":"Noah watered a drooping plant; its leaves rose. What changed?", "answer":"Leaves stood tall", "distractor":"Noah wore shoes"},
-	{"prompt":"The ice cube shrank in a warm room. What shows melting?", "answer":"It got smaller", "distractor":"It grew colder"},
-	{"prompt":"Sam practiced daily and played well. What shows practice helped?", "answer":"He played well", "distractor":"He found a map"},
-	{"prompt":"The river rose after days of rain. What supports this?", "answer":"Days of rain", "distractor":"A bright hat"},
+	{"prompt":"Mud covered Jay's boots after the walk. Which clue shows the path was muddy?", "answer":"Muddy boots", "distractor":"Long walk"},
+	{"prompt":"Ava's umbrella dripped; her book stayed dry. What shows that it rained?", "answer":"Wet umbrella", "distractor":"Dry book"},
+	{"prompt":"Noah watered a drooping plant; its leaves rose. What changed after watering?", "answer":"Leaves rose", "distractor":"Soil darkened"},
+	{"prompt":"The ice cube shrank in a warm room. What is evidence it melted?", "answer":"Ice got smaller", "distractor":"Room felt warm"},
+	{"prompt":"Sam practiced daily and then played the song well. What suggests practice helped?", "answer":"Played well", "distractor":"Practiced daily"},
+	{"prompt":"The river rose after days of rain. Which detail could explain the rise?", "answer":"Days of rain", "distractor":"River's bend"},
 ]
 const READING_AUTHOR_PURPOSE_CASES: Array = [
-	{"prompt":"Poster: 'Save water; turn off taps!' Its purpose?", "answer":"Persuade", "distractor":"Entertain"},
-	{"prompt":"Article: 'A bat uses sound to find food.' Its purpose?", "answer":"Inform", "distractor":"Sell"},
-	{"prompt":"Sam practiced and mastered the song. Which theme fits?", "answer":"Keep trying", "distractor":"Quit quickly"},
-	{"prompt":"Neighbors shared tools in the story. Which theme fits?", "answer":"Help each other", "distractor":"Hide your tools"},
-	{"prompt":"The author describes a rainforest in detail. Purpose?", "answer":"Create a picture", "distractor":"Teach a formula"},
-	{"prompt":"A recipe lists steps to make soup. Purpose?", "answer":"Give instructions", "distractor":"Tell a joke"},
+	{"prompt":"Poster: 'Save water; turn off taps!' Its purpose?", "answer":"Persuade", "distractor":"Inform"},
+	{"prompt":"Article: 'A bat uses sound to find food.' Its purpose?", "answer":"Inform", "distractor":"Persuade"},
+	{"prompt":"The author describes a rainforest in detail. Purpose?", "answer":"Create a picture", "distractor":"Give directions"},
+	{"prompt":"A recipe lists steps to make soup. Purpose?", "answer":"Give steps", "distractor":"Explain health"},
+]
+const READING_THEME_CASES: Array = [
+	{"prompt":"Sam practiced each day and finally mastered the song. Which theme fits?", "answer":"Practice pays off", "distractor":"Skills come easily"},
+	{"prompt":"Neighbors shared tools, then finished fixing the garden together. Which theme fits?", "answer":"Teamwork helps", "distractor":"Work alone"},
+	{"prompt":"Mia returned a lost wallet even though no one saw her. Which theme fits?", "answer":"Be honest", "distractor":"Keep the wallet"},
+	{"prompt":"A character apologized and repaired a broken toy. Which theme fits?", "answer":"Own mistakes", "distractor":"Hide mistakes"},
 ]
 const READING_PLURAL_CASES: Array = [
 	{"noun":"box", "plural":"boxes"}, {"noun":"fox", "plural":"foxes"},
@@ -121,12 +125,12 @@ const SPANISH_WORDS: Array = [
 	{"level":5,"en":"awareness","word":"conciencia"},{"level":5,"en":"to improve","word":"mejorar"},
 ]
 const RUSSIAN_WORDS: Array = [
-	{"level":1,"en":"hello","word":"привет"},{"level":1,"en":"goodbye","word":"пока"},{"level":1,"en":"yes","word":"да"},
+	{"level":1,"en":"hello","word":"привет","form_note":"informal"},{"level":1,"en":"goodbye","word":"пока","form_note":"informal"},{"level":1,"en":"yes","word":"да"},
 	{"level":1,"en":"no","word":"нет"},{"level":1,"en":"mother","word":"мама"},{"level":1,"en":"father","word":"папа"},
-	{"level":1,"en":"cat","word":"кот"},{"level":1,"en":"dog","word":"собака"},{"level":1,"en":"water","word":"вода"},
+	{"level":1,"en":"cat","word":"кот","form_note":"male cat"},{"level":1,"en":"dog","word":"собака"},{"level":1,"en":"water","word":"вода"},
 	{"level":1,"en":"bread","word":"хлеб"},{"level":1,"en":"house","word":"дом"},{"level":1,"en":"book","word":"книга"},
-	{"level":2,"en":"please","word":"пожалуйста"},{"level":2,"en":"thank you","word":"спасибо"},{"level":2,"en":"one","word":"один"},
-	{"level":2,"en":"two","word":"два"},{"level":2,"en":"red","word":"красный","form_note":"masculine singular"},{"level":2,"en":"blue","word":"синий","form_note":"masculine singular"},
+	{"level":2,"en":"please","word":"пожалуйста"},{"level":2,"en":"thank you","word":"спасибо"},{"level":2,"en":"one","word":"один","form_note":"masculine singular"},
+	{"level":2,"en":"two","word":"два","form_note":"masculine or neuter form"},{"level":2,"en":"red","word":"красный","form_note":"masculine singular"},{"level":2,"en":"blue","word":"синий","form_note":"masculine singular"},
 	{"level":2,"en":"apple","word":"яблоко"},{"level":2,"en":"milk","word":"молоко"},{"level":2,"en":"school","word":"школа"},
 	{"level":2,"en":"friend","word":"друг"},{"level":2,"en":"small","word":"маленький","form_note":"masculine singular"},{"level":2,"en":"big","word":"большой","form_note":"masculine singular"},
 	{"level":3,"en":"to read","word":"читать"},{"level":3,"en":"to write","word":"писать"},{"level":3,"en":"to speak","word":"говорить"},
@@ -154,6 +158,15 @@ const SPANISH_PRETERITE: Array = [
 	{"verb":"hablar","forms":["hablé","hablaste","habló","hablamos","hablaron"]},
 	{"verb":"comer","forms":["comí","comiste","comió","comimos","comieron"]},
 	{"verb":"vivir","forms":["viví","viviste","vivió","vivimos","vivieron"]},
+	{"verb":"ser","forms":["fui","fuiste","fue","fuimos","fueron"]},
+	{"verb":"ir","forms":["fui","fuiste","fue","fuimos","fueron"]},
+]
+const SPANISH_IMPERFECT: Array = [
+	{"verb":"hablar","forms":["hablaba","hablabas","hablaba","hablábamos","hablaban"]},
+	{"verb":"comer","forms":["comía","comías","comía","comíamos","comían"]},
+	{"verb":"vivir","forms":["vivía","vivías","vivía","vivíamos","vivían"]},
+	{"verb":"ser","forms":["era","eras","era","éramos","eran"]},
+	{"verb":"ir","forms":["iba","ibas","iba","íbamos","iban"]},
 ]
 const SPANISH_SUBJUNCTIVE: Array = [
 	{"verb":"hablar","forms":["hable","hables","hable","hablemos","hablen"]},
@@ -272,7 +285,7 @@ const SCIENCE_ADVANCED_FACTS: Array = [
 	{"level":3,"topic":"science_life","hint":"hint.science.life","expression":"In a food chain, a plant is a...","answer":"producer","distractor":"consumer"},
 	{"level":3,"topic":"science_earth","hint":"hint.science.earth","expression":"Day and night happen as Earth...","answer":"rotates","distractor":"stops"},
 	{"level":3,"topic":"science_physical","hint":"hint.science.physical","expression":"Sound cannot travel through...","answer":"a vacuum","distractor":"water"},
-	{"level":4,"topic":"science_biology","hint":"hint.science.biology","expression":"A cell's DNA is mainly stored in its...","answer":"nucleus","distractor":"membrane"},
+	{"level":4,"topic":"science_biology","hint":"hint.science.biology","expression":"In a typical plant or animal cell, most DNA is stored in its...","answer":"nucleus","distractor":"membrane"},
 	{"level":4,"topic":"science_chemistry","hint":"hint.science.chemistry","expression":"Covalent bonds ___ electrons.","answer":"share","distractor":"transfer"},
 	{"level":4,"topic":"science_physics","hint":"hint.science.physics","expression":"Electric current is measured in...","answer":"amperes","distractor":"volts"},
 	{"level":5,"topic":"science_biology","hint":"hint.science.biology","expression":"DNA pairs adenine with...","answer":"thymine","distractor":"uracil"},
@@ -510,14 +523,20 @@ static func _reading_higher_order_question(rng: RandomNumberGenerator, level: in
 		items = READING_EVIDENCE_CASES
 		kind = "generated_reading_evidence"
 	elif level >= 5:
-		if rng.randi_range(0, 1) == 0:
+		var advanced_reading_skill := rng.randi_range(0, 2)
+		if advanced_reading_skill == 0:
 			items = READING_EVIDENCE_CASES
 			kind = "generated_reading_evidence"
-		else:
+		elif advanced_reading_skill == 1:
 			items = READING_AUTHOR_PURPOSE_CASES
 			topic = "reading_literature"
-			hint = "hint.reading.literature"
+			hint = "hint.reading.author_purpose"
 			kind = "generated_reading_author_purpose"
+		else:
+			items = READING_THEME_CASES
+			topic = "reading_literature"
+			hint = "hint.reading.theme"
+			kind = "generated_reading_theme"
 	var item: Dictionary = _pick(rng, items)
 	var expression := str(item.prompt)
 	if rng.randi_range(0, 1) == 1:
@@ -533,7 +552,9 @@ static func _language_question(rng: RandomNumberGenerator, area: String, level: 
 		use_grammar = rng.randi_range(0, 2) == 0
 	elif area == "spanish" and level >= 2:
 		use_grammar = rng.randi_range(0, 4) == 0
-	elif area == "russian" and level >= 3:
+	elif area == "russian" and level == 3:
+		use_grammar = rng.randi_range(0, 1) == 0
+	elif area == "russian" and level >= 4:
 		use_grammar = rng.randi_range(0, 4) == 0
 	if use_grammar:
 		if area == "spanish":
@@ -545,8 +566,10 @@ static func _language_question(rng: RandomNumberGenerator, area: String, level: 
 static func _language_vocabulary(rng: RandomNumberGenerator, area: String, level: int) -> Dictionary:
 	var words: Array = SPANISH_WORDS if area == "spanish" else RUSSIAN_WORDS
 	var eligible: Array[Dictionary] = []
+	var is_review_turn := level > 1 and rng.randi_range(0, 4) == 0
 	for item: Dictionary in words:
-		if int(item.level) <= level:
+		var source_level := int(item.level)
+		if source_level == level or (is_review_turn and source_level < level):
 			eligible.append(item)
 	var target: Dictionary = _pick(rng, eligible)
 	var other: Dictionary = _pick(rng, eligible)
@@ -560,7 +583,7 @@ static func _language_vocabulary(rng: RandomNumberGenerator, area: String, level
 	var target_cue := target_word
 	if not form_note.is_empty():
 		english_cue = "%s (%s)" % [english_text, form_note]
-		target_cue = "%s (%s form)" % [target_word, form_note]
+		target_cue = "%s (%s)" % [target_word, form_note]
 	elif not part_of_speech.is_empty():
 		english_cue = "%s (%s)" % [english_text, part_of_speech]
 		target_cue = "%s (%s)" % [target_word, part_of_speech]
@@ -601,7 +624,7 @@ static func _language_vocabulary(rng: RandomNumberGenerator, area: String, level
 	var topic := area + "_phrases" if is_phrase else area + "_vocabulary"
 	var hint := "hint." + area + ".phrases" if is_phrase else "hint." + area + ".vocabulary"
 	return _question(expression, answer, distractor, topic, hint, "generated_%s_translation" % area, {
-		"source_word": target_word, "english_text": english_text, "lexical_type": lexical_type, "form_note": form_note, "part_of_speech": part_of_speech,
+		"source_word": target_word, "english_text": english_text, "source_level": int(target.level), "is_review": int(target.level) < level, "lexical_type": lexical_type, "form_note": form_note, "part_of_speech": part_of_speech,
 	})
 
 
@@ -612,12 +635,15 @@ static func _spanish_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 			return _spanish_subjunctive(rng)
 		if advanced_form == 1:
 			return _spanish_conditional(rng)
+		return _spanish_imperfect(rng)
 	elif level >= 4:
 		var level_four_form := rng.randi_range(0, 3)
 		if level_four_form == 0:
 			return _spanish_conditional(rng)
 		if level_four_form == 1:
 			return _spanish_formal_address(rng)
+		if level_four_form == 2:
+			return _spanish_imperfect(rng)
 	if level >= 2 and rng.randi_range(0, 2) == 0:
 		return _spanish_agreement(rng)
 	var tense := "present"
@@ -671,6 +697,30 @@ static func _spanish_conditional(rng: RandomNumberGenerator) -> Dictionary:
 	})
 
 
+static func _spanish_imperfect(rng: RandomNumberGenerator) -> Dictionary:
+	var verb_data: Dictionary = _pick(rng, SPANISH_IMPERFECT)
+	var subject_index := rng.randi_range(0, 4)
+	var subjects: Array[String] = ["yo", "tú", "él/ella", "nosotros", "ellos/ellas"]
+	var forms: Array = verb_data.forms
+	var answer := str(forms[subject_index])
+	var preterite_forms := _spanish_preterite_forms(str(verb_data.verb))
+	var distractor := str(preterite_forms[subject_index]) if not preterite_forms.is_empty() else str(SPANISH_PRESENT[0].forms[subject_index])
+	var expression := "Habitual past: %s ___ (%s)." % [subjects[subject_index], str(verb_data.verb)]
+	if rng.randi_range(0, 1) == 1:
+		expression = "For what %s used to do, choose the imperfect form of %s." % [subjects[subject_index], str(verb_data.verb)]
+	return _question(expression, answer, distractor, "spanish_grammar", "hint.spanish.grammar", "generated_spanish_imperfect", {
+		"verb": str(verb_data.verb), "subject_index": subject_index, "tense": "imperfect",
+		"conjugation_forms": forms, "contrast_forms": preterite_forms,
+	})
+
+
+static func _spanish_preterite_forms(verb: String) -> Array:
+	for verb_data: Dictionary in SPANISH_PRETERITE:
+		if str(verb_data.verb) == verb:
+			return verb_data.forms
+	return []
+
+
 static func _spanish_present_forms(verb: String) -> Array:
 	for verb_data: Dictionary in SPANISH_PRESENT:
 		if str(verb_data.verb) == verb:
@@ -718,7 +768,7 @@ static func _russian_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 			return _russian_aspect(rng)
 		if advanced_form == 1:
 			return _russian_conditional(rng)
-	var form := rng.randi_range(0, 3)
+	var form := 0 if level == 3 else rng.randi_range(0, 3)
 	if form == 0:
 		var verb_data: Dictionary = _pick(rng, RUSSIAN_PRESENT)
 		var subject_index := rng.randi_range(0, 5)
@@ -888,7 +938,17 @@ static func _science_sense(rng: RandomNumberGenerator) -> Dictionary:
 
 
 static func _science_state(rng: RandomNumberGenerator, state_pool: Array) -> Dictionary:
-	var item: Dictionary = _pick(rng, state_pool)
+	var available_states: Array[String] = []
+	for candidate: Dictionary in state_pool:
+		var candidate_state := str(candidate.state)
+		if not available_states.has(candidate_state):
+			available_states.append(candidate_state)
+	var chosen_state := str(_pick(rng, available_states))
+	var matching_items: Array[Dictionary] = []
+	for candidate: Dictionary in state_pool:
+		if str(candidate.state) == chosen_state:
+			matching_items.append(candidate)
+	var item: Dictionary = _pick(rng, matching_items)
 	var name := str(_pick(rng, NAMES))
 	var other_states: Array[String] = ["solid", "liquid", "gas"]
 	var distractor := str(_pick(rng, other_states))
