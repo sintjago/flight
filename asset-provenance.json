@@ -740,20 +740,16 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "game-sharing.json"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
-      "shipped": true,
+      "shipped": false,
       "size": 1724005,
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "game-sharing.json"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/share/og-dungeon-edited.png": {
@@ -785,6 +781,46 @@
       "sha256": "sha256:25995159306626ee1981f441e337ecc1b596c6ee20eda6b027e1b69656e67156",
       "shipped": false,
       "size": 9089748,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/share/og-paper-dungeon-card.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "game-sharing.json"
+      ],
+      "regions": [],
+      "sha256": "sha256:9fe2876d7ad036e260a7ee71ac10bfd52dfdd7ba72b4b567195d58d42f6c84b6",
+      "shipped": true,
+      "size": 1636444,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "game-sharing.json"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/share/og-paper-dungeon-edited-master.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:869ad9ea43d07b496592aa531e5f7b3947d11c2fa911078f7669385ec8ab641c",
+      "shipped": false,
+      "size": 3356099,
       "source": {},
       "status": "present",
       "transformations": [],
@@ -1172,17 +1208,17 @@
       },
       {
         "contentMatches": [],
-        "path": "share/babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd.png",
-        "sha256": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
-        "size": 1724005,
+        "path": "share/9fe2876d7ad036e260a7ee71ac10bfd52dfdd7ba72b4b567195d58d42f6c84b6.png",
+        "sha256": "sha256:9fe2876d7ad036e260a7ee71ac10bfd52dfdd7ba72b4b567195d58d42f6c84b6",
+        "size": 1636444,
         "sourcePaths": [
-          "assets/share/og-dungeon-1200x630.png"
+          "assets/share/og-paper-dungeon-card.png"
         ]
       }
     ],
-    "pckSha256": "sha256:1de8e7015a17c1a645f89fa02a8d1b2dec2596afa63987e0335672f17654abba",
+    "pckSha256": "sha256:9d61f489236fccc77758a5c4c80c8f632798dc93f24f43cbc78a4826fd26cf2b",
     "profile": "release",
-    "sourceFingerprint": "sha256:d5af2e0f57f678428d52151e3519367f3f6fc5d75aa18b33aede043dba0070bd"
+    "sourceFingerprint": "sha256:f07c9d321e839f16adf7a1cd0f122902693db8a81c664e4d8ba7d19d6e5798cb"
   },
   "procedures": {},
   "summary": {
@@ -1215,7 +1251,7 @@
     },
     "files": {
       "downloaded": 0,
-      "retained": 58,
+      "retained": 60,
       "shipped": 45,
       "used": 10
     },
@@ -1251,7 +1287,7 @@
         "used": 3
       },
       "unknown": {
-        "retained": 43,
+        "retained": 45,
         "shipped": 30,
         "used": 7
       }

@@ -17,8 +17,7 @@ boot_splash/bg_color=Color(0.965, 0.945, 0.885, 1)
 
 
 
-
-config/name="Paper Glide"
+config/name="Paper Dungeon"
 config/description="A turn-based notebook-dungeon adventure where five learning subjects power question-driven battles."
 config/version="1.0.0"
 run/main_scene="res://scenes/main.tscn"

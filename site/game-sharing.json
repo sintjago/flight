@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "publicationOrigin": "https://paperglide-ntrvuiwm.manus.game",
-  "title": "Paper Glide",
+  "title": "Paper Dungeon",
   "description": "Choose Math, Reading, Russian, Spanish, or Science; pick Math 1–3 and a 1–5 challenge. Explore a notebook dungeon with Arrow/WASD movement, answer two-choice questions to defeat enemies, clear three chambers and a final guardian, earn coins, unlock adventurer styles, and review every answer.",
   "defaultCaptions": {},
   "assets": {
     "og": {
-      "digest": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
-      "path": "share/babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd.png",
+      "digest": "sha256:9fe2876d7ad036e260a7ee71ac10bfd52dfdd7ba72b4b567195d58d42f6c84b6",
+      "path": "share/9fe2876d7ad036e260a7ee71ac10bfd52dfdd7ba72b4b567195d58d42f6c84b6.png",
       "mime": "image/png",
       "width": 1200,
       "height": 630,
-      "sizeBytes": 1724005,
-      "sourcePath": "assets/share/og-dungeon-1200x630.png"
+      "sizeBytes": 1636444,
+      "sourcePath": "assets/share/og-paper-dungeon-card.png"
     },
     "favicon": {
       "digest": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e",

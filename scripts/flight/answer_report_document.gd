@@ -7,7 +7,7 @@ const REPORT_FONT_FAMILY := "Paper Glide Noto"
 
 static func build_document(context: Dictionary, entries: Array[Dictionary], labels: Dictionary) -> String:
 	var document := PackedStringArray()
-	var report_title := _escape_html(str(labels.get("report_title", "Paper Glide - Flight Answer Review")))
+	var report_title := _escape_html(str(labels.get("report_title", "Paper Dungeon - Answer Review")))
 	document.append("<!doctype html>")
 	document.append("<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">")
 	document.append("<title>%s</title>" % report_title)
@@ -84,7 +84,7 @@ static func build_document(context: Dictionary, entries: Array[Dictionary], labe
 				_escape_html(str(entry.get("correct_answer", ""))),
 				"<p class=\"gate-note\">%s</p>" % _escape_html(gate_note) if not gate_note.is_empty() else "",
 			])
-	document.append("<footer>%s</footer></main></body></html>" % _escape_html(str(labels.get("footer", "Paper Glide - Flight Answer Review"))))
+	document.append("<footer>%s</footer></main></body></html>" % _escape_html(str(labels.get("footer", "Paper Dungeon - Keep practicing!"))))
 	return "\n".join(document)
 
 

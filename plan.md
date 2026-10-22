@@ -1,4 +1,4 @@
-# Paper Glide: dungeon-crawler redesign plan
+# Paper Dungeon: dungeon-crawler implementation plan
 
 ## Scope
 Replace the one-tap flying loop with a small, turn-based top-down dungeon crawler. Keep the project, paper/notebook palette, five learning areas, Math 1/2/3 track choice, five challenge levels, question generators and content, local coins, cheers, per-subject best scores, answer review and offline PDF export. The explicit user choice is turn-based. The approved gameplay blueprint could not be reopened in this session; this plan records the new scope from the user’s request and will be saved with the implementation.
