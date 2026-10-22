@@ -872,7 +872,7 @@ func _test_save_store() -> void:
 		legacy_file.close()
 		SaveStore.call("_load")
 		_check(SaveStore.get_best_score() == 9 and SaveStore.get_games_played() == 3, "new economy fields preserve a version-five save's scores and run count")
-		_check(SaveStore.get_coins() == 0 and SaveStore.get_selected_plane() == "paper" and SaveStore.owns_plane("paper"), "older saves safely receive a zero wallet and the free starter plane")
+		_check(SaveStore.get_coins() == 0 and SaveStore.get_selected_plane() == "paper" and SaveStore.owns_plane("paper") and SaveStore.get_selected_cheer() == "nice_work" and SaveStore.owns_cheer("nice_work"), "older saves safely receive the free starter plane and default cheer")
 		_check(int(SaveStore.get("_data").get("version", 0)) == SaveStore.SAVE_VERSION, "loaded saves adopt the current schema version")
 	SaveStore.set("_data", SaveStore.call("_default_data"))
 	_check(not SaveStore.purchase_plane("sky"), "an unaffordable plane cannot be purchased")
@@ -881,8 +881,13 @@ func _test_save_store() -> void:
 	_check(SaveStore.get_coins() == 0 and SaveStore.owns_plane("sky") and SaveStore.get_selected_plane() == "sky", "buying a plane deducts its price, records ownership, and equips it")
 	_check(not SaveStore.purchase_plane("sky") and not SaveStore.select_plane("coral"), "owned planes are not charged twice and locked planes cannot be selected")
 	_check(SaveStore.select_plane("paper"), "the free starter plane remains selectable after buying another skin")
+	_check(SaveStore.add_coins(15) == 15 and SaveStore.purchase_plane("kite_glider"), "a distinct paper-aircraft design can be bought with earned coins")
+	_check(SaveStore.get_coins() == 0 and SaveStore.owns_plane("kite_glider") and SaveStore.get_selected_plane() == "kite_glider", "new aircraft purchase deducts its cost and equips the saved design")
+	_check(SaveStore.add_coins(10) == 10 and SaveStore.purchase_cheer("banzai"), "the Banzai celebration is an earnable coin unlock")
+	_check(SaveStore.get_coins() == 0 and SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai", "purchasing a cheer deducts its price and selects it")
+	_check(not SaveStore.purchase_cheer("banzai") and not SaveStore.select_cheer("excelente"), "owned cheers cannot be charged twice and locked cheers cannot be selected")
 	SaveStore.call("_load")
-	_check(SaveStore.owns_plane("sky") and SaveStore.get_selected_plane() == "paper" and SaveStore.get_coins() == 0, "wallet, plane ownership, and selection survive a save reload")
+	_check(SaveStore.owns_plane("sky") and SaveStore.owns_plane("kite_glider") and SaveStore.get_selected_plane() == "kite_glider" and SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai" and SaveStore.get_coins() == 0, "wallet, distinct plane and cheer ownership, and selections survive a save reload")
 	SaveStore.set("_data", SaveStore.call("_default_data"))
 
 
@@ -905,7 +910,9 @@ func _test_runtime_scene() -> void:
 		hangar_button.emit_signal("pressed")
 		var hangar_screen: Control = main.get("_hangar_screen")
 		var hangar_buttons: Dictionary = main.get("_hangar_buttons")
-		_check(main.get("_state") == "hangar" and hangar_screen.visible and hangar_buttons.size() == 4, "Hangar opens from Home with all four plane colorways")
+		var hangar_cheer_buttons: Dictionary = main.get("_hangar_cheer_buttons")
+		_check(main.get("_state") == "hangar" and hangar_screen.visible and hangar_buttons.size() == SaveStore.PLANE_IDS.size() and hangar_buttons.size() == 7, "Hangar opens with seven aircraft, including three distinct new silhouettes")
+		_check(hangar_cheer_buttons.size() == SaveStore.CHEER_IDS.size() and hangar_cheer_buttons.size() == 3, "Hangar includes the default, Banzai, and Spanish celebration cards")
 		var sky_entry: Dictionary = hangar_buttons.get("sky", {})
 		(sky_entry.get("button") as Button).emit_signal("pressed")
 		_check(SaveStore.get_coins() == 0 and not SaveStore.owns_plane("sky") and str((main.get("_hangar_status_label") as Label).text).contains("10 more coins"), "Hangar explains an insufficient wallet without charging it")
@@ -916,6 +923,32 @@ func _test_runtime_scene() -> void:
 		var paper_entry: Dictionary = hangar_buttons.get("paper", {})
 		(paper_entry.get("button") as Button).emit_signal("pressed")
 		_check(SaveStore.get_selected_plane() == "paper" and main.get("_world").get("selected_plane_id") == "paper", "Hangar can re-equip the free starter plane")
+		var cheers_tab := hangar_screen.find_child("HangarCheersTab", true, false) as Button
+		var cheers_row := hangar_screen.find_child("HangarCheerChoices", true, false) as Control
+		_check(cheers_tab != null and cheers_row != null, "Hangar exposes a separate cheers collection tab")
+		if cheers_tab != null:
+			cheers_tab.emit_signal("pressed")
+		var banzai_entry: Dictionary = hangar_cheer_buttons.get("banzai", {})
+		var banzai_button := banzai_entry.get("button") as Button
+		_check(cheers_row != null and cheers_row.visible and banzai_button != null and str((banzai_button.find_child("HangarCheerPreview_banzai", true, false) as Label).text) == "Banzai!", "cheer tab previews the exact correct-answer callout")
+		_check(I18n.t("cheer.callout.excelente") == "¡Excelente!" and SaveStore.get_cheer_cost("excelente") == 15, "Spanish celebration keeps its exact accented wording and coin price")
+		if banzai_button != null:
+			banzai_button.emit_signal("pressed")
+			_check(not SaveStore.owns_cheer("banzai") and str((main.get("_hangar_status_label") as Label).text).contains("10 more coins"), "locked cheers cannot be equipped without their coin cost")
+		SaveStore.add_coins(10)
+		main.call("_update_hangar")
+		if banzai_button != null:
+			banzai_button.emit_signal("pressed")
+		_check(SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai" and SaveStore.get_coins() == 0, "earned coins unlock and equip the Banzai cheer")
+		var planes_tab := hangar_screen.find_child("HangarPlanesTab", true, false) as Button
+		if planes_tab != null:
+			planes_tab.emit_signal("pressed")
+		SaveStore.add_coins(15)
+		main.call("_update_hangar")
+		var kite_entry: Dictionary = hangar_buttons.get("kite_glider", {})
+		(kite_entry.get("button") as Button).emit_signal("pressed")
+		_check(SaveStore.owns_plane("kite_glider") and SaveStore.get_selected_plane() == "kite_glider" and main.get("_world").get("selected_plane_id") == "kite_glider", "buying a new Hangar design selects its distinct sprite without changing gameplay state")
+		(paper_entry.get("button") as Button).emit_signal("pressed")
 		var back_button := hangar_screen.find_child("HangarBackButton", true, false) as Button
 		_check(back_button != null, "Hangar provides a return-to-Home action")
 		if back_button != null:
@@ -995,6 +1028,7 @@ func _test_runtime_scene() -> void:
 		var after_pass_gates: Array = world.get("pipes")
 		var gate_detail := "score=%d state=%s reason=%s plane_y=%.1f gate_count=%d" % [int(world.get("score")), str(world.get("state")), str(world.get("failure_reason")), float(world.get("plane_y")), after_pass_gates.size()]
 		_check(int(world.get("score")) == 1 and SaveStore.get_coins() == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the correct answer gate adds one saved gameplay coin (" + gate_detail + ")")
+		_check(bool((main.get("_cheer_label") as Label).visible) and str((main.get("_cheer_label") as Label).text) == "Banzai!", "a correctly passed answer gate displays the selected saved celebration phrase")
 		world.call("step", 1.0 / 60.0)
 		_check(int(world.get("score")) == 1 and SaveStore.get_coins() == 1 and int(main.get("_coins_earned_this_run")) == 1, "one passed gate cannot award the same coin twice")
 	_check(str((main.get("_coin_label") as Label).text).contains("COINS · 1"), "in-flight HUD shows the updated wallet balance")

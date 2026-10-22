@@ -23,6 +23,7 @@ var _score_label: Label
 var _best_label: Label
 var _coin_label: Label
 var _practice_label: Label
+var _cheer_label: Label
 var _question_bar: PanelContainer
 var _question_label: Label
 var _question_hint_label: Label
@@ -72,12 +73,20 @@ var _hangar_screen: Control
 var _hangar_balance_label: Label
 var _hangar_status_label: Label
 var _hangar_buttons: Dictionary = {}
+var _hangar_cheer_buttons: Dictionary = {}
+var _hangar_planes_tab: Button
+var _hangar_cheers_tab: Button
+var _hangar_scroll: ScrollContainer
+var _hangar_plane_row: HBoxContainer
+var _hangar_cheer_row: HBoxContainer
+var _hangar_category := "planes"
 var _sound_button: Button
 var _over_unlock_ms := 0
 var _score_tween: Tween
 var _prompt_time := 0.0
 var _last_run_practice := false
 var _coins_earned_this_run := 0
+var _cheer_time_left := 0.0
 
 
 func _ready() -> void:
@@ -105,6 +114,20 @@ func _process(delta: float) -> void:
 	_prompt_time += delta
 	if _title_prompt != null and _title_screen.visible:
 		_title_prompt.modulate.a = 0.55 + 0.45 * (0.5 + 0.5 * sin(_prompt_time * 3.6))
+	if _cheer_label == null or not _cheer_label.visible:
+		return
+	_cheer_time_left = maxf(0.0, _cheer_time_left - delta)
+	if _cheer_time_left <= 0.0:
+		_cheer_label.visible = false
+		_cheer_label.modulate.a = 1.0
+		_cheer_label.scale = Vector2.ONE
+		return
+	var store := _store()
+	if store != null and bool(store.call("get_active_value", "ui.reduced_motion", false)):
+		return
+	var elapsed := 1.0 - _cheer_time_left / 0.95
+	_cheer_label.scale = Vector2.ONE * lerpf(0.72, 1.0, clampf(elapsed * 5.0, 0.0, 1.0))
+	_cheer_label.modulate.a = clampf(_cheer_time_left / 0.2, 0.0, 1.0)
 
 
 func _notification(what: int) -> void:
@@ -235,6 +258,18 @@ func _build_hud() -> void:
 	_practice_label.offset_bottom = 180
 	_practice_label.visible = false
 	_hud.add_child(_practice_label)
+	_cheer_label = _make_label("", 38, RED_PENCIL, true)
+	_cheer_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_cheer_label.offset_left = -260
+	_cheer_label.offset_right = 260
+	_cheer_label.offset_top = 184
+	_cheer_label.offset_bottom = 232
+	_cheer_label.add_theme_color_override("font_outline_color", PAPER)
+	_cheer_label.add_theme_constant_override("outline_size", 8)
+	_cheer_label.pivot_offset = Vector2(260, 24)
+	_cheer_label.visible = false
+	_cheer_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_cheer_label)
 	_coin_label = _make_label("", 18, GRAPHITE, true)
 	_coin_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_coin_label.offset_left = -218
@@ -399,27 +434,52 @@ func _build_hangar() -> void:
 	var box: VBoxContainer = page.box
 	_hangar_balance_label = _make_label("", 22, BLUE_PENCIL.darkened(0.15), true)
 	box.add_child(_hangar_balance_label)
-	var row := HBoxContainer.new()
-	row.name = "HangarPlaneChoices"
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_theme_constant_override("separation", 10)
-	box.add_child(row)
+	var tabs := HBoxContainer.new()
+	tabs.name = "HangarCategories"
+	tabs.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tabs.alignment = BoxContainer.ALIGNMENT_CENTER
+	tabs.add_theme_constant_override("separation", 12)
+	box.add_child(tabs)
+	_hangar_planes_tab = _make_button(I18n.t("hangar.category.planes"), 18, SAGE)
+	_hangar_planes_tab.name = "HangarPlanesTab"
+	_hangar_planes_tab.custom_minimum_size = Vector2(260, 46)
+	_hangar_planes_tab.pressed.connect(_on_hangar_category_pressed.bind("planes"))
+	tabs.add_child(_hangar_planes_tab)
+	_hangar_cheers_tab = _make_button(I18n.t("hangar.category.cheers"), 18, CARD)
+	_hangar_cheers_tab.name = "HangarCheersTab"
+	_hangar_cheers_tab.custom_minimum_size = Vector2(260, 46)
+	_hangar_cheers_tab.pressed.connect(_on_hangar_category_pressed.bind("cheers"))
+	tabs.add_child(_hangar_cheers_tab)
+	_hangar_scroll = ScrollContainer.new()
+	_hangar_scroll.name = "HangarCollectionScroll"
+	_hangar_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hangar_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_hangar_scroll.custom_minimum_size = Vector2(0, 230)
+	_hangar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_hangar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(_hangar_scroll)
+	_hangar_plane_row = HBoxContainer.new()
+	_hangar_plane_row.name = "HangarPlaneChoices"
+	_hangar_plane_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hangar_plane_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	_hangar_plane_row.custom_minimum_size = Vector2(0, 210)
+	_hangar_plane_row.add_theme_constant_override("separation", 12)
+	_hangar_scroll.add_child(_hangar_plane_row)
 	for plane_id: String in SaveStore.PLANE_IDS:
 		var button := _make_button("", 16, CARD)
 		button.name = "HangarPlane_" + plane_id
-		button.custom_minimum_size = Vector2(232, 224)
+		button.custom_minimum_size = Vector2(196, 204)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var content := VBoxContainer.new()
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.alignment = BoxContainer.ALIGNMENT_CENTER
 		content.add_theme_constant_override("separation", 8)
 		var preview := TextureRect.new()
-		preview.texture = FlightWorld.T_PLANE
+		preview.name = "HangarPlanePreview_" + plane_id
+		preview.texture = FlightWorld.plane_texture_for(plane_id)
 		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		preview.custom_minimum_size = Vector2(150, 74)
+		preview.custom_minimum_size = Vector2(150, 82)
 		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		preview.modulate = FlightWorld.PLANE_TINTS.get(plane_id, Color.WHITE)
 		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -427,12 +487,43 @@ func _build_hangar() -> void:
 		var name_label := _make_label(I18n.t("hangar.plane." + plane_id), 19, GRAPHITE, true)
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		content.add_child(name_label)
+		var style_label := _make_label(I18n.t("hangar.plane_style." + plane_id), 14, BLUE_PENCIL.darkened(0.15))
+		style_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(style_label)
 		var status_label := _make_label("", 15, BLUE_PENCIL.darkened(0.1))
 		content.add_child(status_label)
 		button.add_child(content)
 		button.pressed.connect(_on_hangar_plane_pressed.bind(plane_id))
 		_hangar_buttons[plane_id] = {"button": button, "status": status_label}
-		row.add_child(button)
+		_hangar_plane_row.add_child(button)
+	_hangar_cheer_row = HBoxContainer.new()
+	_hangar_cheer_row.name = "HangarCheerChoices"
+	_hangar_cheer_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hangar_cheer_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	_hangar_cheer_row.custom_minimum_size = Vector2(0, 210)
+	_hangar_cheer_row.add_theme_constant_override("separation", 14)
+	_hangar_scroll.add_child(_hangar_cheer_row)
+	for cheer_id: String in SaveStore.CHEER_IDS:
+		var button := _make_button("", 16, CARD)
+		button.name = "HangarCheer_" + cheer_id
+		button.custom_minimum_size = Vector2(240, 204)
+		var content := VBoxContainer.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.alignment = BoxContainer.ALIGNMENT_CENTER
+		content.add_theme_constant_override("separation", 10)
+		var preview := _make_label(I18n.t("cheer.callout." + cheer_id), 28, RED_PENCIL, true)
+		preview.name = "HangarCheerPreview_" + cheer_id
+		preview.custom_minimum_size = Vector2(0, 78)
+		content.add_child(preview)
+		var title_label := _make_label(I18n.t("hangar.cheer.name." + cheer_id), 17, GRAPHITE, true)
+		content.add_child(title_label)
+		var status_label := _make_label("", 15, BLUE_PENCIL.darkened(0.1))
+		content.add_child(status_label)
+		button.add_child(content)
+		button.pressed.connect(_on_hangar_cheer_pressed.bind(cheer_id))
+		_hangar_cheer_buttons[cheer_id] = {"button": button, "status": status_label}
+		_hangar_cheer_row.add_child(button)
+	_hangar_cheer_row.visible = false
 	_hangar_status_label = _make_label(I18n.t("hangar.earn_tip"), 16, Color(GRAPHITE, 0.75))
 	_hangar_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_hangar_status_label)
@@ -552,6 +643,8 @@ func _show_setup_page(target: Control, page_state: String) -> void:
 	_over_screen.visible = false
 	_pause_screen.visible = false
 	_question_bar.visible = false
+	_cheer_label.visible = false
+	_cheer_time_left = 0.0
 	_pause_button.visible = false
 	_score_label.visible = false
 	_best_label.visible = false
@@ -834,12 +927,42 @@ func _update_hangar() -> void:
 			status.text = I18n.t("hangar.buy", {"cost": int(save.call("get_plane_cost", plane_id))})
 		button.tooltip_text = status.text
 		_style_choice_button(button, selected, SAGE)
+	var selected_cheer := str(save.call("get_selected_cheer"))
+	for cheer_id: String in SaveStore.CHEER_IDS:
+		if not _hangar_cheer_buttons.has(cheer_id):
+			continue
+		var entry: Dictionary = _hangar_cheer_buttons[cheer_id]
+		var button: Button = entry.button
+		var status: Label = entry.status
+		var owned := bool(save.call("owns_cheer", cheer_id))
+		var selected := selected_cheer == cheer_id
+		if selected:
+			status.text = I18n.t("hangar.equipped")
+		elif owned:
+			status.text = I18n.t("hangar.equip")
+		else:
+			status.text = I18n.t("hangar.buy", {"cost": int(save.call("get_cheer_cost", cheer_id))})
+		button.tooltip_text = status.text
+		_style_choice_button(button, selected, SAGE)
+	if _hangar_planes_tab != null:
+		_style_choice_button(_hangar_planes_tab, _hangar_category == "planes", SAGE)
+	if _hangar_cheers_tab != null:
+		_style_choice_button(_hangar_cheers_tab, _hangar_category == "cheers", SAGE)
+
+
+func _on_hangar_category_pressed(category: String) -> void:
+	_hangar_category = "cheers" if category == "cheers" else "planes"
+	_hangar_plane_row.visible = _hangar_category == "planes"
+	_hangar_cheer_row.visible = _hangar_category == "cheers"
+	_hangar_scroll.get_h_scroll_bar().value = 0.0
+	_update_hangar()
 
 
 func _show_hangar() -> void:
 	if _state != "title":
 		return
 	_hangar_status_label.text = I18n.t("hangar.earn_tip")
+	_on_hangar_category_pressed("planes")
 	_update_hangar()
 	_show_setup_page(_hangar_screen, "hangar")
 
@@ -864,6 +987,28 @@ func _on_hangar_plane_pressed(plane_id: String) -> void:
 		else:
 			_hangar_status_label.text = I18n.t("hangar.save_failed")
 	_world.call("set_selected_plane", str(save.call("get_selected_plane")))
+	_update_hangar()
+
+
+func _on_hangar_cheer_pressed(cheer_id: String) -> void:
+	var save := _save()
+	if save == null or cheer_id not in SaveStore.CHEER_IDS:
+		return
+	var cheer_text := I18n.t("cheer.callout." + cheer_id)
+	if bool(save.call("owns_cheer", cheer_id)):
+		if bool(save.call("select_cheer", cheer_id)):
+			_hangar_status_label.text = I18n.t("hangar.cheer_selected", {"cheer": cheer_text})
+		else:
+			_hangar_status_label.text = I18n.t("hangar.save_failed")
+	else:
+		var cost := int(save.call("get_cheer_cost", cheer_id))
+		var balance := int(save.call("get_coins"))
+		if balance < cost:
+			_hangar_status_label.text = I18n.t("hangar.need_coins", {"amount": cost - balance})
+		elif bool(save.call("purchase_cheer", cheer_id)):
+			_hangar_status_label.text = I18n.t("hangar.cheer_purchase_success", {"cheer": cheer_text})
+		else:
+			_hangar_status_label.text = I18n.t("hangar.save_failed")
 	_update_hangar()
 
 
@@ -894,6 +1039,8 @@ func _start_new_run() -> void:
 	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("set_speed_level", _selected_speed)
 	_coins_earned_this_run = 0
+	_cheer_label.visible = false
+	_cheer_time_left = 0.0
 	var save := _save()
 	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
 	_world.call("reset_ready")
@@ -1055,6 +1202,7 @@ func _on_scored(total: int) -> void:
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
 		audio.call("play_cue", "score.reward", 1.0 + minf(float(total % 10) * 0.012, 0.1))
+	_show_correct_answer_cheer()
 	var store := _store()
 	if store != null and bool(store.call("get_active_value", "ui.reduced_motion", false)):
 		return
@@ -1063,6 +1211,20 @@ func _on_scored(total: int) -> void:
 	_score_label.scale = Vector2(1.3, 1.3)
 	_score_tween = create_tween()
 	_score_tween.tween_property(_score_label, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _show_correct_answer_cheer() -> void:
+	if _cheer_label == null:
+		return
+	var save := _save()
+	var cheer_id := str(save.call("get_selected_cheer")) if save != null else "nice_work"
+	if cheer_id not in SaveStore.CHEER_IDS:
+		cheer_id = "nice_work"
+	_cheer_label.text = I18n.t("cheer.callout." + cheer_id)
+	_cheer_label.visible = true
+	_cheer_label.modulate.a = 1.0
+	_cheer_label.scale = Vector2.ONE * 0.72
+	_cheer_time_left = 0.95
 
 
 func _on_crashed(total: int, _hit_ground: bool) -> void:
@@ -1082,6 +1244,8 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 		audio.call("play_cue", "enemy.impact")
 	_pause_button.visible = false
 	_question_bar.visible = false
+	_cheer_label.visible = false
+	_cheer_time_left = 0.0
 	_score_label.visible = false
 	_coin_label.visible = false
 	_best_label.visible = false

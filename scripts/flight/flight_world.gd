@@ -32,11 +32,26 @@ const YELLOW_PENCIL := Color(0.93, 0.78, 0.25)
 
 const T_PAPER: Texture2D = preload("res://assets/paperglide/notebook.jpg")
 const T_PLANE: Texture2D = preload("res://assets/paperglide/plane.png")
+const T_KITE_GLIDER: Texture2D = preload("res://assets/paperglide/ships/kite_glider_refined.png")
+const T_SAILWING: Texture2D = preload("res://assets/paperglide/ships/sailwing_refined.png")
+const T_COMET_DART: Texture2D = preload("res://assets/paperglide/ships/comet_dart_refined.png")
+const PLANE_TEXTURES := {
+	"paper": T_PLANE,
+	"sky": T_PLANE,
+	"coral": T_PLANE,
+	"gold": T_PLANE,
+	"kite_glider": T_KITE_GLIDER,
+	"sailwing": T_SAILWING,
+	"comet_cruiser": T_COMET_DART,
+}
 const PLANE_TINTS := {
 	"paper": Color(1.0, 1.0, 1.0, 1.0),
 	"sky": Color(0.72, 0.88, 1.0, 1.0),
 	"coral": Color(1.0, 0.79, 0.72, 1.0),
 	"gold": Color(1.0, 0.87, 0.5, 1.0),
+	"kite_glider": Color.WHITE,
+	"sailwing": Color.WHITE,
+	"comet_cruiser": Color.WHITE,
 }
 const T_PIPE_CAP: Texture2D = preload("res://assets/paperglide/pipe_cap.png")
 const T_PIPE_BODY: Texture2D = preload("res://assets/paperglide/pipe_body.png")
@@ -193,8 +208,12 @@ func set_practice_area(value: String) -> void:
 
 
 func set_selected_plane(value: String) -> void:
-	selected_plane_id = value if PLANE_TINTS.has(value) else "paper"
+	selected_plane_id = value if PLANE_TEXTURES.has(value) else "paper"
 	queue_redraw()
+
+
+static func plane_texture_for(plane_id: String) -> Texture2D:
+	return PLANE_TEXTURES.get(plane_id, T_PLANE)
 
 
 func set_speed_level(value: Variant) -> void:
@@ -778,11 +797,20 @@ func _draw_particles() -> void:
 
 func _draw_plane() -> void:
 	var size := PLANE_SIZE * visual_scale
-	var squash := Vector2(1.0 + _plane_squash * 0.06, 1.0 - _plane_squash * 0.1)
+	var squash := Vector2(1.0 + _plane_squash * 0.1, 1.0 - _plane_squash * 0.07)
 	var at := Vector2(PLANE_X, plane_y)
+	var plane_texture := plane_texture_for(selected_plane_id)
+	var texture_size := plane_texture.get_size()
+	var texture_ratio := float(texture_size.x) / maxf(float(texture_size.y), 1.0)
+	var box_ratio := size.x / maxf(size.y, 1.0)
+	var draw_size := size
+	if texture_ratio > box_ratio:
+		draw_size.y = size.x / texture_ratio
+	else:
+		draw_size.x = size.y * texture_ratio
 	var plane_tint: Color = PLANE_TINTS.get(selected_plane_id, Color.WHITE)
 	draw_set_transform(at + Vector2(5.0, 9.0), plane_rot, squash)
-	draw_texture_rect(T_PLANE, Rect2(-size * 0.5, size), false, Color(0.14, 0.15, 0.22, 0.2))
+	draw_texture_rect(plane_texture, Rect2(-draw_size * 0.5, draw_size), false, Color(0.14, 0.15, 0.22, 0.2))
 	draw_set_transform(at, plane_rot, squash)
-	draw_texture_rect(T_PLANE, Rect2(-size * 0.5, size), false, plane_tint)
+	draw_texture_rect(plane_texture, Rect2(-draw_size * 0.5, draw_size), false, plane_tint)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

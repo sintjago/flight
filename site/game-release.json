@@ -3,7 +3,7 @@
   "engineVersion": "4.7.2.stable.official.ed1daf0bf",
   "inputs": {
     "objectFormat": "sha1",
-    "tree": "72475f1e165287c476b595f1f21c208aa02dac47",
+    "tree": "d2016045bf575b433bd5a5cf73e7e35e1c96f736",
     "entries": [
       {
         "path": ".gitignore",
@@ -33,13 +33,13 @@
         "path": "TODO.md",
         "type": "file",
         "mode": "100644",
-        "object": "892bd525b7ad323c0095c5a3bba050513524e717"
+        "object": "8ca0e29e76a580aca254eecf9281f19314be347d"
       },
       {
         "path": "assets.lock.json",
         "type": "file",
         "mode": "100644",
-        "object": "243ee5ff27ee49eee7209c7a9f55cd01d1457b7c"
+        "object": "bcccdb50c1896cf39859f494b2b1242f46ca31f2"
       },
       {
         "path": "assets/paperglide/cloud0.png",
@@ -194,6 +194,72 @@
         "type": "file",
         "mode": "100644",
         "object": "ff78f8f748ae41735ff59852ffb74c149da6958b"
+      },
+      {
+        "path": "assets/paperglide/ships/comet_cruiser_game.png",
+        "type": "managed",
+        "sha256": "sha256:56a1626ab3c777ade375ac2470e2078ddd6d5413689c921c185127f6de94713a"
+      },
+      {
+        "path": "assets/paperglide/ships/comet_cruiser_game.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "3bd9abc60bb0030efe13614898f141b875e45225"
+      },
+      {
+        "path": "assets/paperglide/ships/comet_dart_refined.png",
+        "type": "managed",
+        "sha256": "sha256:1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44"
+      },
+      {
+        "path": "assets/paperglide/ships/comet_dart_refined.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "850f6c6d7bbe6e7e012887cfe0ac2b20d8ecda01"
+      },
+      {
+        "path": "assets/paperglide/ships/kite_glider_game.png",
+        "type": "managed",
+        "sha256": "sha256:d589919fc298925aaffed27a61d7de4cffff355eef8f53e67e86ee7c046ad79d"
+      },
+      {
+        "path": "assets/paperglide/ships/kite_glider_game.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "dc84169efeb263a5cea3fce9070dc95918a579a2"
+      },
+      {
+        "path": "assets/paperglide/ships/kite_glider_refined.png",
+        "type": "managed",
+        "sha256": "sha256:b6bd5ffc4b5a082800e2bbff76f4750841c2d3da555de54e1740e82ff4ebabce"
+      },
+      {
+        "path": "assets/paperglide/ships/kite_glider_refined.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "6a3ca7936056c9a985366e6f77c792fd3bd90077"
+      },
+      {
+        "path": "assets/paperglide/ships/sailwing_game.png",
+        "type": "managed",
+        "sha256": "sha256:2b611fed37a6860dfa7a80b0eaa88bc90a506fa4875ad64490ff92239fbe9eb2"
+      },
+      {
+        "path": "assets/paperglide/ships/sailwing_game.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "81dde752d377a022d4f12c9ef6b52e03e8be5433"
+      },
+      {
+        "path": "assets/paperglide/ships/sailwing_refined.png",
+        "type": "managed",
+        "sha256": "sha256:b4afd042b3a4ab60fed70fa4713a8db43d8af5a2045e51a170ec7ac2fb6efa47"
+      },
+      {
+        "path": "assets/paperglide/ships/sailwing_refined.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "7740da3aa2b6881ef722a6b7b7a1c0a3991f1e08"
       },
       {
         "path": "assets/share/favicon.png",
@@ -530,7 +596,7 @@
         "path": "autoload/save_store.gd",
         "type": "file",
         "mode": "100644",
-        "object": "9f1f340db010efd25d05f3c3c6fc112e6ab45b0b"
+        "object": "db3dcfa063c032f45c7e9d2974f8e71233620a01"
       },
       {
         "path": "autoload/save_store.gd.uid",
@@ -596,7 +662,7 @@
         "path": "localization/en.json",
         "type": "file",
         "mode": "100644",
-        "object": "b90acea86ecfca3856f38b19f0fdaa100479ffd8"
+        "object": "f1d1fc4fca36265317f615c8f66aaf4c60679e5d"
       },
       {
         "path": "package.json",
@@ -620,7 +686,7 @@
         "path": "scripts/flight/flight_world.gd",
         "type": "file",
         "mode": "100644",
-        "object": "fbd61b4950218d0a5ea82366cdb2bf6672a3f65f"
+        "object": "7d2436c273371270defcc6922ab7c46d2f52ddb1"
       },
       {
         "path": "scripts/flight/flight_world.gd.uid",
@@ -680,7 +746,7 @@
         "path": "scripts/main.gd",
         "type": "file",
         "mode": "100644",
-        "object": "d4d4367fa9fc963ae6d8424566ee176268e1b976"
+        "object": "31cc7366b3be431bcef0162c1b918d00a74d7701"
       },
       {
         "path": "scripts/main.gd.uid",
@@ -842,7 +908,7 @@
         "path": "test/test_suite.gd",
         "type": "file",
         "mode": "100644",
-        "object": "230ac2b3ddcfa1e839bab30ac8c878cdabdadd8b"
+        "object": "71d306e8bafa557e8d3918c9964d08d28e7f65ac"
       },
       {
         "path": "test/test_suite.gd.uid",
@@ -908,7 +974,7 @@
         "path": "tools/verify_exported_pack.gd",
         "type": "file",
         "mode": "100644",
-        "object": "986c084eadbf02ea55e44a709d36c07a5435791e"
+        "object": "0579c74785beca7675351424c7eb5a7fd07885b6"
       },
       {
         "path": "tools/verify_exported_pack.gd.uid",
@@ -931,7 +997,7 @@
     ]
   },
   "build": {
-    "snapshotId": "sha256:42e08618ba688d7bc7c48708dd16d9812f54d1080d605b4e758da66edf5efe41",
+    "snapshotId": "sha256:2688bfdb2730ac19effba36c457fc14fee71fbe3e172d5e60d1ba55959b9a695",
     "toolchain": {
       "engineVersion": "4.7.2.stable.official.ed1daf0bf",
       "engineDigest": "sha256:8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
@@ -944,21 +1010,21 @@
     "profile": "release",
     "export": {
       "profile": "release",
-      "snapshotId": "sha256:42e08618ba688d7bc7c48708dd16d9812f54d1080d605b4e758da66edf5efe41",
+      "snapshotId": "sha256:2688bfdb2730ac19effba36c457fc14fee71fbe3e172d5e60d1ba55959b9a695",
       "files": {
         "THIRD_PARTY_NOTICES.txt": "sha256:c729a77bf07eb9745b2d89c3ce4ead3357438366f41743d2755ae35f98509cf9",
         "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
         "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
         "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-        "index.html": "sha256:a88d9b1f7221bd5042d68d1d675c8dcf857dca00227c3162ee20be42f1deafa0",
+        "index.html": "sha256:71838ab2e0fb8940b31bd885efaf35ba802d3d56cad6909ffcd35867af09b9b9",
         "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
         "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
-        "index.pck": "sha256:9d6ea3c226a734307a38e3784de1368ddadfa6036a490fbe90ee9f20724a165f",
+        "index.pck": "sha256:45a2c26b0642b61b955bacc8fdfbeae8b13574f5452fb057581eee7d3b42f17b",
         "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
         "index.wasm": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0",
         "open-source-licenses.html": "sha256:9215f5fdd50039a9b6f3d8f0271cbc21bbdf64b917fb118dd29c8a16b9974e00"
       },
-      "digest": "sha256:d10be0ce3248047bb27f939598551bd4866d359dd39c8c6b80e1d101825424d2"
+      "digest": "sha256:262d5858b6da5dce6837d8896e3b7522b1984269229e03553b302b0dcebee4b2"
     }
   },
   "artifacts": {
@@ -967,8 +1033,8 @@
       "sha256": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0"
     },
     "pck": {
-      "path": "/manus-storage/game/sha256/9d6ea3c226a734307a38e3784de1368ddadfa6036a490fbe90ee9f20724a165f.pck",
-      "sha256": "sha256:9d6ea3c226a734307a38e3784de1368ddadfa6036a490fbe90ee9f20724a165f"
+      "path": "/manus-storage/game/sha256/45a2c26b0642b61b955bacc8fdfbeae8b13574f5452fb057581eee7d3b42f17b.pck",
+      "sha256": "sha256:45a2c26b0642b61b955bacc8fdfbeae8b13574f5452fb057581eee7d3b42f17b"
     }
   },
   "files": {
@@ -977,7 +1043,7 @@
     "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
     "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
     "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-    "index.html": "sha256:3dc40dac4fe3066b62d58f2aa7e6e500c9884368c87cfa37ea270b60d412223b",
+    "index.html": "sha256:059c848520ee90cb863c327c46e47a1466d94fe73e7aaff4803874f871f2220f",
     "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
     "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
     "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",

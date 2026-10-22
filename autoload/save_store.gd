@@ -3,13 +3,15 @@ extends Node
 
 const SAVE_PATH := "user://paper_glide_save.json"
 const TEMP_PATH := "user://paper_glide_save.tmp"
-const SAVE_VERSION := 6
+const SAVE_VERSION := 7
 const MAX_SCORE := 999999
 const MAX_COINS := 999999
 const DIFFICULTIES: Array[String] = ["easy", "medium", "hard"]
 const PRACTICE_AREAS: Array[String] = ["math", "reading", "russian", "spanish", "science"]
-const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold"]
-const PLANE_COSTS := {"paper": 0, "sky": 10, "coral": 20, "gold": 35}
+const PLANE_IDS: Array[String] = ["paper", "kite_glider", "sailwing", "comet_cruiser", "sky", "coral", "gold"]
+const PLANE_COSTS := {"paper": 0, "sky": 10, "coral": 20, "gold": 35, "kite_glider": 15, "sailwing": 30, "comet_cruiser": 50}
+const CHEER_IDS: Array[String] = ["nice_work", "banzai", "excelente"]
+const CHEER_COSTS := {"nice_work": 0, "banzai": 10, "excelente": 15}
 
 var _data: Dictionary = {}
 
@@ -36,6 +38,8 @@ func _default_data() -> Dictionary:
 		"coins": 0,
 		"owned_planes": ["paper"],
 		"selected_plane": "paper",
+		"owned_cheers": ["nice_work"],
+		"selected_cheer": "nice_work",
 	}
 
 
@@ -98,6 +102,16 @@ func _load() -> void:
 	_data.owned_planes = owned_planes
 	var saved_selected_plane := str(candidate.get("selected_plane", "paper"))
 	_data.selected_plane = saved_selected_plane if saved_selected_plane in owned_planes else "paper"
+	var owned_cheers: Array[String] = ["nice_work"]
+	var saved_cheers: Variant = candidate.get("owned_cheers", [])
+	if saved_cheers is Array:
+		for value: Variant in saved_cheers:
+			var cheer_id := str(value)
+			if cheer_id in CHEER_IDS and cheer_id not in owned_cheers:
+				owned_cheers.append(cheer_id)
+	_data.owned_cheers = owned_cheers
+	var saved_selected_cheer := str(candidate.get("selected_cheer", "nice_work"))
+	_data.selected_cheer = saved_selected_cheer if saved_selected_cheer in owned_cheers else "nice_work"
 	_data.version = SAVE_VERSION
 
 
@@ -212,6 +226,67 @@ func purchase_plane(plane_id: String) -> bool:
 		_data.coins = previous_coins
 		_data.owned_planes = previous_owned
 		_data.selected_plane = previous_selected
+		return false
+	return true
+
+
+func get_owned_cheers() -> Array[String]:
+	var owned: Array[String] = []
+	var saved_cheers: Variant = _data.get("owned_cheers", ["nice_work"])
+	if saved_cheers is Array:
+		for value: Variant in saved_cheers:
+			var cheer_id := str(value)
+			if cheer_id in CHEER_IDS and cheer_id not in owned:
+				owned.append(cheer_id)
+	if "nice_work" not in owned:
+		owned.push_front("nice_work")
+	return owned
+
+
+func owns_cheer(cheer_id: String) -> bool:
+	return cheer_id in CHEER_IDS and cheer_id in get_owned_cheers()
+
+
+func get_cheer_cost(cheer_id: String) -> int:
+	return int(CHEER_COSTS.get(cheer_id, -1))
+
+
+func get_selected_cheer() -> String:
+	var selected := str(_data.get("selected_cheer", "nice_work"))
+	return selected if owns_cheer(selected) else "nice_work"
+
+
+func select_cheer(cheer_id: String) -> bool:
+	if not owns_cheer(cheer_id):
+		return false
+	var previous := get_selected_cheer()
+	if previous == cheer_id:
+		return true
+	_data.selected_cheer = cheer_id
+	if not save():
+		_data.selected_cheer = previous
+		return false
+	return true
+
+
+func purchase_cheer(cheer_id: String) -> bool:
+	if cheer_id not in CHEER_IDS or owns_cheer(cheer_id):
+		return false
+	var cost := get_cheer_cost(cheer_id)
+	var previous_coins := get_coins()
+	if cost < 0 or previous_coins < cost:
+		return false
+	var previous_owned := get_owned_cheers()
+	var previous_selected := get_selected_cheer()
+	_data.coins = previous_coins - cost
+	var owned := previous_owned.duplicate()
+	owned.append(cheer_id)
+	_data.owned_cheers = owned
+	_data.selected_cheer = cheer_id
+	if not save():
+		_data.coins = previous_coins
+		_data.owned_cheers = previous_owned
+		_data.selected_cheer = previous_selected
 		return false
 	return true
 

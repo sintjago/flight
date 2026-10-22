@@ -6,7 +6,7 @@ var _saved_save_bytes: Variant = null
 var _had_saved_save_file := false
 var _save_store: Node
 const SAVE_PATH := "user://paper_glide_save.json"
-const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold"]
+const PLANE_IDS: Array[String] = ["paper", "sky", "coral", "gold", "kite_glider", "sailwing", "comet_cruiser"]
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
@@ -49,6 +49,8 @@ func _run() -> void:
 			title_hangar_button.emit_signal("pressed")
 			var hangar_buttons: Dictionary = main.get("_hangar_buttons")
 			_check(main.get("_state") == "hangar" and hangar_buttons.size() == PLANE_IDS.size(), "pack Hangar opens with every cosmetic plane")
+			var hangar_cheer_buttons: Dictionary = main.get("_hangar_cheer_buttons")
+			_check(hangar_cheer_buttons.size() == 3, "pack Hangar includes all three celebration choices")
 			_save_store.call("add_coins", 10)
 			main.call("_update_hangar")
 			var sky_entry: Dictionary = hangar_buttons.get("sky", {})
@@ -58,6 +60,23 @@ func _run() -> void:
 				sky_button.emit_signal("pressed")
 				_check(int(_save_store.call("get_coins")) == 0 and bool(_save_store.call("owns_plane", "sky")) and str(_save_store.call("get_selected_plane")) == "sky", "packed purchase deducts coins and equips an owned plane")
 				_check(main.get("_world").get("selected_plane_id") == "sky", "packed plane selection reaches the flight renderer")
+			_save_store.call("add_coins", 15)
+			main.call("_update_hangar")
+			var kite_entry: Dictionary = hangar_buttons.get("kite_glider", {})
+			var kite_button := kite_entry.get("button") as Button
+			if kite_button != null:
+				kite_button.emit_signal("pressed")
+				_check(bool(_save_store.call("owns_plane", "kite_glider")) and main.get("_world").get("selected_plane_id") == "kite_glider", "packed new paper-craft design equips its own renderer sprite")
+			var cheers_tab := (main.get("_hangar_screen") as Control).find_child("HangarCheersTab", true, false) as Button
+			if cheers_tab != null:
+				cheers_tab.emit_signal("pressed")
+			_save_store.call("add_coins", 10)
+			main.call("_update_hangar")
+			var banzai_entry: Dictionary = hangar_cheer_buttons.get("banzai", {})
+			var banzai_button := banzai_entry.get("button") as Button
+			if banzai_button != null:
+				banzai_button.emit_signal("pressed")
+				_check(bool(_save_store.call("owns_cheer", "banzai")) and str(_save_store.call("get_selected_cheer")) == "banzai" and int(_save_store.call("get_coins")) == 0, "packed Hangar purchases and equips the Banzai cheer")
 			var hangar_screen: Control = main.get("_hangar_screen")
 			var hangar_back := hangar_screen.find_child("HangarBackButton", true, false) as Button
 			_check(hangar_back != null, "pack Hangar provides a return-to-Home action")
@@ -118,6 +137,8 @@ func _run() -> void:
 		_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
 		for path: String in [
 			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
+			"res://assets/paperglide/ships/kite_glider_refined.png", "res://assets/paperglide/ships/sailwing_refined.png",
+			"res://assets/paperglide/ships/comet_dart_refined.png",
 			"res://assets/paperglide/pipe_body.png", "res://assets/paperglide/notebook.jpg",
 			"res://assets/paperglide/cloud0.png",
 		]:
@@ -157,7 +178,8 @@ func _run() -> void:
 				if int(world.get("score")) > 0:
 					break
 				world.call("step", 1.0 / 60.0)
-			_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the packed correct answer gate earns one saved gameplay coin")
+				_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "passing the packed correct answer gate earns one saved gameplay coin")
+				_check(bool((main.get("_cheer_label") as Label).visible) and str((main.get("_cheer_label") as Label).text) == "Banzai!", "packed correct gate displays the equipped celebration phrase")
 			world.call("step", 1.0 / 60.0)
 			_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "one packed gate cannot award the same coin twice")
 		var active_question: Dictionary = world.get("current_question")

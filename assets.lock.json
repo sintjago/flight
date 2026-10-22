@@ -1,6 +1,10 @@
 {
   "version": 2,
   "groups": {
+    "aircraft": {
+      "name": "Aircraft",
+      "order": 15
+    },
     "backgrounds": {
       "name": "Backgrounds",
       "order": 20
@@ -130,6 +134,54 @@
       "size": 52505,
       "assetType": "image",
       "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/ships/comet_cruiser_game.png": {
+      "path": "/manus-storage/game/sha256/56a1626ab3c777ade375ac2470e2078ddd6d5413689c921c185127f6de94713a.png",
+      "sha256": "sha256:56a1626ab3c777ade375ac2470e2078ddd6d5413689c921c185127f6de94713a",
+      "size": 291458,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": false
+    },
+    "assets/paperglide/ships/comet_dart_refined.png": {
+      "path": "/manus-storage/game/sha256/1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44.png",
+      "sha256": "sha256:1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44",
+      "size": 135699,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": true
+    },
+    "assets/paperglide/ships/kite_glider_game.png": {
+      "path": "/manus-storage/game/sha256/d589919fc298925aaffed27a61d7de4cffff355eef8f53e67e86ee7c046ad79d.png",
+      "sha256": "sha256:d589919fc298925aaffed27a61d7de4cffff355eef8f53e67e86ee7c046ad79d",
+      "size": 306670,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": false
+    },
+    "assets/paperglide/ships/kite_glider_refined.png": {
+      "path": "/manus-storage/game/sha256/b6bd5ffc4b5a082800e2bbff76f4750841c2d3da555de54e1740e82ff4ebabce.png",
+      "sha256": "sha256:b6bd5ffc4b5a082800e2bbff76f4750841c2d3da555de54e1740e82ff4ebabce",
+      "size": 182050,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": true
+    },
+    "assets/paperglide/ships/sailwing_game.png": {
+      "path": "/manus-storage/game/sha256/2b611fed37a6860dfa7a80b0eaa88bc90a506fa4875ad64490ff92239fbe9eb2.png",
+      "sha256": "sha256:2b611fed37a6860dfa7a80b0eaa88bc90a506fa4875ad64490ff92239fbe9eb2",
+      "size": 278913,
+      "assetType": "image",
+      "groupId": "aircraft",
+      "used": false
+    },
+    "assets/paperglide/ships/sailwing_refined.png": {
+      "path": "/manus-storage/game/sha256/b4afd042b3a4ab60fed70fa4713a8db43d8af5a2045e51a170ec7ac2fb6efa47.png",
+      "sha256": "sha256:b4afd042b3a4ab60fed70fa4713a8db43d8af5a2045e51a170ec7ac2fb6efa47",
+      "size": 196840,
+      "assetType": "image",
+      "groupId": "aircraft",
       "used": true
     },
     "assets/share/favicon.png": {

@@ -304,6 +304,126 @@
       "used": true,
       "usedBy": []
     },
+    "assets/paperglide/ships/comet_cruiser_game.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:56a1626ab3c777ade375ac2470e2078ddd6d5413689c921c185127f6de94713a",
+      "shipped": true,
+      "size": 291458,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/comet_dart_refined.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44",
+      "shipped": true,
+      "size": 135699,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/kite_glider_game.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:d589919fc298925aaffed27a61d7de4cffff355eef8f53e67e86ee7c046ad79d",
+      "shipped": true,
+      "size": 306670,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/kite_glider_refined.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:b6bd5ffc4b5a082800e2bbff76f4750841c2d3da555de54e1740e82ff4ebabce",
+      "shipped": true,
+      "size": 182050,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/sailwing_game.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:2b611fed37a6860dfa7a80b0eaa88bc90a506fa4875ad64490ff92239fbe9eb2",
+      "shipped": true,
+      "size": 278913,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/paperglide/ships/sailwing_refined.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:b4afd042b3a4ab60fed70fa4713a8db43d8af5a2045e51a170ec7ac2fb6efa47",
+      "shipped": true,
+      "size": 196840,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/flight/flight_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
     "assets/share/favicon.png": {
       "declaredUseEvidence": [],
       "generator": {},
@@ -720,9 +840,9 @@
         ]
       }
     ],
-    "pckSha256": "sha256:9d6ea3c226a734307a38e3784de1368ddadfa6036a490fbe90ee9f20724a165f",
+    "pckSha256": "sha256:45a2c26b0642b61b955bacc8fdfbeae8b13574f5452fb057581eee7d3b42f17b",
     "profile": "release",
-    "sourceFingerprint": "sha256:ed9ab51498dad3380c7ce17383c5bfdaf9b8bfc8f64e2581106666366b59e40a"
+    "sourceFingerprint": "sha256:b351da2561948840e5c6bf23f08b6dda4d0ee3c327faa5d7af59ea3ea8844e11"
   },
   "procedures": {},
   "summary": {
@@ -755,9 +875,9 @@
     },
     "files": {
       "downloaded": 0,
-      "retained": 31,
-      "shipped": 31,
-      "used": 18
+      "retained": 37,
+      "shipped": 37,
+      "used": 21
     },
     "origins": {
       "ai": {
@@ -791,9 +911,9 @@
         "used": 3
       },
       "unknown": {
-        "retained": 16,
-        "shipped": 16,
-        "used": 15
+        "retained": 22,
+        "shipped": 22,
+        "used": 18
       }
     },
     "packs": {

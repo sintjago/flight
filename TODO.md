@@ -57,3 +57,12 @@
 
 ## Local coin economy and plane hangar — complete
 - [x] Award one gameplay coin for each correctly passed answer gate in any learning pack, persist the balance locally with backward-compatible saves, and show the wallet on Home, in flight, and on results. Provide a Hangar from the title screen where the free starter plane remains usable; Blue Sketch, Coral Kite, and Golden Fold cost 10, 20, and 35 coins. Buying equips the colorway, later selection works, and the 10-coin purchase, saved ownership/equipment, and version-five-save migration are regression-tested. No real-money purchases; plane tint is cosmetic and does not alter flight physics, collision, or scoring.
+
+## Correct-answer praise unlocks — complete
+- [x] After each correctly passed answer gate, show a brief readable celebration phrase. Include selectable, coin-unlocked “Banzai!” and “¡Excelente!” cheers, preserve the “Nice flying!” English default, and save cheer ownership/selection locally. The cue does not alter answer correctness, scoring, or coin rewards; save, Hangar, and real-gate tests cover the full flow.
+
+## Distinct unlockable aircraft — complete
+- [x] Expand the Hangar with three additional, visibly distinct paper-craft ship designs beyond color tints; show a preview, name, unlock price, and equipped/owned/locked state. Earned coins buy and equip ships, owned ships can be reselected, and selections persist through existing saves. Every aircraft remains cosmetic: preserve the flight simulation, collision size, and scoring; save, Hangar, renderer, and packaged-art checks cover the additions.
+
+## Folded-paper silhouette refinement — complete
+- [x] Replace the paid options' near-duplicate/sci-fi-looking art with a broad delta-wing Kite Glider, swept Sailwing, and compact Comet Dart, each with transparent pencil-fold artwork and a short style caption. The Hangar now describes all seven designs/colorways and clarifies that handling is identical. Preserve every existing plane ID, price, ownership, equipped state, and save; keep the fixed flight/collision behavior. A real-renderer Hangar capture confirms the three silhouettes and labels fit the 1280×720 screen.
