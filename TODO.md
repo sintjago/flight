@@ -73,5 +73,5 @@
 ## Save/download answer review as PDF — complete
 - [x] Provide a Save/Download PDF action on the answer-review page that creates a readable printable report for that flight, retaining all questions and answers (including Spanish accents and Russian characters) and useful run context such as date, score, and selected subject/difficulty. Embed the bundled font in a self-contained UTF-8 report, wait for font loading before opening the browser's print dialog, and allow saving without a network service. Source and packaged checks verify Cyrillic content, safe HTML escaping, and the embedded font.
 
-## Three additional Hangar aircraft — in progress
+## Three additional Hangar aircraft — complete
 - [x] Add three unlockable paper-plane types—Albatross Glider, Double Fold, and Boomerang Kite—with distinct transparent folded-paper artwork, Hangar previews and style captions. Preserve existing aircraft IDs, ownership, prices and save compatibility. New prices are 65, 80, and 100 coins; each design is cosmetic only and must not change flight physics, collision, scoring, or rewards. Verify purchases, saved selection, renderer mapping, and packaged assets.
