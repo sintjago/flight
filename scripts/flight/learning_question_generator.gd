@@ -19,7 +19,9 @@ const READING_WORD_PAIRS: Array = [
 		{"level":3,"word":"assist", "synonym":"help", "opposite":"hinder"}, {"level":3,"word":"include", "synonym":"contain", "opposite":"exclude"},
 		{"level":3,"word":"protect", "synonym":"guard", "opposite":"harm"}, {"level":3,"word":"observe", "synonym":"notice", "opposite":"ignore"},
 		{"level":3,"word":"expand", "synonym":"grow", "opposite":"shrink"}, {"level":4,"word":"precise", "synonym":"exact", "opposite":"vague"},
-]
+		{"level":5,"word":"fragile", "synonym":"delicate", "opposite":"sturdy"}, {"level":5,"word":"abundant", "synonym":"plentiful", "opposite":"scarce"},
+		{"level":5,"word":"cautious", "synonym":"careful", "opposite":"reckless"},
+	]
 const READING_NOUNS: Array[String] = ["rabbit", "robot", "teacher", "sailor", "puppy", "baker", "dragon", "squirrel", "neighbor", "artist", "captain", "kitten"]
 const READING_ADJECTIVES: Array[String] = ["curious", "gentle", "sleepy", "cheerful", "muddy", "brave", "tiny", "clever", "quiet", "silver", "ancient", "nervous"]
 const READING_VERBS: Array[String] = ["danced", "waited", "laughed", "whispered", "explored", "helped", "watched", "painted", "wondered", "hurried", "rested", "climbed"]
@@ -80,23 +82,39 @@ const READING_AUTHOR_PURPOSE_CASES: Array = [
 	{"prompt":"The author describes a rainforest in detail. Purpose?", "answer":"Create a picture", "distractor":"Teach a formula"},
 	{"prompt":"A recipe lists steps to make soup. Purpose?", "answer":"Give instructions", "distractor":"Tell a joke"},
 ]
+const READING_PLURAL_CASES: Array = [
+	{"noun":"box", "plural":"boxes"}, {"noun":"fox", "plural":"foxes"},
+	{"noun":"dish", "plural":"dishes"}, {"noun":"city", "plural":"cities"},
+	{"noun":"baby", "plural":"babies"}, {"noun":"book", "plural":"books"},
+]
+const READING_PUNCTUATION_CASES: Array = [
+	{"sentence":"Where did the rabbit go", "answer":"?"},
+	{"sentence":"Please close the gate", "answer":"."},
+	{"sentence":"What a bright star", "answer":"!"},
+]
+const READING_COMPLEX_SENTENCE_CASES: Array = [
+	{"prompt":"In 'Although it was late, we kept reading,' which clause is dependent?", "answer":"Dependent", "distractor":"Main"},
+	{"prompt":"In 'We stayed inside because rain began,' what does the because-clause give?", "answer":"Reason", "distractor":"Time"},
+	{"prompt":"In 'When the bell rang, the class lined up,' the when-clause tells...", "answer":"Time", "distractor":"Place"},
+	{"prompt":"In 'If the sky clears, we will play outside,' the if-clause gives...", "answer":"Condition", "distractor":"Command"},
+]
 
 const SPANISH_WORDS: Array = [
 	{"level":1,"en":"hello","word":"hola"},{"level":1,"en":"goodbye","word":"adiós"},{"level":1,"en":"please","word":"por favor"},
 	{"level":1,"en":"thank you","word":"gracias"},{"level":1,"en":"yes","word":"sí"},{"level":1,"en":"no","word":"no"},
 	{"level":1,"en":"mother","word":"madre"},{"level":1,"en":"father","word":"padre"},{"level":1,"en":"cat","word":"gato"},
 	{"level":1,"en":"dog","word":"perro"},{"level":1,"en":"water","word":"agua"},{"level":1,"en":"bread","word":"pan"},
-	{"level":1,"en":"red","word":"rojo"},{"level":1,"en":"blue","word":"azul"},{"level":1,"en":"one","word":"uno"},
+	{"level":1,"en":"red","word":"rojo","form_note":"masculine singular"},{"level":1,"en":"blue","word":"azul"},{"level":1,"en":"one","word":"uno"},
 	{"level":1,"en":"two","word":"dos"},{"level":1,"en":"sun","word":"sol"},{"level":1,"en":"moon","word":"luna"},
 	{"level":2,"en":"book","word":"libro"},{"level":2,"en":"school","word":"escuela"},{"level":2,"en":"house","word":"casa"},
 	{"level":2,"en":"friend","word":"amigo"},{"level":2,"en":"family","word":"familia"},{"level":2,"en":"apple","word":"manzana"},
-	{"level":2,"en":"milk","word":"leche"},{"level":2,"en":"green","word":"verde"},{"level":2,"en":"small","word":"pequeño"},
+	{"level":2,"en":"milk","word":"leche"},{"level":2,"en":"green","word":"verde"},{"level":2,"en":"small","word":"pequeño","form_note":"masculine singular"},
 	{"level":2,"en":"big","word":"grande"},{"level":2,"en":"today","word":"hoy"},{"level":2,"en":"tomorrow","word":"mañana"},
 	{"level":3,"en":"to eat","word":"comer"},{"level":3,"en":"to read","word":"leer"},{"level":3,"en":"to speak","word":"hablar"},
 	{"level":3,"en":"to live","word":"vivir"},{"level":3,"en":"because","word":"porque"},{"level":3,"en":"but","word":"pero"},
 	{"level":3,"en":"always","word":"siempre"},{"level":3,"en":"sometimes","word":"a veces"},{"level":3,"en":"yesterday","word":"ayer"},
-	{"level":3,"en":"beautiful","word":"hermoso"},{"level":4,"en":"to choose","word":"elegir"},{"level":4,"en":"although","word":"aunque"},
-	{"level":4,"en":"while","word":"mientras"},{"level":4,"en":"perhaps","word":"quizás"},{"level":4,"en":"careful","word":"cuidadoso"},
+	{"level":3,"en":"beautiful","word":"hermoso","form_note":"masculine singular"},{"level":4,"en":"to choose","word":"elegir"},{"level":4,"en":"although","word":"aunque"},
+	{"level":4,"en":"while","word":"mientras"},{"level":4,"en":"perhaps","word":"quizás"},{"level":4,"en":"careful","word":"cuidadoso","form_note":"masculine singular"},
 	{"level":4,"en":"environment","word":"medio ambiente"},{"level":4,"en":"to discover","word":"descubrir"},{"level":4,"en":"however","word":"sin embargo"},
 	{"level":5,"en":"evidence","word":"prueba"},{"level":5,"en":"although","word":"aunque"},{"level":5,"en":"to achieve","word":"lograr"},
 	{"level":5,"en":"unless","word":"a menos que"},{"level":5,"en":"nevertheless","word":"sin embargo"},{"level":5,"en":"to suggest","word":"sugerir"},
@@ -108,17 +126,17 @@ const RUSSIAN_WORDS: Array = [
 	{"level":1,"en":"cat","word":"кот"},{"level":1,"en":"dog","word":"собака"},{"level":1,"en":"water","word":"вода"},
 	{"level":1,"en":"bread","word":"хлеб"},{"level":1,"en":"house","word":"дом"},{"level":1,"en":"book","word":"книга"},
 	{"level":2,"en":"please","word":"пожалуйста"},{"level":2,"en":"thank you","word":"спасибо"},{"level":2,"en":"one","word":"один"},
-	{"level":2,"en":"two","word":"два"},{"level":2,"en":"red","word":"красный"},{"level":2,"en":"blue","word":"синий"},
+	{"level":2,"en":"two","word":"два"},{"level":2,"en":"red","word":"красный","form_note":"masculine singular"},{"level":2,"en":"blue","word":"синий","form_note":"masculine singular"},
 	{"level":2,"en":"apple","word":"яблоко"},{"level":2,"en":"milk","word":"молоко"},{"level":2,"en":"school","word":"школа"},
-	{"level":2,"en":"friend","word":"друг"},{"level":2,"en":"small","word":"маленький"},{"level":2,"en":"big","word":"большой"},
+	{"level":2,"en":"friend","word":"друг"},{"level":2,"en":"small","word":"маленький","form_note":"masculine singular"},{"level":2,"en":"big","word":"большой","form_note":"masculine singular"},
 	{"level":3,"en":"to read","word":"читать"},{"level":3,"en":"to write","word":"писать"},{"level":3,"en":"to speak","word":"говорить"},
-	{"level":3,"en":"to see","word":"видеть"},{"level":3,"en":"beautiful","word":"красивый"},{"level":3,"en":"we","word":"мы"},
+	{"level":3,"en":"to see","word":"видеть"},{"level":3,"en":"beautiful","word":"красивый","form_note":"masculine singular"},{"level":3,"en":"we","word":"мы"},
 	{"level":3,"en":"they","word":"они"},{"level":3,"en":"today","word":"сегодня"},{"level":3,"en":"tomorrow","word":"завтра"},
 	{"level":3,"en":"where?","word":"где?"},{"level":4,"en":"because","word":"потому что"},{"level":4,"en":"although","word":"хотя"},
 	{"level":4,"en":"to understand","word":"понимать"},{"level":4,"en":"go by vehicle","word":"ехать"},{"level":4,"en":"city","word":"город"},
-	{"level":4,"en":"language","word":"язык"},{"level":4,"en":"interesting","word":"интересный"},{"level":4,"en":"careful","word":"осторожный"},
+	{"level":4,"en":"language","word":"язык"},{"level":4,"en":"interesting","word":"интересный","form_note":"masculine singular"},{"level":4,"en":"careful","word":"осторожный","form_note":"masculine singular"},
 	{"level":5,"en":"chance","word":"шанс"},{"level":5,"en":"to explain","word":"объяснять"},{"level":5,"en":"nevertheless","word":"тем не менее"},
-	{"level":5,"en":"nature","word":"природа"},{"level":5,"en":"to improve","word":"улучшать"},{"level":5,"en":"study","word":"изучение"},
+	{"level":5,"en":"nature","word":"природа"},{"level":5,"en":"to improve","word":"улучшать"},{"level":5,"en":"study","word":"изучение","part_of_speech":"noun"},
 	{"level":5,"en":"duty","word":"долг"},{"level":5,"en":"to compare","word":"сравнивать"},
 ]
 const SPANISH_PRESENT: Array = [
@@ -191,11 +209,11 @@ const RUSSIAN_PAST: Array = [
 ]
 const RUSSIAN_PAST_SUBJECTS: Array[String] = ["он", "она", "оно", "они"]
 const RUSSIAN_ASPECT_PAIRS: Array = [
-	{"imperfective":"читать","perfective":"прочитать","meaning":"read to completion"},
-	{"imperfective":"писать","perfective":"написать","meaning":"write to completion"},
+	{"imperfective":"читать","perfective":"прочитать","meaning":"finish reading"},
+	{"imperfective":"писать","perfective":"написать","meaning":"finish writing"},
 	{"imperfective":"делать","perfective":"сделать","meaning":"finish doing"},
-	{"imperfective":"покупать","perfective":"купить","meaning":"complete a purchase"},
-	{"imperfective":"смотреть","perfective":"посмотреть","meaning":"watch to the end"},
+	{"imperfective":"покупать","perfective":"купить","meaning":"make a purchase"},
+	{"imperfective":"смотреть","perfective":"посмотреть","meaning":"take a look"},
 ]
 
 const SCIENCE_ANIMALS: Array = [
@@ -235,6 +253,21 @@ const SCIENCE_METHODS: Array = [
 	{"test":"whether a ramp changes a toy car's travel distance","change":"ramp height","wrong":"travel range"},
 	{"test":"which material keeps an ice cube cold longest","change":"wrap type","wrong":"melt time"},
 ]
+const SCIENCE_LEVEL3_ECOSYSTEM_CASES: Array = [
+	{"expression":"In a food chain, a plant makes its own food. It is a...", "answer":"producer", "distractor":"consumer"},
+	{"expression":"A rabbit eats plants. In a food chain, the rabbit is a...", "answer":"consumer", "distractor":"producer"},
+	{"expression":"Fungi break down dead material. They are...", "answer":"decomposers", "distractor":"producers"},
+]
+const SCIENCE_LEVEL3_CYCLE_CASES: Array = [
+	{"expression":"The Sun warms puddle water, which changes into vapor by...", "answer":"evaporation", "distractor":"condensation"},
+	{"expression":"Water vapor cools and forms tiny cloud droplets by...", "answer":"condensation", "distractor":"evaporation"},
+	{"expression":"Rain falling from clouds is called...", "answer":"precipitation", "distractor":"collection"},
+]
+const SCIENCE_LEVEL3_ENERGY_CASES: Array = [
+	{"expression":"Energy an object has because it is moving is...", "answer":"kinetic energy", "distractor":"stored energy"},
+	{"expression":"A stretched rubber band stores which type of energy?", "answer":"potential", "distractor":"kinetic"},
+	{"expression":"A battery powers a flashlight. Electrical energy changes mainly into...", "answer":"light energy", "distractor":"soil energy"},
+]
 const SCIENCE_ADVANCED_FACTS: Array = [
 	{"level":3,"topic":"science_life","hint":"hint.science.life","expression":"In a food chain, a plant is a...","answer":"producer","distractor":"consumer"},
 	{"level":3,"topic":"science_earth","hint":"hint.science.earth","expression":"Day and night happen as Earth...","answer":"rotates","distractor":"stops"},
@@ -247,7 +280,14 @@ const SCIENCE_ADVANCED_FACTS: Array = [
 	{"level":5,"topic":"science_physics","hint":"hint.science.physics","expression":"Newton's second law: F = ?","answer":"m × a","distractor":"m + a"},
 	{"level":5,"topic":"science_earth","hint":"hint.science.earth","expression":"Most earthquakes occur near...","answer":"plate boundaries","distractor":"plate centers"},
 ]
-const SCIENCE_SCENARIOS: Array[String] = ["a cyclist", "a train", "a runner", "a small robot", "a river boat", "a delivery van", "a toy car", "a hiking group"]
+const SCIENCE_SPEED_SCENARIOS: Array = [
+	{"id":"runner", "name":"a runner", "min_speed":4, "max_speed":10, "max_hours":3, "min_level":3},
+	{"id":"hiking_group", "name":"a hiking group", "min_speed":2, "max_speed":5, "max_hours":5, "min_level":3},
+	{"id":"cyclist", "name":"a cyclist", "min_speed":10, "max_speed":20, "max_hours":5, "min_level":3},
+	{"id":"river_boat", "name":"a river boat", "min_speed":8, "max_speed":25, "max_hours":8, "min_level":4},
+	{"id":"delivery_van", "name":"a delivery van", "min_speed":30, "max_speed":80, "max_hours":6, "min_level":4},
+	{"id":"train", "name":"a train", "min_speed":60, "max_speed":120, "max_hours":8, "min_level":4},
+]
 const SCIENCE_UNITS: Array[String] = ["km", "m"]
 
 
@@ -282,14 +322,20 @@ static func _pick(rng: RandomNumberGenerator, items: Array) -> Variant:
 
 static func _reading_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	var family := rng.randi_range(0, 4)
-	if level <= 2:
+	if level == 1:
 		if family == 0:
 			return _reading_rhyme(rng)
 		if family <= 2:
 			return _reading_story(rng)
 		return _reading_vocabulary(rng, level)
+	if level == 2:
+		if family <= 2:
+			return _reading_level_two_grammar(rng)
+		if family == 3:
+			return _reading_story(rng)
+		return _reading_vocabulary(rng, level)
 	if family == 0:
-		return _reading_grammar(rng)
+		return _reading_grammar(rng, level)
 	if family == 1:
 		return _reading_vocabulary(rng, level)
 	if family == 2 and level >= 4:
@@ -345,8 +391,10 @@ static func _reading_story(rng: RandomNumberGenerator, _level: int = 1) -> Dicti
 
 static func _reading_vocabulary(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	var eligible: Array[Dictionary] = []
+	var level_five_review := level >= 5 and rng.randi_range(0, 4) == 0
 	for item: Dictionary in READING_WORD_PAIRS:
-		if int(item.level) <= level:
+		var source_level := int(item.level)
+		if (level < 5 and source_level <= level) or (level >= 5 and not level_five_review and source_level >= 4) or (level >= 5 and level_five_review and source_level <= 3):
 			eligible.append(item)
 	var entry: Dictionary = _pick(rng, eligible)
 	var use_synonym := rng.randi_range(0, 1) == 0
@@ -365,11 +413,36 @@ static func _reading_vocabulary(rng: RandomNumberGenerator, level: int) -> Dicti
 	var hint := "hint.reading.vocabulary"
 	var relation := "synonym" if use_synonym else "antonym"
 	return _question(expression, answer, distractor, topic, hint, "generated_reading_vocabulary", {
-		"source_word": word, "relation": relation, "synonym": str(entry.synonym), "opposite": str(entry.opposite),
+		"source_word": word, "source_level": int(entry.level), "relation": relation, "synonym": str(entry.synonym), "opposite": str(entry.opposite),
 	})
 
 
-static func _reading_grammar(rng: RandomNumberGenerator) -> Dictionary:
+static func _reading_level_two_grammar(rng: RandomNumberGenerator) -> Dictionary:
+	var form := rng.randi_range(0, 2)
+	if form == 0:
+		var plural_item: Dictionary = _pick(rng, READING_PLURAL_CASES)
+		return _question("What is the plural of %s?" % str(plural_item.noun), str(plural_item.plural), str(plural_item.noun), "reading_grammar", "hint.reading.grammar", "generated_reading_plural", {
+			"source_word": str(plural_item.noun), "plural_form": str(plural_item.plural),
+		})
+	if form == 1:
+		var punctuation_item: Dictionary = _pick(rng, READING_PUNCTUATION_CASES)
+		var punctuation_distractor := "?" if str(punctuation_item.answer) != "?" else "."
+		return _question("Finish the sentence: '%s'" % str(punctuation_item.sentence), str(punctuation_item.answer), punctuation_distractor, "reading_grammar", "hint.reading.grammar", "generated_reading_punctuation", {
+			"punctuation": str(punctuation_item.answer),
+		})
+	var noun := str(_pick(rng, READING_NOUNS))
+	var adjective := str(_pick(rng, READING_ADJECTIVES))
+	var verb := str(_pick(rng, READING_VERBS))
+	var other_adjective := str(_pick(rng, READING_ADJECTIVES))
+	while other_adjective == adjective:
+		other_adjective = str(_pick(rng, READING_ADJECTIVES))
+	var sentence := "The %s %s %s." % [adjective, noun, verb]
+	return _question("In '%s' which word describes the %s?" % [sentence, noun], adjective, other_adjective, "reading_grammar", "hint.reading.grammar", "generated_reading_adjective")
+
+
+static func _reading_grammar(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	if level >= 4 and rng.randi_range(0, 2) == 0:
+		return _reading_complex_sentence(rng)
 	var noun := str(_pick(rng, READING_NOUNS))
 	var adjective := str(_pick(rng, READING_ADJECTIVES))
 	var verb := str(_pick(rng, READING_VERBS))
@@ -384,6 +457,12 @@ static func _reading_grammar(rng: RandomNumberGenerator) -> Dictionary:
 	while other_verb == verb:
 		other_verb = str(_pick(rng, READING_VERBS))
 	return _question("In '%s' which word shows the action?" % sentence, verb, other_verb, "reading_grammar", "hint.reading.grammar", "generated_reading_verb")
+static func _reading_complex_sentence(rng: RandomNumberGenerator) -> Dictionary:
+	var item: Dictionary = _pick(rng, READING_COMPLEX_SENTENCE_CASES)
+	var expression := str(item.prompt)
+	if rng.randi_range(0, 1) == 1:
+		expression = "Read: %s" % expression
+	return _question(expression, str(item.answer), str(item.distractor), "reading_grammar", "hint.reading.grammar", "generated_reading_complex_sentence")
 
 
 static func _reading_prefix(rng: RandomNumberGenerator) -> Dictionary:
@@ -409,14 +488,14 @@ static func _reading_literature(rng: RandomNumberGenerator) -> Dictionary:
 		var adjective := str(_pick(rng, READING_ADJECTIVES))
 		var comparison := str(_pick(rng, READING_COMPARISONS))
 		var expression := "%s was as %s as %s. This is a..." % [name, adjective, comparison]
-		return _question(expression, "simile", "metaphor", "reading_literature", "hint.reading.literature", "generated_reading_figure")
+		return _question(expression, "simile", "metaphor", "reading_literature", "hint.reading.figure_of_speech", "generated_reading_figure")
 	if form == 1:
 		var object := str(_pick(rng, READING_ADJECTIVE_OBJECTS))
 		var action := str(_pick(rng, READING_HUMAN_ACTIONS))
-		return _question("The %s %s. This gives it a human action: which device?" % [object, action], "personification", "alliteration", "reading_literature", "hint.reading.literature", "generated_reading_figure")
+		return _question("The %s %s. This gives it a human action: which device?" % [object, action], "personification", "alliteration", "reading_literature", "hint.reading.figure_of_speech", "generated_reading_figure")
 	var object := str(_pick(rng, READING_ADJECTIVE_OBJECTS))
 	var role := str(_pick(rng, ["a beehive", "a maze", "a furnace", "a library", "a playground", "a stage"]))
-	return _question("The %s was %s. This direct comparison is a..." % [object, role], "metaphor", "simile", "reading_literature", "hint.reading.literature", "generated_reading_figure")
+	return _question("The %s was %s. This direct comparison is a..." % [object, role], "metaphor", "simile", "reading_literature", "hint.reading.figure_of_speech", "generated_reading_figure")
 
 
 static func _reading_higher_order_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
@@ -431,10 +510,14 @@ static func _reading_higher_order_question(rng: RandomNumberGenerator, level: in
 		items = READING_EVIDENCE_CASES
 		kind = "generated_reading_evidence"
 	elif level >= 5:
-		items = READING_AUTHOR_PURPOSE_CASES
-		topic = "reading_literature"
-		hint = "hint.reading.literature"
-		kind = "generated_reading_author_purpose"
+		if rng.randi_range(0, 1) == 0:
+			items = READING_EVIDENCE_CASES
+			kind = "generated_reading_evidence"
+		else:
+			items = READING_AUTHOR_PURPOSE_CASES
+			topic = "reading_literature"
+			hint = "hint.reading.literature"
+			kind = "generated_reading_author_purpose"
 	var item: Dictionary = _pick(rng, items)
 	var expression := str(item.prompt)
 	if rng.randi_range(0, 1) == 1:
@@ -469,46 +552,56 @@ static func _language_vocabulary(rng: RandomNumberGenerator, area: String, level
 	var other: Dictionary = _pick(rng, eligible)
 	while str(other.word) == str(target.word):
 		other = _pick(rng, eligible)
+	var target_word := str(target.word)
+	var english_text := str(target.en)
+	var form_note := str(target.get("form_note", ""))
+	var part_of_speech := str(target.get("part_of_speech", ""))
+	var english_cue := english_text
+	var target_cue := target_word
+	if not form_note.is_empty():
+		english_cue = "%s (%s)" % [english_text, form_note]
+		target_cue = "%s (%s form)" % [target_word, form_note]
+	elif not part_of_speech.is_empty():
+		english_cue = "%s (%s)" % [english_text, part_of_speech]
+		target_cue = "%s (%s)" % [target_word, part_of_speech]
 	var to_target := rng.randi_range(0, 1) == 0
-	var answer := str(target.word) if to_target else str(target.en)
+	var answer := target_word if to_target else english_text
 	var distractor := str(other.word) if to_target else str(other.en)
 	var language := "Spanish" if area == "spanish" else "Russian"
 	var name := str(_pick(rng, NAMES))
 	var style := rng.randi_range(0, 5)
-	var expression := "How do you say '%s' in %s?" % [str(target.en), language]
+	var expression := "How do you say '%s' in %s?" % [english_cue, language]
 	if to_target:
 		match style:
 			1:
-				expression = "Translate into %s: '%s'." % [language, str(target.en)]
+				expression = "Translate into %s: '%s'." % [language, english_cue]
 			2:
-				expression = "Choose the %s word for '%s'." % [language, str(target.en)]
+				expression = "Choose the %s word for '%s'." % [language, english_cue]
 			3:
-				expression = "%s asks: what's %s for '%s'?" % [name, language, str(target.en)]
+				expression = "%s asks: what's %s for '%s'?" % [name, language, english_cue]
 			4:
-				expression = "Complete the translation — %s for '%s': ?" % [language, str(target.en)]
+				expression = "Complete the translation — %s for '%s': ?" % [language, english_cue]
 			5:
-				expression = "Pick the word that means '%s' in %s." % [str(target.en), language]
+				expression = "Pick the word that means '%s' in %s." % [english_cue, language]
 	else:
-		expression = "What does '%s' mean in English?" % str(target.word)
+		expression = "What does '%s' mean in English?" % target_cue
 		match style:
 			1:
-				expression = "Translate '%s' into English." % str(target.word)
+				expression = "Translate '%s' into English." % target_cue
 			2:
-				expression = "Choose the meaning of the %s word '%s'." % [language, str(target.word)]
+				expression = "Choose the meaning of the %s word '%s'." % [language, target_cue]
 			3:
-				expression = "%s asks: what does '%s' mean?" % [name, str(target.word)]
+				expression = "%s asks: what does '%s' mean?" % [name, target_cue]
 			4:
-				expression = "In English, '%s' means..." % str(target.word)
+				expression = "In English, '%s' means..." % target_cue
 			5:
-				expression = "Pick the English translation of '%s'." % str(target.word)
-	var target_word := str(target.word)
-	var english_text := str(target.en)
+				expression = "Pick the English translation of '%s'." % target_cue
 	var is_phrase := target_word.contains(" ")
 	var lexical_type := "phrase" if is_phrase else "vocabulary"
 	var topic := area + "_phrases" if is_phrase else area + "_vocabulary"
 	var hint := "hint." + area + ".phrases" if is_phrase else "hint." + area + ".vocabulary"
 	return _question(expression, answer, distractor, topic, hint, "generated_%s_translation" % area, {
-		"source_word": target_word, "english_text": english_text, "lexical_type": lexical_type,
+		"source_word": target_word, "english_text": english_text, "lexical_type": lexical_type, "form_note": form_note, "part_of_speech": part_of_speech,
 	})
 
 
@@ -635,7 +728,9 @@ static func _russian_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 		var expression := "%s · %s (present): ?" % [str(verb_data.verb), str(RUSSIAN_SUBJECTS[subject_index])]
 		if rng.randi_range(0, 1) == 1:
 			expression = "For '%s', choose the present form for %s." % [str(verb_data.verb), str(RUSSIAN_SUBJECTS[subject_index])]
-		return _question(expression, answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_present", {"subject_index": subject_index})
+		return _question(expression, answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_present", {
+			"subject_index": subject_index, "verb": str(verb_data.verb), "tense": "present", "forms": forms,
+		})
 	if form == 1 and level >= 4:
 		var verb_data: Dictionary = _pick(rng, RUSSIAN_PAST)
 		var subject_index := rng.randi_range(0, 3)
@@ -645,14 +740,18 @@ static func _russian_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 		var expression := "Past tense of '%s' for %s: ?" % [str(verb_data.verb), str(RUSSIAN_PAST_SUBJECTS[subject_index])]
 		if rng.randi_range(0, 1) == 1:
 			expression = "%s вчера ___ (%s)" % [str(RUSSIAN_PAST_SUBJECTS[subject_index]).capitalize(), str(verb_data.verb)]
-		return _question(expression, answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_past", {"subject_index": subject_index})
+		return _question(expression, answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_past", {
+			"subject_index": subject_index, "verb": str(verb_data.verb), "tense": "past", "forms": forms,
+		})
 	if form == 2 and level >= 4:
 		var future_verb := str(_pick(rng, RUSSIAN_FUTURE_VERBS))
 		var subject_index := rng.randi_range(0, 5)
 		var answer := "%s %s" % [str(RUSSIAN_FUTURE[subject_index]), future_verb]
 		var alternate_index := (subject_index + rng.randi_range(1, 5)) % RUSSIAN_FUTURE.size()
 		var distractor := "%s %s" % [str(RUSSIAN_FUTURE[alternate_index]), future_verb]
-		return _question("Future: '%s' · %s: ?" % [future_verb, str(RUSSIAN_SUBJECTS[subject_index])], answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_future")
+		return _question("Future: '%s' · %s: ?" % [future_verb, str(RUSSIAN_SUBJECTS[subject_index])], answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_future", {
+			"subject_index": subject_index, "future_verb": future_verb, "future_auxiliary": str(RUSSIAN_FUTURE[subject_index]), "tense": "future",
+		})
 	if level >= 4:
 		var noun_data: Dictionary = _pick(rng, RUSSIAN_NOUNS)
 		var case_index := rng.randi_range(1, RUSSIAN_CASES.size() - 1)
@@ -664,7 +763,9 @@ static func _russian_grammar(rng: RandomNumberGenerator, level: int) -> Dictiona
 			wrong_index = (wrong_index + 1) % RUSSIAN_CASES.size()
 			distractor = str(forms[wrong_index])
 		var expression := "'%s' · %s case: ?" % [str(noun_data.word), str(RUSSIAN_CASES[case_index])]
-		return _question(expression, answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_case", {"case_index": case_index})
+		return _question(expression, answer, distractor, "russian_grammar", "hint.russian.grammar", "generated_russian_case", {
+			"case_index": case_index, "noun": str(noun_data.word), "forms": forms,
+		})
 	return _language_vocabulary(rng, "russian", level)
 
 
@@ -708,14 +809,16 @@ static func _science_question(rng: RandomNumberGenerator, level: int) -> Diction
 			_:
 				return _science_plant(rng)
 	if level == 3:
-		match rng.randi_range(0, 3):
+		match rng.randi_range(0, 4):
 			0:
 				return _science_method(rng)
 			1:
-				return _science_speed(rng)
+				return _science_ecosystem(rng)
 			2:
-				return _science_state(rng, SCIENCE_STATES)
+				return _science_water_cycle(rng)
 			_:
+				if rng.randi_range(0, 1) == 0:
+					return _science_energy(rng)
 				return _science_advanced_fact(rng, level)
 	if level == 4:
 		match rng.randi_range(0, 3):
@@ -726,7 +829,7 @@ static func _science_question(rng: RandomNumberGenerator, level: int) -> Diction
 			2:
 				return _science_advanced_fact(rng, level)
 			_:
-				return _science_speed(rng)
+				return _science_speed(rng, level)
 	if level >= 5:
 		match rng.randi_range(0, 3):
 			0:
@@ -752,7 +855,7 @@ static func _science_animal(rng: RandomNumberGenerator) -> Dictionary:
 		expression = "%s is sorting animals: a %s is a..." % [name, str(item.animal)]
 	elif form == 2:
 		expression = "Which group does %s put a %s in?" % [name, str(item.animal)]
-	return _question(expression, str(item["class"]), distractor, "science_life", "hint.science.life", "generated_science_classification")
+	return _question(expression, str(item["class"]), distractor, "science_life", "hint.science.classification", "generated_science_classification")
 
 
 static func _science_plant(rng: RandomNumberGenerator) -> Dictionary:
@@ -781,7 +884,7 @@ static func _science_sense(rng: RandomNumberGenerator) -> Dictionary:
 	var expression := "%s wants to %s. Which body part helps?" % [name, str(item.sense)]
 	if rng.randi_range(0, 1) == 1:
 		expression = "To %s, %s uses their..." % [str(item.sense), name]
-	return _question(expression, str(item.organ), str(other.organ), "science_life", "hint.science.life", "generated_science_sense")
+	return _question(expression, str(item.organ), str(other.organ), "science_life", "hint.science.senses", "generated_science_sense")
 
 
 static func _science_state(rng: RandomNumberGenerator, state_pool: Array) -> Dictionary:
@@ -794,7 +897,7 @@ static func _science_state(rng: RandomNumberGenerator, state_pool: Array) -> Dic
 	var form := rng.randi_range(0, 2)
 	var expression := "%s observes %s. Its state of matter is..." % [name, str(item.thing)]
 	if form == 1:
-		expression = "%s asks: is %s a solid, liquid, or gas?" % [name, str(item.thing)]
+		expression = "%s asks: what state of matter is %s?" % [name, str(item.thing)]
 	elif form == 2:
 		expression = "For %s's sample of %s, choose the state of matter." % [name, str(item.thing)]
 	return _question(expression, str(item.state), distractor, "science_physical", "hint.science.physical", "generated_science_state", {
@@ -808,7 +911,7 @@ static func _science_earth_force(rng: RandomNumberGenerator) -> Dictionary:
 		{"q":"The Moon travels around...", "a":"Earth", "d":"the Sun"},
 		{"q":"What does the Sun give Earth?", "a":"light and warmth", "d":"rocks and soil"},
 		{"q":"Which force pulls objects toward Earth?", "a":"gravity", "d":"magnetism"},
-		{"q":"A magnet can attract objects made of...", "a":"iron", "d":"wood"},
+		{"q":"Which material can a magnet attract?", "a":"iron", "d":"wood"},
 		{"q":"Clouds are made mostly of tiny...", "a":"water droplets", "d":"grains of sand"},
 		{"q":"Which material lets light pass through?", "a":"clear glass", "d":"a wooden board"},
 	]
@@ -835,6 +938,21 @@ static func _science_method(rng: RandomNumberGenerator) -> Dictionary:
 	return _question(expression, str(item.change), str(item.wrong), "science_methods", "hint.science.methods", "generated_science_variable")
 
 
+static func _science_ecosystem(rng: RandomNumberGenerator) -> Dictionary:
+	var item: Dictionary = _pick(rng, SCIENCE_LEVEL3_ECOSYSTEM_CASES)
+	return _question(str(item.expression), str(item.answer), str(item.distractor), "science_life", "hint.science.ecosystems", "generated_science_ecosystem")
+
+
+static func _science_water_cycle(rng: RandomNumberGenerator) -> Dictionary:
+	var item: Dictionary = _pick(rng, SCIENCE_LEVEL3_CYCLE_CASES)
+	return _question(str(item.expression), str(item.answer), str(item.distractor), "science_earth", "hint.science.water_cycle", "generated_science_water_cycle")
+
+
+static func _science_energy(rng: RandomNumberGenerator) -> Dictionary:
+	var item: Dictionary = _pick(rng, SCIENCE_LEVEL3_ENERGY_CASES)
+	return _question(str(item.expression), str(item.answer), str(item.distractor), "science_physical", "hint.science.energy", "generated_science_energy")
+
+
 static func _science_advanced_fact(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	var eligible: Array[Dictionary] = []
 	for item: Dictionary in SCIENCE_ADVANCED_FACTS:
@@ -847,21 +965,28 @@ static func _science_advanced_fact(rng: RandomNumberGenerator, level: int) -> Di
 	return _question(expression, str(item.answer), str(item.distractor), str(item.topic), str(item.hint), "generated_science_concept")
 
 
-static func _science_speed(rng: RandomNumberGenerator) -> Dictionary:
-	var time_hours := rng.randi_range(2, 18)
-	var speed := rng.randi_range(3, 45)
+static func _science_speed(rng: RandomNumberGenerator, level: int) -> Dictionary:
+	var eligible: Array[Dictionary] = []
+	for scenario: Dictionary in SCIENCE_SPEED_SCENARIOS:
+		if int(scenario.min_level) <= level:
+			eligible.append(scenario)
+	var item: Dictionary = _pick(rng, eligible)
+	var time_hours := rng.randi_range(1, int(item.max_hours))
+	var speed := rng.randi_range(int(item.min_speed), int(item.max_speed))
 	var distance := time_hours * speed
-	var scenario := str(_pick(rng, SCIENCE_SCENARIOS))
+	var scenario := str(item.name)
 	var answer := "%d km/h" % speed
-	var wrong_value := distance + time_hours
+	var wrong_value := speed + time_hours
 	if wrong_value == speed:
 		wrong_value += 2
 	var distractor := "%d km/h" % wrong_value
 	var expression := "%s travels %d km in %d h. Average speed?" % [scenario.capitalize(), distance, time_hours]
 	if rng.randi_range(0, 1) == 1:
-		expression = "A %s covers %d km over %d hours; speed = ?" % [scenario, distance, time_hours]
+		expression = "%s covers %d km over %d hours; speed = ?" % [scenario.capitalize(), distance, time_hours]
 	return _question(expression, answer, distractor, "science_physics", "hint.science.physics", "generated_science_speed", {
 		"distance": distance, "time_hours": time_hours, "expected_speed": speed,
+		"scenario_id": str(item.id), "scenario_name": scenario, "min_speed": int(item.min_speed),
+		"max_speed": int(item.max_speed), "max_hours": int(item.max_hours),
 	})
 
 
@@ -890,7 +1015,7 @@ static func _science_density(rng: RandomNumberGenerator) -> Dictionary:
 	var wrong := mass + volume
 	if wrong == density:
 		wrong += 1
-	return _question(expression, "%d g/cm³" % density, "%d g/cm³" % wrong, "science_chemistry", "hint.science.chemistry", "generated_science_density", {
+	return _question(expression, "%d g/cm³" % density, "%d g/cm³" % wrong, "science_chemistry", "hint.science.density", "generated_science_density", {
 		"mass": mass, "volume": volume, "expected_density": density,
 	})
 

@@ -75,3 +75,20 @@
 
 ## Three additional Hangar aircraft — complete
 - [x] Add three unlockable paper-plane types—Albatross Glider, Double Fold, and Boomerang Kite—with distinct transparent folded-paper artwork, Hangar previews and style captions. Preserve existing aircraft IDs, ownership, prices and save compatibility. New prices are 65, 80, and 100 coins; each design is cosmetic only and must not change flight physics, collision, scoring, or rewards. Verify purchases, saved selection, renderer mapping, and packaged assets.
+
+## Math engine refinement — complete
+- [x] Make generated hints match the exact math form, including signed multiplication, measurement addition/conversion/rate questions, and Pythagorean problems. Keep Math 1/2/3 track boundaries intact, align the lowest challenge level with its gentle age target, and provide bounded, clearly scaffolded geometry examples.
+
+## Reading engine refinement — complete
+- [x] Ensure procedural questions actually teach the advertised skills at each level: add Level 2 plurals/punctuation/adjectives, Level 4 complex sentences, and Level 5 text-evidence analysis; keep Level 5 vocabulary appropriately challenging with intentional review. Make inference/evidence prompts contain enough explicit information for the intended answer.
+
+## Russian engine refinement — complete
+- [x] Correct aspect and translation glosses, clarify grammatical form for adjective translations, distinguish noun/verb meanings where English is ambiguous, and give targeted aspect/conditional hints that match each question.
+
+## Spanish engine refinement — complete
+- [x] Clarify gender/number when presenting gendered adjective forms, keep invariant forms distinct, and make subjunctive guidance cover all generated triggers, including possibility expressions.
+
+## Science engine refinement — complete
+- [x] Align generated Level 3 questions with promised ecosystems, cycles, energy, and fair-test learning; bound travel scenarios to credible age-appropriate values; provide hints suited to classification, senses, and density; and ensure stems fit the two displayed answer choices.
+
+Across these engine updates, preserve procedural variety, age appropriateness, accurate prompts, distinct answer choices with exactly one correct lane, useful localized topic/hint metadata, the staged setup, and the existing flight, score, coin, and save behavior.

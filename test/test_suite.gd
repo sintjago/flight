@@ -4,6 +4,7 @@ const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 const AnswerReportDocument = preload("res://scripts/flight/answer_report_document.gd")
+const LearningEngineRefinementTests = preload("res://test/learning_engine_refinement_tests.gd")
 
 var _failures := PackedStringArray()
 var _checks := 0
@@ -26,6 +27,7 @@ func _run() -> void:
 		_test_geometry()
 	_test_math_questions()
 	_test_learning_questions()
+	LearningEngineRefinementTests.run(Callable(self, "_check"))
 	_test_question_rotation()
 	await _test_simulation()
 	_test_fairness_bot()
@@ -436,7 +438,7 @@ func _test_extended_question_forms(rng: RandomNumberGenerator) -> void:
 					for data_value: Variant in question.get("values", []):
 						_check(int(data_value) >= 0, "level three statistics stay nonnegative before integers unlock")
 			if group == "measurement" and level == 1:
-				_check(seen_kinds.has("money_sum") and seen_kinds.has("unit_conversion") and seen_kinds.has("measurement_sum"), "level one measurement includes money, time, and length practice")
+				_check(seen_kinds.has("money_sum") and seen_kinds.has("measurement_sum") and not seen_kinds.has("unit_conversion"), "level one measurement stays with matching-unit addition; conversions unlock at level two")
 			if group == "measurement" and level == 2:
 				_check(seen_measurements.has("meters_to_cm") and seen_measurements.has("kilograms_to_g") and seen_measurements.has("hours_to_minutes") and seen_measurements.has("cm_to_m"), "level two measurement includes metric and time conversions in both directions")
 			if group == "measurement" and level == 3:

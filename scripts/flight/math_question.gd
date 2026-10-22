@@ -639,37 +639,34 @@ static func _fraction_operation(rng: RandomNumberGenerator, advanced: bool, leve
 
 static func _measurement_question(rng: RandomNumberGenerator, level: int) -> Dictionary:
 	if level <= 1:
-		match rng.randi_range(0, 2):
+		match rng.randi_range(0, 1):
 			0:
 				var coins: Array[int] = [5, 10, 25, 50]
 				var first_coin: int = coins[rng.randi_range(0, coins.size() - 1)]
 				var second_coin: int = coins[rng.randi_range(0, coins.size() - 1)]
-				return _integer_problem("%d¢ + %d¢ = ?¢" % [first_coin, second_coin], first_coin + second_coin, "measurement", "hint.measurement", "money_sum", first_coin, second_coin, "+")
-			1:
-				var hours := rng.randi_range(1, 4)
-				return _integer_problem("%d hours = ? minutes" % hours, hours * 60, "measurement", "hint.measurement", "unit_conversion", hours, 60, "×", {"conversion": "hours_to_minutes", "input_value": hours})
+				return _integer_problem("%d¢ + %d¢ = ?¢" % [first_coin, second_coin], first_coin + second_coin, "measurement", "hint.measurement_addition", "money_sum", first_coin, second_coin, "+")
 			_:
 				var first_cm := rng.randi_range(5, 35)
 				var second_cm := rng.randi_range(5, 35)
-				return _integer_problem("%d cm + %d cm = ? cm" % [first_cm, second_cm], first_cm + second_cm, "measurement", "hint.measurement", "measurement_sum", first_cm, second_cm, "+")
+				return _integer_problem("%d cm + %d cm = ? cm" % [first_cm, second_cm], first_cm + second_cm, "measurement", "hint.measurement_addition", "measurement_sum", first_cm, second_cm, "+")
 	if level == 2:
 		match rng.randi_range(0, 3):
 			0:
 				var meters := rng.randi_range(1, 9)
-				return _integer_problem("%d m = ? cm" % meters, meters * 100, "measurement", "hint.measurement", "unit_conversion", meters, 100, "×", {"conversion": "meters_to_cm", "input_value": meters})
+				return _integer_problem("%d m = ? cm" % meters, meters * 100, "measurement", "hint.measurement_conversion", "unit_conversion", meters, 100, "×", {"conversion": "meters_to_cm", "input_value": meters})
 			1:
 				var kilograms := rng.randi_range(1, 8)
-				return _integer_problem("%d kg = ? g" % kilograms, kilograms * 1000, "measurement", "hint.measurement", "unit_conversion", kilograms, 1000, "×", {"conversion": "kilograms_to_g", "input_value": kilograms})
+				return _integer_problem("%d kg = ? g" % kilograms, kilograms * 1000, "measurement", "hint.measurement_conversion", "unit_conversion", kilograms, 1000, "×", {"conversion": "kilograms_to_g", "input_value": kilograms})
 			2:
 				var hours := rng.randi_range(1, 5)
-				return _integer_problem("%d hours = ? minutes" % hours, hours * 60, "measurement", "hint.measurement", "unit_conversion", hours, 60, "×", {"conversion": "hours_to_minutes", "input_value": hours})
+				return _integer_problem("%d hours = ? minutes" % hours, hours * 60, "measurement", "hint.measurement_conversion", "unit_conversion", hours, 60, "×", {"conversion": "hours_to_minutes", "input_value": hours})
 			_:
 				var meters_from_cm := rng.randi_range(2, 9)
-				return _integer_problem("%d cm = ? m" % (meters_from_cm * 100), meters_from_cm, "measurement", "hint.measurement", "unit_conversion", meters_from_cm * 100, 100, "÷", {"conversion": "cm_to_m", "input_value": meters_from_cm * 100})
+				return _integer_problem("%d cm = ? m" % (meters_from_cm * 100), meters_from_cm, "measurement", "hint.measurement_conversion", "unit_conversion", meters_from_cm * 100, 100, "÷", {"conversion": "cm_to_m", "input_value": meters_from_cm * 100})
 	var hours_travelled := rng.randi_range(2, 5 if level == 3 else 8)
 	var speed := rng.randi_range(20, 80 if level < 5 else 140)
 	var distance := hours_travelled * speed
-	return _integer_problem("%d km in %d h: ? km/h" % [distance, hours_travelled], speed, "measurement", "hint.measurement", "measurement_rate", distance, hours_travelled, "÷", {
+	return _integer_problem("%d km in %d h: ? km/h" % [distance, hours_travelled], speed, "measurement", "hint.measurement_rate", "measurement_rate", distance, hours_travelled, "÷", {
 		"distance": distance, "time_hours": hours_travelled, "speed": speed,
 	})
 
@@ -842,19 +839,43 @@ static func _pythagorean_question(rng: RandomNumberGenerator) -> Dictionary:
 	var a := int(triple[0])
 	var b := int(triple[1])
 	var c := int(triple[2])
-	return _integer_problem("Right triangle: legs %d, %d; c = ?" % [a, b], c, "geometry", "hint.geometry", "pythagorean", a, b, "c", {"hypotenuse": c})
+	var expression := "Right triangle legs %d and %d. Find hypotenuse c = ?" % [a, b]
+	match rng.randi_range(0, 2):
+		1:
+			expression = "A right triangle has legs %d and %d. What is its hypotenuse?" % [a, b]
+		2:
+			expression = "Legs %d and %d meet at a right angle. Hypotenuse = ?" % [a, b]
+	return _integer_problem(expression, c, "geometry", "hint.pythagorean", "pythagorean", a, b, "c", {"hypotenuse": c})
 
 
 static func _random_pythagorean_triple(rng: RandomNumberGenerator) -> Array[int]:
-	var m := rng.randi_range(2, 40)
-	var n := rng.randi_range(1, m - 1)
-	var side_a := m * m - n * n
-	var side_b := 2 * m * n
-	if side_a > side_b:
-		var held := side_a
-		side_a = side_b
-		side_b = held
-	return [side_a, side_b, m * m + n * n]
+	var triples: Array = []
+	for m in range(2, 10):
+		for n in range(1, m):
+			var hypotenuse := m * m + n * n
+			if hypotenuse > 100 or (m - n) % 2 == 0 or _greatest_common_divisor(m, n) != 1:
+				continue
+			var leg_a := m * m - n * n
+			var leg_b := 2 * m * n
+			if leg_a > leg_b:
+				var held := leg_a
+				leg_a = leg_b
+				leg_b = held
+			var max_scale := int(100 / hypotenuse)
+			for scale in range(1, max_scale + 1):
+				triples.append([leg_a * scale, leg_b * scale, hypotenuse * scale])
+	var triple: Array = triples[rng.randi_range(0, triples.size() - 1)]
+	return [int(triple[0]), int(triple[1]), int(triple[2])]
+
+
+static func _greatest_common_divisor(first: int, second: int) -> int:
+	var left := first
+	var right := second
+	while right != 0:
+		var remainder := left % right
+		left = right
+		right = remainder
+	return left
 
 
 static func _hard_integers(rng: RandomNumberGenerator) -> Dictionary:
@@ -866,7 +887,8 @@ static func _hard_signed_operation(rng: RandomNumberGenerator, operation_group: 
 	if operation_group == "multiplication":
 		var left := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 		var right := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
-		return _integer_problem("%d × (%d) = ?" % [left, right], left * right, "multiplication", "hint.multiplication", "integer_operation", left, right, "×")
+		var multiplication_hint := "hint.signed_multiplication" if left < 0 or right < 0 else "hint.multiplication"
+		return _integer_problem("%d × (%d) = ?" % [left, right], left * right, "multiplication", multiplication_hint, "integer_operation", left, right, "×")
 	if operation_group == "division":
 		var divisor := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
 		var quotient := rng.randi_range(2, factor_limit) * (-1 if rng.randi_range(0, 1) == 0 else 1)
@@ -895,7 +917,7 @@ static func _hard_signed_operation(rng: RandomNumberGenerator, operation_group: 
 	var topic := operation_group
 	var hint := "hint.integers" if operation_group == "integers" or (a < 0 or b < 0) else ("hint.addition" if operator == "+" else "hint.subtraction")
 	if operator == "×":
-		hint = "hint.multiplication"
+		hint = "hint.signed_multiplication" if a < 0 or b < 0 else "hint.multiplication"
 	return _integer_problem(expression, answer, topic, hint, "integer_operation", a, b, operator)
 
 
