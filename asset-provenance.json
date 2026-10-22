@@ -216,6 +216,34 @@
       "used": true,
       "usedBy": []
     },
+    "assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "assets/template/fonts/noto_sans_sc_bold.tres",
+        "assets/template/fonts/noto_sans_sc_medium.tres",
+        "assets/template/fonts/noto_sans_sc_regular.tres",
+        "scripts/flight/answer_report_document.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:64fce226712c1f9cf18046fff658d6aed0fa9fcb06d5689eef5e85e491d334b9",
+      "shipped": true,
+      "size": 89324,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "assets/template/fonts/noto_sans_sc_bold.tres",
+        "assets/template/fonts/noto_sans_sc_medium.tres",
+        "assets/template/fonts/noto_sans_sc_regular.tres",
+        "scripts/flight/answer_report_document.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
     "assets/paperglide/notebook.jpg": {
       "declaredUseEvidence": [],
       "generator": {},
@@ -840,9 +868,9 @@
         ]
       }
     ],
-    "pckSha256": "sha256:45a2c26b0642b61b955bacc8fdfbeae8b13574f5452fb057581eee7d3b42f17b",
+    "pckSha256": "sha256:5d051b0605b2687e809cbde28f77183b341d6a2487f0abde1dbff93a2295911b",
     "profile": "release",
-    "sourceFingerprint": "sha256:b351da2561948840e5c6bf23f08b6dda4d0ee3c327faa5d7af59ea3ea8844e11"
+    "sourceFingerprint": "sha256:653feca66929cf81c76d75abc406b11a437afdb1f9f16adde617f51dbe60e7fa"
   },
   "procedures": {},
   "summary": {
@@ -875,9 +903,9 @@
     },
     "files": {
       "downloaded": 0,
-      "retained": 37,
-      "shipped": 37,
-      "used": 21
+      "retained": 38,
+      "shipped": 38,
+      "used": 22
     },
     "origins": {
       "ai": {
@@ -911,9 +939,9 @@
         "used": 3
       },
       "unknown": {
-        "retained": 22,
-        "shipped": 22,
-        "used": 18
+        "retained": 23,
+        "shipped": 23,
+        "used": 19
       }
     },
     "packs": {

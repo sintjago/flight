@@ -1,8 +1,10 @@
-[gd_resource type="FontVariation" load_steps=2 format=3]
+[gd_resource type="FontVariation" load_steps=3 format=3]
 
 [ext_resource type="FontFile" path="res://assets/template/fonts/NotoSansSC-VF.subset.woff2" id="1_base"]
+[ext_resource type="FontFile" path="res://assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2" id="2_cyrillic"]
 
 [resource]
-resource_name = "Noto Sans SC wght 500 (Chinese body/runtime face)"
+resource_name = "Noto Sans SC wght 500 + Noto Sans Cyrillic fallback"
 base_font = ExtResource("1_base")
 variation_opentype = {2003265652: 500}
+fallbacks = Array[Font]([ExtResource("2_cyrillic")])

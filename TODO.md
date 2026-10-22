@@ -66,3 +66,9 @@
 
 ## Folded-paper silhouette refinement — complete
 - [x] Replace the paid options' near-duplicate/sci-fi-looking art with a broad delta-wing Kite Glider, swept Sailwing, and compact Comet Dart, each with transparent pencil-fold artwork and a short style caption. The Hangar now describes all seven designs/colorways and clarifies that handling is identical. Preserve every existing plane ID, price, ownership, equipped state, and save; keep the fixed flight/collision behavior. A real-renderer Hangar capture confirms the three silhouettes and labels fit the 1280×720 screen.
+
+## Post-flight answer review — complete
+- [x] When a flight ends, allow the player to open a page showing all questions from that flight in order, the answer they chose (or that they did not answer), the correct answer, and whether the response was right, wrong, or unanswered. Keep the review available until the player returns to the results screen or leaves for Home. Render the original question and answers legibly for every learning pack, including Russian/Cyrillic text. Always allow the page to open; when no gate was reached, show a clear empty state instead of disabling the review action. Source and packaged-game assertions exercise both zero-answer and scored flights.
+
+## Save/download answer review as PDF — complete
+- [x] Provide a Save/Download PDF action on the answer-review page that creates a readable printable report for that flight, retaining all questions and answers (including Spanish accents and Russian characters) and useful run context such as date, score, and selected subject/difficulty. Embed the bundled font in a self-contained UTF-8 report, wait for font loading before opening the browser's print dialog, and allow saving without a network service. Source and packaged checks verify Cyrillic content, safe HTML escaping, and the embedded font.

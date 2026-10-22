@@ -3,6 +3,7 @@ extends Node
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
+const AnswerReportDocument = preload("res://scripts/flight/answer_report_document.gd")
 
 var _failures := PackedStringArray()
 var _checks := 0
@@ -19,9 +20,10 @@ func _ready() -> void:
 func _run() -> void:
 	for path: String in [SaveStore.SAVE_PATH]:
 		_saved_user_files[path] = FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else null
-	SaveStore.set("_data", SaveStore.call("_default_data"))
-	_test_autoloads_and_schema()
-	_test_geometry()
+		SaveStore.set("_data", SaveStore.call("_default_data"))
+		_test_autoloads_and_schema()
+		_test_answer_report_document()
+		_test_geometry()
 	_test_math_questions()
 	_test_learning_questions()
 	_test_question_rotation()
@@ -49,6 +51,26 @@ func _test_autoloads_and_schema() -> void:
 	_check(get_tree().root.get_node("I18n").call("t", "over.restart") == "TRY AGAIN", "English strings resolve")
 	for setting: Dictionary in tuning.call("get_settings"):
 		_check(get_tree().root.get_node("I18n").call("t", str(setting.label_key)) != str(setting.label_key), "label for %s" % setting.id)
+
+
+func _test_answer_report_document() -> void:
+	var entries: Array[Dictionary] = [{
+		"number": 1,
+		"topic_label": "Spanish",
+		"status": "incorrect",
+		"outcome_label": "Incorrect",
+		"expression": "¿Cómo se escribe “hello”?",
+		"selected_answer": "ñandú & <script>",
+		"correct_answer": "ёж",
+	}]
+	var report := AnswerReportDocument.build_document(
+		{"summary": "¡Excelente! · Score 1", "date": "October 22, 2026"},
+		entries,
+		{"report_title": "Flight Answers", "print_button": "Print / Save as PDF"},
+	)
+	_check(report.contains("¿Cómo") and report.contains("¡Excelente!"), "PDF report preserves Spanish punctuation and accents")
+	_check(report.contains("ñandú &amp; &lt;script&gt;") and report.contains("ёж") and not report.contains("<script>"), "PDF report preserves Cyrillic and escapes unsafe answer text")
+	_check(report.contains("@font-face") and report.contains("data:font/woff2;base64,") and report.contains("Paper Glide Noto"), "PDF report embeds the bundled Cyrillic font for offline printing")
 
 
 func _test_geometry() -> void:
@@ -749,6 +771,8 @@ func _test_simulation() -> void:
 	for i in 60:
 		world.call("step", 1.0 / 60.0)
 	_check(_crash_events == 1, "dead world does not re-report crashes")
+	var untouched_history: Array = world.get("answer_history")
+	_check(untouched_history.is_empty(), "crashing before reaching a gate does not invent a future unanswered question")
 	world.queue_free()
 
 	world = _make_world()
@@ -767,6 +791,8 @@ func _test_simulation() -> void:
 	_check(world.get("state") == "playing", "flying through the correct answer lane is safe")
 	_check(int(world.get("score")) == 1 and _score_events == 1, "passing a correct answer gate scores once")
 	_check(_question_events >= 2, "the next gate refreshes the active equation")
+	var passed_answers: Array = world.get("answer_history")
+	_check(passed_answers.size() == 1 and str(passed_answers[0].get("status", "")) == "correct" and bool(passed_answers[0].get("scored", false)) and str(passed_answers[0].get("selected_answer", "")) == str(passed_answers[0].get("correct_answer", "")), "correct gate passage records the selected and correct answers exactly once")
 	world.queue_free()
 
 	world = _make_world()
@@ -781,6 +807,8 @@ func _test_simulation() -> void:
 	_check(world.get("failure_reason") == "wrong_answer", "wrong-answer feedback is distinguished from a collision")
 	_check(str(world.get("failure_answer")) == "42", "wrong-answer state reveals the correct answer")
 	_check(int(world.get("score")) == 0, "a wrong answer does not score")
+	var wrong_answers: Array = world.get("answer_history")
+	_check(wrong_answers.size() == 1 and str(wrong_answers[0].get("status", "")) == "incorrect" and not bool(wrong_answers[0].get("scored", true)) and str(wrong_answers[0].get("selected_answer", "")) != str(wrong_answers[0].get("correct_answer", "")), "wrong gate passage records the player's selected and correct answers")
 	world.queue_free()
 
 	world = _make_world()
@@ -1045,6 +1073,29 @@ func _test_runtime_scene() -> void:
 	_check(bool((main.get("_over_screen") as Control).visible), "crash screen presents the recovery choices")
 	_check(str((main.get("_over_coins_label") as Label).text).contains("+1") and str((main.get("_over_coins_label") as Label).text).contains("WALLET: 1"), "crash screen reports this flight's earned coins and wallet total")
 	_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "crash screen has Try Again, Lower Difficulty, and Home actions")
+	var run_history: Array = world.get("answer_history")
+	_check(run_history.size() == 1 and str(run_history[0].get("status", "")) == "correct" and str(run_history[0].get("expression", "")).contains("?"), "finished flight keeps the actual question and correct gate answer for review")
+	var review_button: Button = main.get("_over_review_button")
+	_check(review_button != null and not review_button.disabled and review_button.text.contains("REVIEW ANSWERS · 1"), "results offers a review action with the number of recorded questions")
+	if review_button != null:
+		review_button.emit_signal("pressed")
+		await get_tree().process_frame
+		var review_screen: Control = main.get("_answer_review_screen")
+		var review_rows: VBoxContainer = main.get("_answer_review_list")
+		_check(main.get("_state") == "review" and review_screen.visible and not (main.get("_over_screen") as Control).visible and review_rows.get_child_count() == 1, "Review Answers opens a scrollable page with one row per question")
+		var review_font: Font = review_screen.get_theme_font("font")
+		_check(review_font.has_char(0x0441) and review_font.has_char(0x00F1), "answer review fallback covers Russian Cyrillic and Spanish accents")
+		var report_html := str(main.call("_build_answer_report_html"))
+		_check(report_html.contains("<meta charset=\"utf-8\">") and report_html.contains(str(run_history[0].get("expression", ""))) and report_html.contains(str(run_history[0].get("correct_answer", ""))) and report_html.contains("Save as PDF"), "print-ready report preserves the real question, correct answer, and Save-as-PDF instructions")
+		var pdf_button: Button = main.get("_answer_review_pdf_button")
+		if pdf_button != null:
+			pdf_button.emit_signal("pressed")
+		_check(str((main.get("_answer_review_status") as Label).text) == I18n.t("answer_review.pdf_web_only"), "native build explains that browser PDF saving requires the Web export")
+		var review_back: Button = main.get("_answer_review_back_button")
+		if review_back != null:
+			review_back.emit_signal("pressed")
+		await get_tree().process_frame
+		_check(main.get("_state") == "over" and (main.get("_over_screen") as Control).visible and world.visible and (main.get("_hud") as Control).visible, "Back to Results restores the results card and hidden playfield")
 	(main.get("_over_easier_button") as Button).emit_signal("pressed")
 	await get_tree().process_frame
 	_check(main.get("_state") == "playing" and int(main.get("_selected_level")) == 4 and int(world.get("score")) == 0, "Lower Difficulty decreases one step and starts a fresh run")
@@ -1052,6 +1103,21 @@ func _test_runtime_scene() -> void:
 	world.set("plane_y", FlightWorld.GROUND_Y)
 	world.call("step", 1.0 / 60.0)
 	await get_tree().create_timer(0.8).timeout
+	var empty_run_history: Array = world.get("answer_history")
+	var empty_review_button: Button = main.get("_over_review_button")
+	_check(main.get("_state") == "over" and empty_run_history.is_empty() and empty_review_button != null and not empty_review_button.disabled, "an early crash offers answer review even when no gate was reached")
+	if empty_review_button != null:
+		empty_review_button.emit_signal("pressed")
+		await get_tree().process_frame
+		var empty_review_list: VBoxContainer = main.get("_answer_review_list")
+		var empty_pdf_html := str(main.call("_build_answer_report_html"))
+		var empty_message := I18n.t("answer_review.empty")
+		_check(main.get("_state") == "review" and empty_review_list.get_child_count() == 1 and str((empty_review_list.get_child(0) as Label).text) == empty_message and empty_pdf_html.contains(empty_message), "zero-answer review and PDF show the clear empty state")
+		var empty_review_back: Button = main.get("_answer_review_back_button")
+		if empty_review_back != null:
+			empty_review_back.emit_signal("pressed")
+		await get_tree().process_frame
+		_check(main.get("_state") == "over" and (main.get("_over_screen") as Control).visible, "empty answer review returns safely to Results")
 	(main.get("_over_home_button") as Button).emit_signal("pressed")
 	await get_tree().process_frame
 	_check(main.get("_state") == "title" and bool((main.get("_title_screen") as Control).visible), "Home returns to practice-area selection")

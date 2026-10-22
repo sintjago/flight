@@ -38,6 +38,7 @@ func _run() -> void:
 		_check(not ResourceLoader.exists("res://scripts/ui/tuning_panel.gd"), "release tuning panel excluded")
 		_check(ResourceLoader.exists("res://scripts/flight/math_question.gd"), "math question generator is packed")
 		_check(ResourceLoader.exists("res://scripts/flight/learning_question.gd"), "non-math question generator is packed")
+		_check(ResourceLoader.exists("res://scripts/flight/answer_report_document.gd"), "answer-review PDF document builder is packed")
 		var practice_buttons: Dictionary = main.get("_practice_buttons")
 		_check(practice_buttons.size() == 5 and not (practice_buttons["math"] as Button).disabled, "pack offers five practice areas")
 		for area: String in ["reading", "russian", "spanish", "science"]:
@@ -137,6 +138,7 @@ func _run() -> void:
 		_check(main.get("_over_again_button") is Button and main.get("_over_easier_button") is Button and main.get("_over_home_button") is Button, "pack includes all three crash recovery actions")
 		for path: String in [
 			"res://assets/paperglide/plane.png", "res://assets/paperglide/pipe_cap.png",
+			"res://assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2",
 			"res://assets/paperglide/ships/kite_glider_refined.png", "res://assets/paperglide/ships/sailwing_refined.png",
 			"res://assets/paperglide/ships/comet_dart_refined.png",
 			"res://assets/paperglide/pipe_body.png", "res://assets/paperglide/notebook.jpg",
@@ -182,6 +184,40 @@ func _run() -> void:
 				_check(bool((main.get("_cheer_label") as Label).visible) and str((main.get("_cheer_label") as Label).text) == "Banzai!", "packed correct gate displays the equipped celebration phrase")
 			world.call("step", 1.0 / 60.0)
 			_check(int(world.get("score")) == 1 and int(_save_store.call("get_coins")) == 1 and int(main.get("_coins_earned_this_run")) == 1, "one packed gate cannot award the same coin twice")
+			var saved_answers: Array = world.get("answer_history")
+			_check(saved_answers.size() == 1 and str(saved_answers[0].get("status", "")) == "correct", "export records the correct answer before the run ends")
+			world.set("plane_y", FlightWorld.GROUND_Y)
+			world.call("step", 1.0 / 60.0)
+			await create_timer(0.8).timeout
+			var review_button := main.get("_over_review_button") as Button
+			_check(main.get("_state") == "over" and review_button != null and not review_button.disabled, "exported crash results offer the completed answer review")
+			if review_button != null:
+				review_button.emit_signal("pressed")
+				await process_frame
+				var review_screen := main.get("_answer_review_screen") as Control
+				var print_html := str(main.call("_build_answer_report_html"))
+				_check(main.get("_state") == "review" and review_screen.visible and print_html.contains(str(saved_answers[0].get("correct_answer", ""))) and print_html.contains("Save as PDF") and print_html.contains("data:font/woff2;base64,") and print_html.contains("Paper Glide Noto"), "exported review page and PDF report contain the correct answer and embedded font")
+				var review_back := main.get("_answer_review_back_button") as Button
+				if review_back != null:
+					review_back.emit_signal("pressed")
+				await process_frame
+				_check(main.get("_state") == "over" and (main.get("_over_screen") as Control).visible and world.visible, "export can return from answer review to its results screen")
+				var replay_button := main.get("_over_again_button") as Button
+				if replay_button != null:
+					replay_button.emit_signal("pressed")
+					await process_frame
+					world.set("plane_y", FlightWorld.GROUND_Y)
+					world.call("step", 1.0 / 60.0)
+					await create_timer(0.8).timeout
+					var empty_history: Array = world.get("answer_history")
+					var empty_review_button := main.get("_over_review_button") as Button
+					_check(empty_history.is_empty() and main.get("_state") == "over" and empty_review_button != null and not empty_review_button.disabled, "export allows review after a crash before the first gate")
+					if empty_review_button != null:
+						empty_review_button.emit_signal("pressed")
+						await process_frame
+						var empty_list := main.get("_answer_review_list") as VBoxContainer
+						var empty_html := str(main.call("_build_answer_report_html"))
+						_check(main.get("_state") == "review" and empty_list.get_child_count() == 1 and empty_html.contains("No questions were recorded on this flight."), "exported zero-answer review and PDF show the empty state")
 		var active_question: Dictionary = world.get("current_question")
 		_check(active_question.has("topic") and active_question.has("topic_group") and active_question.has("hint_key"), "pack question includes selected subject and teaching metadata")
 		_check(str(active_question.topic_group) in main.call("_selected_topic_groups"), "generated question respects the selected Math track")

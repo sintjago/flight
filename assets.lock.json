@@ -20,6 +20,10 @@
     "template": {
       "name": "Template",
       "order": 0
+    },
+    "typography": {
+      "name": "Typography",
+      "order": 5
     }
   },
   "bundles": {},
@@ -102,6 +106,14 @@
       "size": 9266,
       "assetType": "image",
       "groupId": "sprites",
+      "used": true
+    },
+    "assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2": {
+      "path": "/manus-storage/game/sha256/64fce226712c1f9cf18046fff658d6aed0fa9fcb06d5689eef5e85e491d334b9.woff2",
+      "sha256": "sha256:64fce226712c1f9cf18046fff658d6aed0fa9fcb06d5689eef5e85e491d334b9",
+      "size": 89324,
+      "assetType": "font",
+      "groupId": "typography",
       "used": true
     },
     "assets/paperglide/notebook.jpg": {

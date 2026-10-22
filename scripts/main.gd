@@ -5,6 +5,7 @@ const FlightWorld = preload("res://scripts/flight/flight_world.gd")
 const SfxBank = preload("res://scripts/flight/sfx_bank.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
+const AnswerReportDocument = preload("res://scripts/flight/answer_report_document.gd")
 const TITLE_FONT: Font = preload("res://assets/template/fonts/display/generic_title.tres")
 
 const GRAPHITE := Color(0.16, 0.17, 0.2)
@@ -15,7 +16,7 @@ const RED_PENCIL := Color(0.82, 0.25, 0.22)
 const SAGE := Color(0.6, 0.78, 0.5)
 const RESTART_LOCKOUT_MS := 550
 
-## "title", "playing", "paused" or "over".
+## "title", "playing", "paused", "over" or "review".
 var _state := "title"
 var _world: Node2D
 var _hud: Control
@@ -67,7 +68,16 @@ var _over_note: Label
 var _over_again_button: Button
 var _over_easier_button: Button
 var _over_home_button: Button
+var _over_review_button: Button
 var _over_coins_label: Label
+var _answer_review_screen: Control
+var _answer_review_summary: Label
+var _answer_review_list: VBoxContainer
+var _answer_review_status: Label
+var _answer_review_pdf_button: Button
+var _answer_review_back_button: Button
+var _answer_history: Array[Dictionary] = []
+var _answer_review_context: Dictionary = {}
 var _pause_screen: Control
 var _hangar_screen: Control
 var _hangar_balance_label: Label
@@ -101,6 +111,7 @@ func _ready() -> void:
 	_build_difficulty_screen()
 	_build_speed_screen()
 	_build_over()
+	_build_answer_review()
 	_build_pause()
 	SfxBank.register_all(get_node_or_null("/root/AudioDirector"))
 	var store := get_node_or_null("/root/TuningStore")
@@ -839,6 +850,15 @@ func _build_over() -> void:
 	_over_home_button.custom_minimum_size = Vector2(190, 58)
 	_over_home_button.pressed.connect(_return_to_home)
 	actions.add_child(_over_home_button)
+	var review_row := HBoxContainer.new()
+	review_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	review_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_child(review_row)
+	_over_review_button = _make_button(I18n.t("over.review_answers", {"count": 0}), 18, Color(0.78, 0.86, 0.96))
+	_over_review_button.name = "ReviewAnswersButton"
+	_over_review_button.custom_minimum_size = Vector2(340, 48)
+	_over_review_button.pressed.connect(_show_answer_review)
+	review_row.add_child(_over_review_button)
 	box.add_child(_make_label(I18n.t("over.choose_action"), 15, Color(GRAPHITE, 0.6)))
 	_over_stamp = _make_label(I18n.t("over.new_best"), 34, RED_PENCIL, true)
 	_over_stamp.rotation_degrees = 12.0
@@ -849,6 +869,241 @@ func _build_over() -> void:
 	_over_stamp.add_theme_constant_override("outline_size", 6)
 	_over_screen.add_child(_over_stamp)
 	_over_again_button = again
+
+
+func _build_answer_review() -> void:
+	_answer_review_screen = _full_rect_control("AnswerReviewScreen")
+	_answer_review_screen.visible = false
+	var background := ColorRect.new()
+	background.color = PAPER
+	background.mouse_filter = Control.MOUSE_FILTER_STOP
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_answer_review_screen.add_child(background)
+	var card := _make_card(Vector2(1160, 684), 360.0)
+	_answer_review_screen.add_child(card)
+	var box := VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 8)
+	card.add_child(box)
+	box.add_child(_make_label(I18n.t("answer_review.title"), 36, GRAPHITE, true))
+	_answer_review_summary = _make_label("", 17, BLUE_PENCIL.darkened(0.2))
+	box.add_child(_answer_review_summary)
+	var intro := _make_label(I18n.t("answer_review.subtitle"), 15, Color(GRAPHITE, 0.76))
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(intro)
+	var scroll := ScrollContainer.new()
+	scroll.name = "AnswerReviewScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.custom_minimum_size = Vector2(0, 390)
+	box.add_child(scroll)
+	_answer_review_list = VBoxContainer.new()
+	_answer_review_list.name = "AnswerReviewEntries"
+	_answer_review_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_answer_review_list.add_theme_constant_override("separation", 10)
+	scroll.add_child(_answer_review_list)
+	_answer_review_status = _make_label(I18n.t("answer_review.pdf_help"), 14, Color(GRAPHITE, 0.68))
+	_answer_review_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_answer_review_status)
+	var actions := HBoxContainer.new()
+	actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation", 12)
+	box.add_child(actions)
+	var home_button := _make_button(I18n.t("answer_review.home"), 18, Color(0.78, 0.86, 0.96))
+	home_button.name = "AnswerReviewHomeButton"
+	home_button.custom_minimum_size = Vector2(190, 54)
+	home_button.pressed.connect(_return_to_home)
+	actions.add_child(home_button)
+	_answer_review_back_button = _make_button(I18n.t("answer_review.back_results"), 18, Color(0.98, 0.86, 0.5))
+	_answer_review_back_button.name = "AnswerReviewBackButton"
+	_answer_review_back_button.custom_minimum_size = Vector2(270, 54)
+	_answer_review_back_button.pressed.connect(_show_results_from_review)
+	actions.add_child(_answer_review_back_button)
+	_answer_review_pdf_button = _make_button(I18n.t("answer_review.pdf"), 18, SAGE)
+	_answer_review_pdf_button.name = "AnswerReviewPdfButton"
+	_answer_review_pdf_button.custom_minimum_size = Vector2(340, 54)
+	_answer_review_pdf_button.pressed.connect(_save_answer_review_pdf)
+	actions.add_child(_answer_review_pdf_button)
+
+
+func _show_answer_review() -> void:
+	if _state != "over":
+		return
+	_state = "review"
+	_world.visible = false
+	_hud.visible = false
+	_over_screen.visible = false
+	_pause_screen.visible = false
+	_answer_review_screen.visible = true
+	_answer_review_status.text = I18n.t("answer_review.pdf_help")
+	_update_answer_review()
+	_answer_review_back_button.grab_focus()
+
+
+func _show_results_from_review() -> void:
+	if _state != "review":
+		return
+	_state = "over"
+	_world.visible = true
+	_hud.visible = true
+	_answer_review_screen.visible = false
+	_over_screen.visible = true
+	_over_again_button.grab_focus()
+
+
+func _answer_topic_label(topic: String) -> String:
+	if topic.is_empty():
+		return ""
+	var key := "topic." + topic
+	var translated := I18n.t(key)
+	return topic.replace("_", " ").capitalize() if translated == key else translated
+
+
+func _answer_outcome_label(entry: Dictionary) -> String:
+	var status := str(entry.get("status", "unanswered"))
+	if status == "correct":
+		return I18n.t("answer_review.status.correct" if bool(entry.get("scored", false)) else "answer_review.status.correct_incomplete")
+	if status == "incorrect":
+		return I18n.t("answer_review.status.incorrect")
+	return I18n.t("answer_review.status.unanswered")
+
+
+func _localized_answer_review_entries() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for source_entry: Dictionary in _answer_history:
+		var entry := source_entry.duplicate(true)
+		entry["topic_label"] = _answer_topic_label(str(entry.get("topic", "")))
+		entry["outcome_label"] = _answer_outcome_label(entry)
+		if str(entry.get("status", "")) == "correct" and not bool(entry.get("scored", false)):
+			entry["gate_note"] = I18n.t("answer_review.gate_not_scored_note")
+		entries.append(entry)
+	return entries
+
+
+func _update_answer_review() -> void:
+	var area := str(_answer_review_context.get("practice_area", _selected_practice_area))
+	var level := int(_answer_review_context.get("level", _selected_level))
+	var pace := int(_answer_review_context.get("pace", _selected_speed))
+	_answer_review_summary.text = I18n.t("answer_review.summary", {
+		"score": int(_answer_review_context.get("score", 0)),
+		"count": _answer_history.size(),
+		"area": I18n.t("practice." + area),
+		"level": I18n.t("difficulty.level." + str(level)),
+		"pace": I18n.t("speed.pace." + str(pace)),
+	})
+	for child: Node in _answer_review_list.get_children():
+		child.queue_free()
+	if _answer_history.is_empty():
+		var empty := _make_label(I18n.t("answer_review.empty"), 18, Color(GRAPHITE, 0.72))
+		_answer_review_list.add_child(empty)
+		return
+	for entry: Dictionary in _localized_answer_review_entries():
+		var status := str(entry.get("status", "unanswered"))
+		var border := SAGE.darkened(0.22) if status == "correct" else RED_PENCIL if status == "incorrect" else BLUE_PENCIL
+		var panel := PanelContainer.new()
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_theme_stylebox_override("panel", _card_style(border))
+		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_answer_review_list.add_child(panel)
+		var card_box := VBoxContainer.new()
+		card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card_box.add_theme_constant_override("separation", 6)
+		panel.add_child(card_box)
+		var heading := I18n.t("answer_review.question", {
+			"number": int(entry.get("number", 0)),
+			"topic": str(entry.get("topic_label", "")),
+		})
+		var heading_row := HBoxContainer.new()
+		heading_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card_box.add_child(heading_row)
+		var heading_label := _make_label(heading, 17, GRAPHITE, true)
+		heading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		heading_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		heading_row.add_child(heading_label)
+		var status_color := SAGE.darkened(0.3) if status == "correct" else RED_PENCIL if status == "incorrect" else BLUE_PENCIL.darkened(0.2)
+		var status_label := _make_label(_answer_outcome_label(entry), 14, status_color, true)
+		status_label.custom_minimum_size.x = 255
+		heading_row.add_child(status_label)
+		var question_label := _make_label(str(entry.get("expression", "")), 20, GRAPHITE)
+		question_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		question_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		card_box.add_child(question_label)
+		var answers_row := HBoxContainer.new()
+		answers_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		answers_row.add_theme_constant_override("separation", 24)
+		card_box.add_child(answers_row)
+		var selected_answer := str(entry.get("selected_answer", ""))
+		if selected_answer.is_empty():
+			selected_answer = I18n.t("answer_review.not_answered")
+		_add_review_answer_column(answers_row, I18n.t("answer_review.your_answer"), selected_answer)
+		_add_review_answer_column(answers_row, I18n.t("answer_review.correct_answer"), str(entry.get("correct_answer", "")))
+		var gate_note := str(entry.get("gate_note", ""))
+		if not gate_note.is_empty():
+			var note := _make_label(gate_note, 13, Color(GRAPHITE, 0.68))
+			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			card_box.add_child(note)
+
+
+func _add_review_answer_column(parent: HBoxContainer, heading: String, answer: String) -> void:
+	var column := VBoxContainer.new()
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 2)
+	parent.add_child(column)
+	var title := _make_label(heading.to_upper(), 12, Color(GRAPHITE, 0.62))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	column.add_child(title)
+	var value := _make_label(answer, 16, GRAPHITE)
+	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(value)
+
+
+func _build_answer_report_html() -> String:
+	var area := str(_answer_review_context.get("practice_area", _selected_practice_area))
+	var level := int(_answer_review_context.get("level", _selected_level))
+	var pace := int(_answer_review_context.get("pace", _selected_speed))
+	var score := int(_answer_review_context.get("score", 0))
+	var context := {
+		"summary": I18n.t("answer_review.summary", {
+			"score": score,
+			"count": _answer_history.size(),
+			"area": I18n.t("practice." + area),
+			"level": I18n.t("difficulty.level." + str(level)),
+			"pace": I18n.t("speed.pace." + str(pace)),
+		}),
+		"date": str(_answer_review_context.get("ended_at", "")),
+	}
+	var labels := {
+		"report_title": I18n.t("answer_review.print_title"),
+		"print_button": I18n.t("answer_review.print_button"),
+		"print_instructions": I18n.t("answer_review.pdf_help"),
+		"date_label": I18n.t("answer_review.date_label"),
+		"question_prefix": I18n.t("answer_review.question_prefix"),
+		"your_answer": I18n.t("answer_review.your_answer"),
+		"correct_answer": I18n.t("answer_review.correct_answer"),
+		"not_answered": I18n.t("answer_review.not_answered"),
+		"empty": I18n.t("answer_review.empty"),
+		"footer": I18n.t("answer_review.print_footer"),
+	}
+	return AnswerReportDocument.build_document(context, _localized_answer_review_entries(), labels)
+
+
+func _save_answer_review_pdf() -> void:
+	if _state != "review":
+		return
+	if not OS.has_feature("web") or not Engine.has_singleton("JavaScriptBridge"):
+		_answer_review_status.text = I18n.t("answer_review.pdf_web_only")
+		return
+	var report_html := _build_answer_report_html()
+	var javascript := "(function(){var reportWindow=window.open('', '_blank');if(!reportWindow)return 'blocked';reportWindow.document.open();reportWindow.document.write(" + JSON.stringify(report_html) + ");reportWindow.document.close();var printReport=function(){reportWindow.focus();reportWindow.print();};if(reportWindow.document.fonts&&reportWindow.document.fonts.ready){reportWindow.document.fonts.ready.then(printReport,printReport);}else{reportWindow.setTimeout(printReport,600);}return 'opened';})()"
+	var bridge: Object = Engine.get_singleton("JavaScriptBridge")
+	var result: Variant = bridge.call("eval", javascript, true)
+	_answer_review_status.text = I18n.t("answer_review.pdf_opened") if str(result) == "opened" else I18n.t("answer_review.pdf_blocked")
 
 
 func _build_pause() -> void:
@@ -1026,7 +1281,10 @@ func _show_title() -> void:
 	_world.call("set_speed_level", _selected_speed)
 	var save := _save()
 	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
+	_world.visible = true
+	_hud.visible = true
 	_world.call("reset_ready")
+	_answer_review_screen.visible = false
 	_show_setup_page(_title_screen, "title")
 	_update_title_best()
 	_update_wallet_labels()
@@ -1039,10 +1297,14 @@ func _start_new_run() -> void:
 	_world.call("set_selected_topics", _selected_topic_groups())
 	_world.call("set_speed_level", _selected_speed)
 	_coins_earned_this_run = 0
+	_answer_history.clear()
+	_answer_review_context.clear()
 	_cheer_label.visible = false
 	_cheer_time_left = 0.0
 	var save := _save()
 	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
+	_world.visible = true
+	_hud.visible = true
 	_world.call("reset_ready")
 	_title_screen.visible = false
 	_topic_screen.visible = false
@@ -1050,6 +1312,7 @@ func _start_new_run() -> void:
 	_speed_screen.visible = false
 	_over_screen.visible = false
 	_pause_screen.visible = false
+	_answer_review_screen.visible = false
 	_question_bar.visible = true
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
 			"level": _selected_level,
@@ -1232,6 +1495,21 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 		return
 	_state = "over"
 	_over_unlock_ms = Time.get_ticks_msec() + RESTART_LOCKOUT_MS
+	_answer_history.clear()
+	var flight_history: Variant = _world.get("answer_history")
+	if flight_history is Array:
+		for entry: Variant in flight_history:
+			if entry is Dictionary:
+				_answer_history.append(entry.duplicate(true))
+	_answer_review_context = {
+		"practice_area": _selected_practice_area,
+		"level": _selected_level,
+		"pace": _selected_speed,
+		"score": total,
+		"ended_at": Time.get_datetime_string_from_system(false, true),
+	}
+	_over_review_button.text = I18n.t("over.review_answers", {"count": _answer_history.size()})
+	_over_review_button.disabled = false
 	var store := _store()
 	var ranked := store == null or bool(store.call("is_ranked_eligible"))
 	_last_run_practice = not ranked

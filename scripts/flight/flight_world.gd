@@ -86,6 +86,7 @@ var speed_level := 1
 var selected_topic_groups: Array[String] = ["addition", "subtraction", "multiplication", "division", "fractions", "number_sense"]
 var practice_area := "math"
 var current_question: Dictionary = {}
+var answer_history: Array[Dictionary] = []
 var failure_reason := ""
 var failure_answer := ""
 var failure_question := ""
@@ -243,6 +244,7 @@ func _start_run() -> void:
 	score = 0
 	spawned = 0
 	pipes.clear()
+	answer_history.clear()
 	current_question.clear()
 	_learning_prompt_history.clear()
 	_last_learning_category_by_key.clear()
@@ -366,6 +368,11 @@ func _spawn_gate(x: float) -> void:
 		"upper_answer": question.upper_answer,
 		"lower_answer": question.lower_answer,
 		"correct_lane": question.correct_lane,
+		"question_number": spawned + 1,
+		"practice_area": str(question.get("practice_area", practice_area)),
+		"difficulty_level": int(question.get("difficulty_level", difficulty_level)),
+		"difficulty": str(question.get("difficulty", MathQuestion.band_for_level(difficulty_level))),
+		"answer_recorded": false,
 		"passed": false,
 	})
 	current_question = question.duplicate()
@@ -424,12 +431,14 @@ func _step_playing(delta: float) -> void:
 			gate.passed = true
 			var chosen_lane := _lane_for_y(plane_y, gate)
 			if chosen_lane != str(gate.correct_lane):
+				_record_gate_answer(gate, chosen_lane, false)
 				failure_answer = str(gate.answer)
 				failure_question = str(gate.expression)
 				failure_hint_key = str(gate.hint_key)
 				_die(false, "wrong_answer")
 				return
 			score += 1
+			_record_gate_answer(gate, chosen_lane, true)
 			_emit_score_ticks()
 			scored.emit(score)
 
@@ -452,6 +461,7 @@ func _step_dead(delta: float) -> void:
 func _die(hit_ground: bool, reason: String = "collision") -> void:
 	if state != "playing":
 		return
+	_record_pending_answer_on_crash()
 	state = "dead"
 	failure_reason = reason
 	plane_vy = 0.0 if hit_ground else -260.0
@@ -462,6 +472,46 @@ func _die(hit_ground: bool, reason: String = "collision") -> void:
 	if store != null:
 		store.call("end_run")
 	crashed.emit(score, hit_ground)
+
+
+func _record_gate_answer(gate: Dictionary, selected_lane: String, scored: bool) -> void:
+	if bool(gate.get("answer_recorded", false)):
+		return
+	var selected_answer := ""
+	if selected_lane == "upper":
+		selected_answer = str(gate.get("upper_answer", ""))
+	elif selected_lane == "lower":
+		selected_answer = str(gate.get("lower_answer", ""))
+	var correct_answer := str(gate.get("answer", ""))
+	var status := "unanswered"
+	if not selected_answer.is_empty():
+		status = "correct" if selected_answer == correct_answer else "incorrect"
+	answer_history.append({
+		"number": int(gate.get("question_number", answer_history.size() + 1)),
+		"expression": str(gate.get("expression", "")),
+		"selected_answer": selected_answer,
+		"correct_answer": correct_answer,
+		"topic": str(gate.get("topic", "")),
+		"practice_area": str(gate.get("practice_area", practice_area)),
+		"difficulty_level": int(gate.get("difficulty_level", difficulty_level)),
+		"status": status,
+		"scored": scored,
+	})
+	gate["answer_recorded"] = true
+
+
+func _record_pending_answer_on_crash() -> void:
+	for index: int in range(pipes.size() - 1, -1, -1):
+			var gate: Dictionary = pipes[index]
+			if bool(gate.get("passed", false)) or bool(gate.get("answer_recorded", false)):
+				continue
+			var gate_distance := absf(float(gate.get("x", 0.0)) - PLANE_X)
+			if gate_distance > PIPE_CAP_HALF + 60.0:
+				continue
+			var selected_lane := ""
+			selected_lane = _lane_for_y(plane_y, gate)
+			_record_gate_answer(gate, selected_lane, false)
+			return
 
 
 func _advance_background(delta: float, speed: float) -> void:
