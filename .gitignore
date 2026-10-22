@@ -23,5 +23,6 @@ node_modules/
 /assets/**/*.woff2
 
 !site/**
+site/**/*.import
 
 # Template fonts (subset WOFF2) restore from assets.lock.json like other media.

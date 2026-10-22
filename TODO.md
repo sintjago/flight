@@ -105,3 +105,12 @@ Across these engine updates, preserve procedural variety, age appropriateness, a
 
 ## Science fact-scope and beginner coverage refinement — complete
 - [x] Scope the DNA/nucleus fact to typical plant/animal cells in curated and generated content, and balance beginner solid/liquid/gas coverage while keeping questions procedural and offline.
+
+
+## Scope change: Paper Glide educational dungeon crawler — complete
+The user has replaced the flight gameplay with a turn-based dungeon crawler and selected turn-based combat. This supersedes flight-specific loop and pace requirements; preserve the existing five learning packs, question content/generators, Math tracks, 1–5 challenge, local save data, coin rewards, cheer unlocks and printable answer review.
+- [x] Replace one-tap flight with a readable top-down, grid-based, turn-by-turn paper dungeon. Move by arrow keys/WASD one tile at a time; no real-time pressure, touch-control expansion, or flight-pace step.
+- [x] Trigger each enemy encounter when the player steps adjacent. Ask a two-choice question from the existing subject/track/level engine; correct answers damage enemies, score, and earn a coin/cheer; incorrect answers record the response, show the correct answer and hint, and cost one of three hearts. Provide clear win, defeat, restart, Home, and lower-difficulty paths.
+- [x] Deliver a short three-room crawl with unlockable exits and a final guardian, using clear paths and distinct enemy roles; preserve topic/hint metadata, per-subject best scores, and accurate run answer history.
+- [x] Repurpose the plane Hangar as a paper-adventurer wardrobe without discarding save IDs, owned items, costs, coin balances or cheer selections; keep all cosmetic styles separate from combat math.
+- [x] Retain the post-run answer-review screen and offline PDF export, replacing flight-specific summary fields with dungeon context. Use coherent pen-drawn hero/enemy art and notebook-paper dungeon visuals.

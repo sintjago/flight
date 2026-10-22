@@ -1,10 +1,12 @@
 extends Node
 
 const FlightWorld = preload("res://scripts/flight/flight_world.gd")
+const DungeonWorld = preload("res://scripts/dungeon/dungeon_world.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
 const AnswerReportDocument = preload("res://scripts/flight/answer_report_document.gd")
 const LearningEngineRefinementTests = preload("res://test/learning_engine_refinement_tests.gd")
+const DungeonLoopTests = preload("res://test/dungeon_loop_tests.gd")
 
 var _failures := PackedStringArray()
 var _checks := 0
@@ -29,10 +31,11 @@ func _run() -> void:
 	_test_learning_questions()
 	LearningEngineRefinementTests.run(Callable(self, "_check"))
 	_test_question_rotation()
+	DungeonLoopTests.run(Callable(self, "_check"), get_tree())
 	await _test_simulation()
 	_test_fairness_bot()
 	_test_save_store()
-	await _test_runtime_scene()
+	await _test_runtime_dungeon_scene()
 	_restore_user_files()
 	if _failures.is_empty():
 		print("[paper-glide-tests] PASS: %d checks" % _checks)
@@ -1203,3 +1206,222 @@ func _check(condition: bool, message: String) -> void:
 	_checks += 1
 	if not condition:
 		_failures.append(message)
+
+
+func _test_runtime_dungeon_scene() -> void:
+	get_tree().root.get_node("TuningStore").call("reset_defaults")
+	SaveStore.set("_data", SaveStore.call("_default_data"))
+	var packed: PackedScene = load("res://scenes/main.tscn")
+	_check(packed != null, "main dungeon scene must load")
+	if packed == null:
+		return
+	var main: Control = packed.instantiate()
+	get_tree().root.add_child(main)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check(main.get("_state") == "title" and (main.get("_title_screen") as Control).visible, "the game boots at learning-pack selection")
+	_check(main.find_child("SpeedScreen", true, false) == null, "the obsolete Flight Pace setup step is removed")
+
+	var hangar_button := main.get("_title_hangar_button") as Button
+	_check(hangar_button != null and hangar_button.text.contains("WARDROBE"), "the title opens an adventurer wardrobe")
+	if hangar_button != null:
+		hangar_button.emit_signal("pressed")
+	var hangar_screen := main.get("_hangar_screen") as Control
+	var hangar_buttons: Dictionary = main.get("_hangar_buttons")
+	var cheer_buttons: Dictionary = main.get("_hangar_cheer_buttons")
+	_check(main.get("_state") == "hangar" and hangar_screen.visible and hangar_buttons.size() == SaveStore.PLANE_IDS.size() and hangar_buttons.size() == 10, "the wardrobe preserves all ten unlockable cosmetic styles")
+	_check(cheer_buttons.size() == SaveStore.CHEER_IDS.size() and cheer_buttons.size() == 3, "the wardrobe preserves the three cheers")
+	var sky_entry: Dictionary = hangar_buttons.get("sky", {})
+	var sky_button := sky_entry.get("button") as Button
+	if sky_button != null:
+		sky_button.emit_signal("pressed")
+	_check(SaveStore.get_coins() == 0 and not SaveStore.owns_plane("sky") and str((main.get("_hangar_status_label") as Label).text).contains("10 more coins"), "locked styles explain the coin shortfall without charging the wallet")
+	SaveStore.add_coins(10)
+	main.call("_update_hangar")
+	if sky_button != null:
+		sky_button.emit_signal("pressed")
+	_check(SaveStore.owns_plane("sky") and SaveStore.get_selected_plane() == "sky" and str(main.get("_world").get("selected_style_id")) == "sky", "correct-answer coins unlock and equip an adventurer style")
+	var paper_entry: Dictionary = hangar_buttons.get("paper", {})
+	var paper_button := paper_entry.get("button") as Button
+	if paper_button != null:
+		paper_button.emit_signal("pressed")
+	_check(SaveStore.get_selected_plane() == "paper", "the free starter style remains selectable")
+	var cheers_tab := hangar_screen.find_child("HangarCheersTab", true, false) as Button
+	var cheers_row := hangar_screen.find_child("HangarCheerChoices", true, false) as Control
+	if cheers_tab != null:
+		cheers_tab.emit_signal("pressed")
+	var banzai_entry: Dictionary = cheer_buttons.get("banzai", {})
+	var banzai_button := banzai_entry.get("button") as Button
+	var banzai_preview := banzai_button.find_child("HangarCheerPreview_banzai", true, false) as Label if banzai_button != null else null
+	_check(cheers_row != null and cheers_row.visible and banzai_preview != null and banzai_preview.text == "Banzai!", "the cheers tab keeps the Banzai callout")
+	_check(I18n.t("cheer.callout.excelente") == "¡Excelente!" and SaveStore.get_cheer_cost("excelente") == 15, "the Spanish celebration keeps its exact wording and coin cost")
+	if banzai_button != null:
+		banzai_button.emit_signal("pressed")
+	SaveStore.add_coins(10)
+	main.call("_update_hangar")
+	if banzai_button != null:
+		banzai_button.emit_signal("pressed")
+	_check(SaveStore.owns_cheer("banzai") and SaveStore.get_selected_cheer() == "banzai", "earned coins unlock and equip the Banzai cheer")
+	var styles_checked := 0
+	for style_id: String in SaveStore.PLANE_IDS:
+		var style_entry: Dictionary = hangar_buttons.get(style_id, {})
+		var style_button := style_entry.get("button") as Button
+		var style_preview := style_button.find_child("HangarPlanePreview_" + style_id, true, false) as TextureRect if style_button != null else null
+		_check(style_button != null and style_preview != null and style_preview.texture == DungeonWorld.hero_texture_for(style_id), "%s shows the shared hand-drawn adventurer sprite" % style_id)
+		if style_button == null:
+			continue
+		if not SaveStore.owns_plane(style_id):
+			SaveStore.add_coins(SaveStore.get_plane_cost(style_id))
+			main.call("_update_hangar")
+			style_button.emit_signal("pressed")
+		else:
+			style_button.emit_signal("pressed")
+		_check(SaveStore.owns_plane(style_id) and SaveStore.get_selected_plane() == style_id and str(main.get("_world").get("selected_style_id")) == style_id, "%s saves and equips as a cosmetic hero style" % style_id)
+		styles_checked += 1
+	_check(styles_checked == 10 and DungeonWorld.hero_texture_for("paper") != null, "all ten saved styles use a valid transparent hero texture")
+	var wardrobe_back := hangar_screen.find_child("HangarBackButton", true, false) as Button
+	if wardrobe_back != null:
+		wardrobe_back.emit_signal("pressed")
+	_check(main.get("_state") == "title", "leaving the wardrobe returns to learning-pack selection")
+
+	var practice_buttons: Dictionary = main.get("_practice_buttons")
+	_check(practice_buttons.size() == 5, "all five learning subjects remain selectable")
+	for area: String in ["reading", "russian", "spanish", "science"]:
+		var pack_button := practice_buttons.get(area) as Button
+		_check(pack_button != null and not pack_button.disabled and pack_button.text == I18n.t("practice." + area), "%s remains a clearly named learning pack" % area)
+		main.call("_show_title")
+		if pack_button != null:
+			pack_button.emit_signal("pressed")
+		_check(main.get("_state") == "difficulty" and not (main.get("_topic_screen") as Control).visible, "%s goes directly to its challenge without a Math-only track page" % area)
+		_check(str((main.get("_difficulty_subtitle_label") as Label).text).contains("STEP 2 OF 2"), "%s uses the final two-step setup count" % area)
+	main.call("_show_title")
+	var math_button := practice_buttons.get("math") as Button
+	if math_button != null:
+		math_button.emit_signal("pressed")
+	_check(main.get("_state") == "topics" and bool((main.get("_topic_screen") as Control).visible), "Math opens its separate track-selection step")
+	var track_buttons: Dictionary = main.get("_track_buttons")
+	_check(track_buttons.size() == 3 and track_buttons.has("math_1") and track_buttons.has("math_2") and track_buttons.has("math_3"), "Math keeps its three bundled tracks")
+	(track_buttons.get("math_2") as Button).emit_signal("pressed")
+	var selected_groups: Array = main.call("_selected_topic_groups")
+	_check("decimals" in selected_groups and "algebra" in selected_groups and "fractions" in selected_groups and "addition" not in selected_groups, "Math 2 still selects its bundled middle-school content")
+	main.call("_continue_to_difficulty")
+	(track_buttons.get("math_3") as Button).emit_signal("pressed")
+	main.call("_set_difficulty_level", 5)
+	_check(main.get("_state") == "difficulty" and int(main.get("_selected_level")) == 5 and str(main.get("_selected_math_track")) == "math_3", "Math 3 retains the independent five-level challenge selector")
+	_check(str((main.get("_difficulty_subtitle_label") as Label).text).contains("STEP 3 OF 3"), "Math now enters the dungeon directly after its third setup step")
+	var wallet_before := SaveStore.get_coins()
+	var enter_button := main.get("_difficulty_next_button") as Button
+	if enter_button != null:
+		enter_button.emit_signal("pressed")
+	_check(main.get("_state") == "playing", "the challenge screen starts a fresh dungeon run directly")
+	var world: Node2D = main.get("_world")
+	_check(str(world.get("state")) == "exploring" and int(world.get("hearts")) == 3 and int(world.get("room_index")) == 0, "the run begins in chamber one with three hearts")
+	_check("trigonometry" in world.get("selected_topic_groups") and "quadratics" in world.get("selected_topic_groups"), "the chosen Math 3 topics reach the dungeon question generator")
+	_check(bool((main.get("_question_bar") as Control).visible) and str((main.get("_question_hint_label") as Label).text).contains("WASD"), "the HUD explains turn-based keyboard movement")
+	var initial_room_label := str((main.get("_room_label") as Label).text)
+	_check(initial_room_label.contains("1/4"), "the HUD shows current chamber progress")
+	_send_dungeon_key(main, KEY_D)
+	_send_dungeon_key(main, KEY_D)
+	_check(str(world.get("state")) == "combat", "WASD movement triggers combat when the hero reaches the foe")
+	var answer_buttons: Array = main.get("_answer_choice_buttons")
+	var question: Dictionary = world.get("current_question")
+	var options: Array = question.get("answer_options", [])
+	var correct_index := int(question.get("correct_index", -1))
+	_check(options.size() == 2 and (answer_buttons[0] as Button).visible and (answer_buttons[1] as Button).visible, "combat presents two visible answer choices")
+	(answer_buttons[1 - correct_index] as Button).emit_signal("pressed")
+	_check(str(world.get("state")) == "feedback" and int(world.get("hearts")) == 2 and str((main.get("_heart_label") as Label).text).contains("2/3"), "an incorrect choice removes one heart and updates the HUD")
+	_check((main.get("_continue_turn_button") as Button).visible and str((main.get("_question_hint_label") as Label).text) != I18n.t("dungeon.choose_answer"), "incorrect combat shows a teaching hint and a continue action")
+	(main.get("_continue_turn_button") as Button).emit_signal("pressed")
+	question = world.get("current_question")
+	correct_index = int(question.get("correct_index", -1))
+	(answer_buttons[correct_index] as Button).emit_signal("pressed")
+	_check(str(world.get("state")) == "exploring" and not bool(world.get("enemy_alive")) and bool(world.get("exit_unlocked")), "a correct choice defeats the foe and opens the chamber exit")
+	_check(int(world.get("score")) == 1 and SaveStore.get_coins() == wallet_before + 1 and int(main.get("_coins_earned_this_run")) == 1, "one correct combat answer earns one score point and one coin")
+	_check(bool((main.get("_cheer_label") as Label).visible) and str((main.get("_cheer_label") as Label).text) == "Banzai!", "the selected saved cheer appears after a correct answer")
+	main.call("_set_paused", true)
+	_check(get_tree().paused and main.get("_state") == "paused", "pause freezes the dungeon run")
+	main.call("_set_paused", false)
+	_check(not get_tree().paused and main.get("_state") == "playing", "resume returns to the same dungeon turn")
+
+	for _step in range(4):
+		_send_dungeon_key(main, KEY_D)
+	_check(int(world.get("room_index")) == 1 and str((main.get("_room_label") as Label).text).contains("2/4"), "stepping onto the open exit advances to chamber two")
+	_send_dungeon_key(main, KEY_S)
+	for _step in range(4):
+		_send_dungeon_key(main, KEY_D)
+	_send_dungeon_key(main, KEY_W)
+	_check(str(world.get("state")) == "combat", "the second chamber is reachable by grid exploration")
+	for attempt in range(2):
+		question = world.get("current_question")
+		correct_index = int(question.get("correct_index", -1))
+		(answer_buttons[1 - correct_index] as Button).emit_signal("pressed")
+		if attempt == 0:
+			_check(int(world.get("hearts")) == 1 and str(world.get("state")) == "feedback", "a second mistake costs exactly one more heart")
+			(main.get("_continue_turn_button") as Button).emit_signal("pressed")
+	_check(str(world.get("state")) == "defeated" and int(world.get("hearts")) == 0, "the third incorrect answer ends the run")
+	await get_tree().create_timer(0.8).timeout
+	_check(bool((main.get("_over_screen") as Control).visible), "defeat results present recovery actions")
+	_check(str((main.get("_over_coins_label") as Label).text).contains("+1") and str((main.get("_over_coins_label") as Label).text).contains("WALLET:"), "results report the earned coin and saved balance")
+	_check((main.get("_over_again_button") as Button) != null and (main.get("_over_easier_button") as Button) != null and (main.get("_over_home_button") as Button) != null, "results offer Try Again, Lower Difficulty and Home")
+	var run_history: Array = world.get("answer_history")
+	_check(run_history.size() == 4 and str(run_history[0].get("status", "")) == "incorrect" and str(run_history[1].get("status", "")) == "correct", "results preserve the complete answer history for review")
+	var review_button := main.get("_over_review_button") as Button
+	_check(review_button != null and not review_button.disabled and review_button.text.contains("REVIEW ANSWERS · 4"), "results offer answer review with the recorded question count")
+	if review_button != null:
+		review_button.emit_signal("pressed")
+	await get_tree().process_frame
+	var review_screen := main.get("_answer_review_screen") as Control
+	var review_list := main.get("_answer_review_list") as VBoxContainer
+	_check(main.get("_state") == "review" and review_screen.visible and review_list.get_child_count() == 4, "the answer-review screen contains one row for each answered encounter")
+	_check((review_screen.get_theme_font("font") as Font).has_char(0x0441) and (review_screen.get_theme_font("font") as Font).has_char(0x00F1), "answer review still supports Cyrillic and Spanish characters")
+	var report_html := str(main.call("_build_answer_report_html"))
+	_check(report_html.contains("<meta charset=\"utf-8\">") and report_html.contains(str(run_history[0].get("expression", ""))) and report_html.contains(str(run_history[0].get("correct_answer", ""))) and report_html.contains("Save as PDF"), "print-ready report preserves the actual dungeon questions and PDF instructions")
+	var pdf_button := main.get("_answer_review_pdf_button") as Button
+	if pdf_button != null:
+		pdf_button.emit_signal("pressed")
+	_check(str((main.get("_answer_review_status") as Label).text) == I18n.t("answer_review.pdf_web_only"), "native test runner explains that PDF saving uses the Web export")
+	var review_back := main.get("_answer_review_back_button") as Button
+	if review_back != null:
+		review_back.emit_signal("pressed")
+	await get_tree().process_frame
+	_check(main.get("_state") == "over" and (main.get("_over_screen") as Control).visible, "Back to Results restores the dungeon results card")
+
+	var try_again := main.get("_over_again_button") as Button
+	if try_again != null:
+		try_again.emit_signal("pressed")
+	_check(main.get("_state") == "playing" and int(main.get("_selected_level")) == 5 and int(world.get("hearts")) == 3, "Try Again starts a fresh run at the same challenge")
+	_defeat_active_dungeon_run(main)
+	await get_tree().create_timer(0.8).timeout
+	_check(not (main.get("_over_easier_button") as Button).disabled, "Lower Difficulty is available when the selected Math track has lower-level content")
+	(main.get("_over_easier_button") as Button).emit_signal("pressed")
+	_check(main.get("_state") == "playing" and int(main.get("_selected_level")) == 4 and int(world.get("hearts")) == 3, "Lower Difficulty reduces the challenge by one and restarts")
+	_defeat_active_dungeon_run(main)
+	await get_tree().create_timer(0.8).timeout
+	(main.get("_over_home_button") as Button).emit_signal("pressed")
+	await get_tree().process_frame
+	_check(main.get("_state") == "title" and bool((main.get("_title_screen") as Control).visible), "Home returns to learning-pack selection")
+	_check(str(main.get("_selected_math_track")) == "math_3", "Home preserves the selected Math track")
+	get_tree().paused = false
+	main.queue_free()
+	await get_tree().process_frame
+
+
+func _send_dungeon_key(main: Control, keycode: int) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode
+	event.pressed = true
+	main.call("_unhandled_input", event)
+
+
+func _defeat_active_dungeon_run(main: Control) -> void:
+	_send_dungeon_key(main, KEY_D)
+	_send_dungeon_key(main, KEY_D)
+	var world: Node2D = main.get("_world")
+	var answer_buttons: Array = main.get("_answer_choice_buttons")
+	for attempt in range(3):
+		var question: Dictionary = world.get("current_question")
+		var correct_index := int(question.get("correct_index", -1))
+		(answer_buttons[1 - correct_index] as Button).emit_signal("pressed")
+		if attempt < 2:
+			(main.get("_continue_turn_button") as Button).emit_signal("pressed")

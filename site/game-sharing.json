@@ -2,26 +2,26 @@
   "schemaVersion": 2,
   "publicationOrigin": "https://paperglide-ntrvuiwm.manus.game",
   "title": "Paper Glide",
-  "description": "Choose Math, Reading, Russian, Spanish, or Science; Math includes selectable math topics. Set a 1–5 challenge and separate flight pace, then steer through the gate showing the right answer. All five learning packs are playable.",
+  "description": "Choose Math, Reading, Russian, Spanish, or Science; pick Math 1–3 and a 1–5 challenge. Explore a notebook dungeon with Arrow/WASD movement, answer two-choice questions to defeat enemies, clear three chambers and a final guardian, earn coins, unlock adventurer styles, and review every answer.",
   "defaultCaptions": {},
   "assets": {
     "og": {
-      "digest": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
-      "path": "share/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
+      "digest": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
+      "path": "share/babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd.png",
       "mime": "image/png",
       "width": 1200,
       "height": 630,
-      "sizeBytes": 1365943,
-      "sourcePath": "assets/share/og.png"
+      "sizeBytes": 1724005,
+      "sourcePath": "assets/share/og-dungeon-1200x630.png"
     },
     "favicon": {
-      "digest": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
-      "path": "share/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
+      "digest": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e",
+      "path": "share/80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e.png",
       "mime": "image/png",
       "width": 256,
       "height": 256,
-      "sizeBytes": 21187,
-      "sourcePath": "assets/share/favicon.png"
+      "sizeBytes": 85845,
+      "sourcePath": "assets/share/favicon-dungeon-head.png"
     }
   }
 }

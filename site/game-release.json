@@ -3,13 +3,13 @@
   "engineVersion": "4.7.2.stable.official.ed1daf0bf",
   "inputs": {
     "objectFormat": "sha1",
-    "tree": "1357049a82e42c5ee7749e485bca84075272bc17",
+    "tree": "342355693dc9c0cbb73f8f23c6d64530a83e1071",
     "entries": [
       {
         "path": ".gitignore",
         "type": "file",
         "mode": "100644",
-        "object": "30fef87c6f4fea47eeba577f52db0adcfa27f46c"
+        "object": "5290dc4b7c508e9e1188e6257b0e50feab9b2e0a"
       },
       {
         "path": ".manus-game-template.json",
@@ -33,13 +33,145 @@
         "path": "TODO.md",
         "type": "file",
         "mode": "100644",
-        "object": "27c1973ac7d4b0347469549d1f61e0d1dbfe310d"
+        "object": "180f45745d5091e0a9b6b02fe59464bb499559f7"
       },
       {
         "path": "assets.lock.json",
         "type": "file",
         "mode": "100644",
-        "object": "e96fafcf22161d5eeab6143a7ddd214140871f46"
+        "object": "e6310dd3e28e7b0f2347266279fdeaf9c3de590f"
+      },
+      {
+        "path": "assets/dungeon/boss_paper_dragon.png",
+        "type": "managed",
+        "sha256": "sha256:491922860e5bb5273e321309523e26de218144fb542746da2f43134f56ee77d1"
+      },
+      {
+        "path": "assets/dungeon/boss_paper_dragon.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "ecdef015f02efa9c1c05fccfe713b1a882268160"
+      },
+      {
+        "path": "assets/dungeon/boss_paper_dragon_clean.png",
+        "type": "managed",
+        "sha256": "sha256:9157fb8844ff38adaaa163ed7a6a1723105241939a93ae54c62707a80e89be23"
+      },
+      {
+        "path": "assets/dungeon/boss_paper_dragon_clean.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "b3c7ecdc5d812105a6d9f097d116af0c0010afe5"
+      },
+      {
+        "path": "assets/dungeon/boss_paper_dragon_runtime.png",
+        "type": "managed",
+        "sha256": "sha256:30605ca28620d180ee93ddeff041af50da39d6e3524398db81e23d16410bcdf1"
+      },
+      {
+        "path": "assets/dungeon/boss_paper_dragon_runtime.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "543ba7be207c832a8eabda823390437ca42f474b"
+      },
+      {
+        "path": "assets/dungeon/enemy_ink_slime.png",
+        "type": "managed",
+        "sha256": "sha256:61c7aae246dd7b2f9d924c3f01b9a60bd9436976466242aea63993d269a9207e"
+      },
+      {
+        "path": "assets/dungeon/enemy_ink_slime.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "b68f6ffea3342ef0e9622587e14379a5ac353a48"
+      },
+      {
+        "path": "assets/dungeon/enemy_ink_slime_clean.png",
+        "type": "managed",
+        "sha256": "sha256:7774eab47606ed1afbc3d211090c32265413a2457ed38dacb0e5fb6657758ff2"
+      },
+      {
+        "path": "assets/dungeon/enemy_ink_slime_clean.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "f532abb1bb711f695339d68a22aed5d502771479"
+      },
+      {
+        "path": "assets/dungeon/enemy_ink_slime_runtime.png",
+        "type": "managed",
+        "sha256": "sha256:f3e53e71c58b0967ab486c465f15ffcb2467481733dc478d1bd0537d6521fe11"
+      },
+      {
+        "path": "assets/dungeon/enemy_ink_slime_runtime.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "b7495be95180781884f62cf0f3decb31cbcc08ba"
+      },
+      {
+        "path": "assets/dungeon/enemy_pencil_bat.png",
+        "type": "managed",
+        "sha256": "sha256:9e9db30f74688f1ad4784006e8cfff1dcd10f9fa44716f877c6b8fc4b6636440"
+      },
+      {
+        "path": "assets/dungeon/enemy_pencil_bat.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "afac4cf103c75bf264f17ca94840e7966a1ea7c6"
+      },
+      {
+        "path": "assets/dungeon/enemy_pencil_bat_clean.png",
+        "type": "managed",
+        "sha256": "sha256:8993f9b4274bd1bfb2f2ff75874d37951d58c42924f1dc20d3cada1ddfda2527"
+      },
+      {
+        "path": "assets/dungeon/enemy_pencil_bat_clean.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "cc513db3be9281117fa9a1f6eeed18bd793cba98"
+      },
+      {
+        "path": "assets/dungeon/enemy_pencil_bat_runtime.png",
+        "type": "managed",
+        "sha256": "sha256:9f31bc7650b7cb5c5acc9912addfaa93ed2f3778dc41854839c515a2bd1d0ffc"
+      },
+      {
+        "path": "assets/dungeon/enemy_pencil_bat_runtime.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "b407f03b27d23bc46f63531279f9b42429f420a2"
+      },
+      {
+        "path": "assets/dungeon/hero_paper_scholar.png",
+        "type": "managed",
+        "sha256": "sha256:dd34444534a1b18e338851f9ed46a32ca180494a17665f309db43a2ce2efaf7e"
+      },
+      {
+        "path": "assets/dungeon/hero_paper_scholar.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "38f9b9bfe64bebb8fc6ab5e2b7e6e2c307c158bf"
+      },
+      {
+        "path": "assets/dungeon/hero_paper_scholar_clean.png",
+        "type": "managed",
+        "sha256": "sha256:3f1773bb66bd322f40c8a184c9b49c726a4cb53d8d22240aa6d707f4fb2644e2"
+      },
+      {
+        "path": "assets/dungeon/hero_paper_scholar_clean.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "d0d56c4bc73daf7f0895891052b4e53d12c9dbba"
+      },
+      {
+        "path": "assets/dungeon/hero_paper_scholar_runtime.png",
+        "type": "managed",
+        "sha256": "sha256:b9be55132c9d59a52c7b7d0af61af33d7525e823c3cf5d6ff1fcab1af2ab1d23"
+      },
+      {
+        "path": "assets/dungeon/hero_paper_scholar_runtime.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "be3de84bd4d15f162ecdadd60d344cb9d2209c0d"
       },
       {
         "path": "assets/paperglide/cloud0.png",
@@ -318,6 +450,28 @@
         "object": "7740da3aa2b6881ef722a6b7b7a1c0a3991f1e08"
       },
       {
+        "path": "assets/share/favicon-dungeon-head.png",
+        "type": "managed",
+        "sha256": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e"
+      },
+      {
+        "path": "assets/share/favicon-dungeon-head.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "453861922badd642b0cbb58589f272dfbbdf5d0e"
+      },
+      {
+        "path": "assets/share/favicon-dungeon.png",
+        "type": "managed",
+        "sha256": "sha256:d696547b72d10e669b7bf15fe11ac04cbe04c60f1df223036eae877f672c5a6c"
+      },
+      {
+        "path": "assets/share/favicon-dungeon.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "6a017f92ca085226f919d0ec68f319fc6d8c91f9"
+      },
+      {
         "path": "assets/share/favicon.png",
         "type": "managed",
         "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f"
@@ -327,6 +481,39 @@
         "type": "file",
         "mode": "100644",
         "object": "23f5a0dcac994d48a0834507853b45613f32b61b"
+      },
+      {
+        "path": "assets/share/og-dungeon-1200x630.png",
+        "type": "managed",
+        "sha256": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd"
+      },
+      {
+        "path": "assets/share/og-dungeon-1200x630.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "b5315f9a2b90be3100d1f4330bc34efe03238f20"
+      },
+      {
+        "path": "assets/share/og-dungeon-edited.png",
+        "type": "managed",
+        "sha256": "sha256:3eb441955b4212c62f8d2f16bd97ab752ffd716660323a8a00c78fb77ad66140"
+      },
+      {
+        "path": "assets/share/og-dungeon-edited.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "813a92ba459a3b271a334ce9df70bba454e27c13"
+      },
+      {
+        "path": "assets/share/og-dungeon.png",
+        "type": "managed",
+        "sha256": "sha256:25995159306626ee1981f441e337ecc1b596c6ee20eda6b027e1b69656e67156"
+      },
+      {
+        "path": "assets/share/og-dungeon.png.import",
+        "type": "file",
+        "mode": "100644",
+        "object": "e36b71501eadb3e17a499a49ede2a0d1635d4043"
       },
       {
         "path": "assets/share/og.png",
@@ -706,7 +893,7 @@
         "path": "export_presets.cfg",
         "type": "file",
         "mode": "100644",
-        "object": "9ee83d3950ad7b44534a7d3d12eaed8307ecd6e9"
+        "object": "dc8f60d8172db3380daff31f9ae7142c37440100"
       },
       {
         "path": "game-verification.json",
@@ -718,7 +905,7 @@
         "path": "localization/en.json",
         "type": "file",
         "mode": "100644",
-        "object": "b26dd8c6bca3e883daaebaad41f370c9252ca15d"
+        "object": "ab62cb16c3e34ed63546d08c804d6a715f4cf508"
       },
       {
         "path": "package.json",
@@ -727,16 +914,34 @@
         "object": "7fdb8d6e36ba84d4057355994f73582b2ca91840"
       },
       {
+        "path": "plan.md",
+        "type": "file",
+        "mode": "100644",
+        "object": "a4d57c74f16fa1233ade6ecf68b19b9db628f856"
+      },
+      {
         "path": "project.godot",
         "type": "file",
         "mode": "100644",
-        "object": "41a516d579e5ad3dd4862983c872631ab71a32c5"
+        "object": "da096824b5adbc042572de8d87069e8d29ae480a"
       },
       {
         "path": "scenes/main.tscn",
         "type": "file",
         "mode": "100644",
         "object": "b38d830360e230443976bda00eada736b88769c2"
+      },
+      {
+        "path": "scripts/dungeon/dungeon_world.gd",
+        "type": "file",
+        "mode": "100644",
+        "object": "313d7f992ba132181861d3e79d9b4d3c690e5568"
+      },
+      {
+        "path": "scripts/dungeon/dungeon_world.gd.uid",
+        "type": "file",
+        "mode": "100644",
+        "object": "b39ae16ea44ca0f42a59c3ca1fc633daf64d68a3"
       },
       {
         "path": "scripts/flight/answer_report_document.gd",
@@ -814,7 +1019,7 @@
         "path": "scripts/main.gd",
         "type": "file",
         "mode": "100644",
-        "object": "27e120c11129d53d6f7c5b062f90a22eb3e6ffda"
+        "object": "266f013a4ef8633f8cb7659871d122f266ec0449"
       },
       {
         "path": "scripts/main.gd.uid",
@@ -973,6 +1178,18 @@
         "object": "4fad95346f5c75e70357defb5a1522a8e41f5806"
       },
       {
+        "path": "test/dungeon_loop_tests.gd",
+        "type": "file",
+        "mode": "100644",
+        "object": "747a16fef1ce6d84fc513f506f84512377325349"
+      },
+      {
+        "path": "test/dungeon_loop_tests.gd.uid",
+        "type": "file",
+        "mode": "100644",
+        "object": "ce1d9dc6b0afab6ac36604c48c1d41cde12e632e"
+      },
+      {
         "path": "test/learning_engine_refinement_tests.gd",
         "type": "file",
         "mode": "100644",
@@ -988,7 +1205,7 @@
         "path": "test/test_suite.gd",
         "type": "file",
         "mode": "100644",
-        "object": "5f5dd29c566aa5edf00c48bde0b6897f26d395f2"
+        "object": "5f98240f0cad5e6310f8a8e0fb9aeb55e5f96c1a"
       },
       {
         "path": "test/test_suite.gd.uid",
@@ -1072,15 +1289,15 @@
         "path": "web/loading.html",
         "type": "file",
         "mode": "100644",
-        "object": "77502f1c326216a552b97a5dd7f003d054676ef0"
+        "object": "555513175810e31b2101ddb9fa53f472ae94f062"
       }
     ]
   },
   "build": {
-    "snapshotId": "sha256:3aa95b31a20d78bbc7e0861dd6b92f6d7857507432b265db8b9eaf5955a51757",
+    "snapshotId": "sha256:e27647f1335ff9550e68ffb39a4cd079f7048969342493216f7423a9b388f3d7",
     "toolchain": {
       "engineVersion": "4.7.2.stable.official.ed1daf0bf",
-      "engineDigest": "sha256:8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+      "engineDigest": "sha256:3fcb80f4fe794e3859360eb641d8c41d8ffe2c2e54ba1981e55a76851d5ed1f4",
       "templates": {
         "debug": "sha256:08962aefef811b603541d7951ac67ef00413aad2d978855183c28adee98f626a",
         "release": "sha256:d3ee2f08cef0cf3cf6678a6355a92a8db48ccdd35cbd2e8bfd5f0e8a0b4032a0"
@@ -1090,21 +1307,21 @@
     "profile": "release",
     "export": {
       "profile": "release",
-      "snapshotId": "sha256:3aa95b31a20d78bbc7e0861dd6b92f6d7857507432b265db8b9eaf5955a51757",
+      "snapshotId": "sha256:e27647f1335ff9550e68ffb39a4cd079f7048969342493216f7423a9b388f3d7",
       "files": {
         "THIRD_PARTY_NOTICES.txt": "sha256:1bb0eec4ff841776ed33214d0fef03afd098afc6e80959fdf4d1748cf38acd10",
-        "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
+        "index.apple-touch-icon.png": "sha256:d8fea460645adc85293105dca5c94397179b6d8e0a5e7f930aa6cb7b8c80eeac",
         "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
         "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-        "index.html": "sha256:0ea790783cfa18ba0e1e70d786e7133b4ffbfc3456590e869da0865d198be748",
-        "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
+        "index.html": "sha256:df11b07960119002359717c7ebb0d85fa200965d2cccc702fe113ec6915222e4",
+        "index.icon.png": "sha256:0a8cb30bfc6e06e8f7a443da186354882f072d5a5c3f42bec3e8d50e53b9c46e",
         "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
-        "index.pck": "sha256:14e41be5bb3c1fde048388a153e4f611e3bd1ff2e5ee58d0da09ecfd5b610407",
+        "index.pck": "sha256:b5089fae66020611ac0a69a6fa6b9f77b0f59e6188a203927ad543f62264f311",
         "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
         "index.wasm": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0",
         "open-source-licenses.html": "sha256:61e49d6a99c38d0d0202dc4e12b91ece9756c0df184bbef434242b267cde046c"
       },
-      "digest": "sha256:5539548c7c0f4346ecf141cde0e84c4dd9d5a9015822880d80353bc079fe8074"
+      "digest": "sha256:c00b121e4b3e7a62c543ff30e099b4ec2aa5736c1473f85208d08dbdd32f866e"
     }
   },
   "artifacts": {
@@ -1113,22 +1330,22 @@
       "sha256": "sha256:fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0"
     },
     "pck": {
-      "path": "/manus-storage/game/sha256/14e41be5bb3c1fde048388a153e4f611e3bd1ff2e5ee58d0da09ecfd5b610407.pck",
-      "sha256": "sha256:14e41be5bb3c1fde048388a153e4f611e3bd1ff2e5ee58d0da09ecfd5b610407"
+      "path": "/manus-storage/game/sha256/b5089fae66020611ac0a69a6fa6b9f77b0f59e6188a203927ad543f62264f311.pck",
+      "sha256": "sha256:b5089fae66020611ac0a69a6fa6b9f77b0f59e6188a203927ad543f62264f311"
     }
   },
   "files": {
     "THIRD_PARTY_NOTICES.txt": "sha256:1bb0eec4ff841776ed33214d0fef03afd098afc6e80959fdf4d1748cf38acd10",
-    "game-sharing.json": "sha256:8dc06fb881af49aea9cbafe2b9971147eb3b22e177ad729843302cb8f128592a",
-    "index.apple-touch-icon.png": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
+    "game-sharing.json": "sha256:28c5790e4387edf680781dc0576c0e559a6dfb0dbf7ec45c6a43658778ac9e06",
+    "index.apple-touch-icon.png": "sha256:d8fea460645adc85293105dca5c94397179b6d8e0a5e7f930aa6cb7b8c80eeac",
     "index.audio.position.worklet.js": "sha256:be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
     "index.audio.worklet.js": "sha256:5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
-    "index.html": "sha256:684360e17460f08dc0763b6aa4bb4f78439ede40b5d34650034be3fac2a35fa7",
-    "index.icon.png": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
+    "index.html": "sha256:fd6ae10589069eb099033ef09abda4cf4d4b12d9d3e7062dc14983c8ebabec05",
+    "index.icon.png": "sha256:0a8cb30bfc6e06e8f7a443da186354882f072d5a5c3f42bec3e8d50e53b9c46e",
     "index.js": "sha256:cb28c2d8ffd8981888823f1b6d98cdec4e3e11adf209ad556c22878e6d51c63a",
     "index.png": "sha256:3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
     "open-source-licenses.html": "sha256:61e49d6a99c38d0d0202dc4e12b91ece9756c0df184bbef434242b267cde046c",
-    "share/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
-    "share/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e"
+    "share/80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e.png": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e",
+    "share/babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd.png": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd"
   }
 }

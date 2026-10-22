@@ -1,7 +1,7 @@
 extends Control
-## Paper Glide: input, game flow and notebook-styled UI around the flight world.
+## Paper Glide: input, game flow and notebook-styled UI around DungeonWorld.
 
-const FlightWorld = preload("res://scripts/flight/flight_world.gd")
+const DungeonWorld = preload("res://scripts/dungeon/dungeon_world.gd")
 const SfxBank = preload("res://scripts/flight/sfx_bank.gd")
 const MathQuestion = preload("res://scripts/flight/math_question.gd")
 const LearningQuestion = preload("res://scripts/flight/learning_question.gd")
@@ -22,12 +22,16 @@ var _world: Node2D
 var _hud: Control
 var _score_label: Label
 var _best_label: Label
+var _heart_label: Label
+var _room_label: Label
 var _coin_label: Label
 var _practice_label: Label
 var _cheer_label: Label
 var _question_bar: PanelContainer
 var _question_label: Label
 var _question_hint_label: Label
+var _answer_choice_buttons: Array[Button] = []
+var _continue_turn_button: Button
 var _question_difficulty_label: Label
 var _pause_button: Button
 var _title_screen: Control
@@ -40,20 +44,13 @@ var _difficulty_value_label: Label
 var _track_buttons: Dictionary = {}
 var _practice_buttons: Dictionary = {}
 var _difficulty_buttons: Dictionary = {}
-var _speed_buttons: Dictionary = {}
 var _topic_screen: Control
 var _difficulty_screen: Control
-var _speed_screen: Control
 var _topic_next_button: Button
 var _difficulty_summary: Label
 var _difficulty_next_button: Button
 var _difficulty_subtitle_label: Label
-var _speed_value_label: Label
-var _speed_description: Label
-var _speed_start_button: Button
-var _speed_subtitle_label: Label
 var _selected_level := 1
-var _selected_speed := 1
 var _selected_difficulty := "easy"
 var _selected_practice_area := "math"
 var _selected_math_track := "math_1"
@@ -61,6 +58,7 @@ var _over_screen: Control
 var _over_card: PanelContainer
 var _over_title_label: Label
 var _over_score: Label
+var _over_rooms_label: Label
 var _over_best: Label
 var _over_feedback: Label
 var _over_stamp: Label
@@ -109,7 +107,6 @@ func _ready() -> void:
 	_build_hangar()
 	_build_topic_screen()
 	_build_difficulty_screen()
-	_build_speed_screen()
 	_build_over()
 	_build_answer_review()
 	_build_pause()
@@ -149,13 +146,14 @@ func _notification(what: int) -> void:
 # ------------------------------------------------------------------ building
 
 func _build_world() -> void:
-	_world = FlightWorld.new()
-	_world.name = "FlightWorld"
+	_world = DungeonWorld.new()
+	_world.name = "DungeonWorld"
 	_world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_world)
-	_world.connect("flapped", _on_flapped)
 	_world.connect("scored", _on_scored)
-	_world.connect("crashed", _on_crashed)
+	_world.connect("hearts_changed", _on_hearts_changed)
+	_world.connect("room_changed", _on_room_changed)
+	_world.connect("run_ended", _on_run_ended)
 	_world.connect("question_changed", _on_question_changed)
 
 
@@ -201,7 +199,7 @@ func _make_card(size: Vector2, center_y: float) -> PanelContainer:
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.custom_minimum_size = size
 	card.size = size
-	card.position = Vector2((FlightWorld.VIEW_SIZE.x - size.x) * 0.5, center_y - size.y * 0.5)
+	card.position = Vector2((DungeonWorld.VIEW_SIZE.x - size.x) * 0.5, center_y - size.y * 0.5)
 	card.pivot_offset = size * 0.5
 	card.add_theme_stylebox_override("panel", _card_style())
 	return card
@@ -242,42 +240,62 @@ func _make_button(text: String, font_size: int, fill: Color) -> Button:
 
 func _build_hud() -> void:
 	_hud = _full_rect_control("Hud")
-	_score_label = _make_label("0", 104, GRAPHITE, true)
+	_score_label = _make_label(I18n.t("hud.score", {"score": 0}), 32, GRAPHITE, true)
 	_score_label.add_theme_color_override("font_outline_color", PAPER)
-	_score_label.add_theme_constant_override("outline_size", 14)
+	_score_label.add_theme_constant_override("outline_size", 5)
 	_score_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_score_label.offset_left = -200
 	_score_label.offset_right = 200
-	_score_label.offset_top = 14
-	_score_label.offset_bottom = 134
-	_score_label.pivot_offset = Vector2(200, 60)
+	_score_label.offset_top = 16
+	_score_label.offset_bottom = 60
+	_score_label.pivot_offset = Vector2(200, 22)
 	_hud.add_child(_score_label)
-	_best_label = _make_label("", 22, Color(GRAPHITE, 0.75))
+	_best_label = _make_label("", 16, Color(GRAPHITE, 0.75))
 	_best_label.add_theme_color_override("font_outline_color", PAPER)
-	_best_label.add_theme_constant_override("outline_size", 8)
-	_best_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_best_label.offset_left = -200
-	_best_label.offset_right = 200
-	_best_label.offset_top = 124
-	_best_label.offset_bottom = 156
+	_best_label.add_theme_constant_override("outline_size", 4)
+	_best_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_best_label.offset_left = -340
+	_best_label.offset_right = -78
+	_best_label.offset_top = 80
+	_best_label.offset_bottom = 104
+	_best_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_hud.add_child(_best_label)
+	_heart_label = _make_label("", 21, RED_PENCIL, true)
+	_heart_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_heart_label.offset_left = 26
+	_heart_label.offset_right = 270
+	_heart_label.offset_top = 24
+	_heart_label.offset_bottom = 58
+	_heart_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_heart_label.visible = false
+	_hud.add_child(_heart_label)
+	_room_label = _make_label("", 18, GRAPHITE, true)
+	_room_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_room_label.offset_left = 26
+	_room_label.offset_right = 300
+	_room_label.offset_top = 62
+	_room_label.offset_bottom = 92
+	_room_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_room_label.visible = false
+	_hud.add_child(_room_label)
 	_practice_label = _make_label(I18n.t("hud.practice"), 18, RED_PENCIL)
-	_practice_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_practice_label.offset_left = -200
-	_practice_label.offset_right = 200
-	_practice_label.offset_top = 154
-	_practice_label.offset_bottom = 180
+	_practice_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_practice_label.offset_left = 26
+	_practice_label.offset_right = 300
+	_practice_label.offset_top = 96
+	_practice_label.offset_bottom = 120
+	_practice_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_practice_label.visible = false
 	_hud.add_child(_practice_label)
-	_cheer_label = _make_label("", 38, RED_PENCIL, true)
+	_cheer_label = _make_label("", 28, RED_PENCIL, true)
 	_cheer_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_cheer_label.offset_left = -260
 	_cheer_label.offset_right = 260
-	_cheer_label.offset_top = 184
-	_cheer_label.offset_bottom = 232
+	_cheer_label.offset_top = 74
+	_cheer_label.offset_bottom = 118
 	_cheer_label.add_theme_color_override("font_outline_color", PAPER)
-	_cheer_label.add_theme_constant_override("outline_size", 8)
-	_cheer_label.pivot_offset = Vector2(260, 24)
+	_cheer_label.add_theme_constant_override("outline_size", 5)
+	_cheer_label.pivot_offset = Vector2(260, 22)
 	_cheer_label.visible = false
 	_cheer_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(_cheer_label)
@@ -298,7 +316,7 @@ func _build_hud() -> void:
 	_pause_button.tooltip_text = I18n.t("hud.pause")
 	_pause_button.focus_mode = Control.FOCUS_NONE
 	_pause_button.size = Vector2(58, 58)
-	_pause_button.position = Vector2(FlightWorld.VIEW_SIZE.x - 58 - 22, 20)
+	_pause_button.position = Vector2(DungeonWorld.VIEW_SIZE.x - 58 - 22, 20)
 	for slot in ["normal", "hover", "pressed"]:
 		var style := StyleBoxFlat.new()
 		style.bg_color = CARD if slot != "hover" else CARD.lightened(0.5)
@@ -325,7 +343,7 @@ func _build_hud() -> void:
 
 
 func _build_question_bar() -> void:
-	_question_bar = _make_card(Vector2(760, 138), 646.0)
+	_question_bar = _make_card(Vector2(940, 210), 604.0)
 	var panel_style := _card_style(BLUE_PENCIL)
 	panel_style.content_margin_left = 18
 	panel_style.content_margin_right = 18
@@ -336,15 +354,39 @@ func _build_question_bar() -> void:
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 0)
+	box.add_theme_constant_override("separation", 2)
 	_question_difficulty_label = _make_label("", 16, BLUE_PENCIL.darkened(0.2), true)
 	box.add_child(_question_difficulty_label)
-	_question_label = _make_label(I18n.t("hud.tap_to_launch"), 40, GRAPHITE, true)
+	_question_label = _make_label("", 32, GRAPHITE, true)
 	_question_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_question_label.custom_minimum_size = Vector2(0, 58)
+	_question_label.custom_minimum_size = Vector2(0, 66)
 	box.add_child(_question_label)
 	_question_hint_label = _make_label(I18n.t("hud.question_wait"), 16, Color(GRAPHITE, 0.72))
+	_question_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_question_hint_label.custom_minimum_size = Vector2(0, 24)
 	box.add_child(_question_hint_label)
+	var answer_row := HBoxContainer.new()
+	answer_row.name = "AnswerChoices"
+	answer_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	answer_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	answer_row.add_theme_constant_override("separation", 12)
+	_answer_choice_buttons.clear()
+	for index in range(2):
+		var button := _make_button("", 18, SAGE if index == 0 else Color(0.78, 0.86, 0.96))
+		button.name = "AnswerChoice%d" % (index + 1)
+		button.custom_minimum_size = Vector2(420, 52)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.visible = false
+		button.pressed.connect(_on_answer_button_pressed.bind(index))
+		_answer_choice_buttons.append(button)
+		answer_row.add_child(button)
+	box.add_child(answer_row)
+	_continue_turn_button = _make_button(I18n.t("dungeon.continue"), 18, SAGE)
+	_continue_turn_button.name = "ContinueTurnButton"
+	_continue_turn_button.custom_minimum_size = Vector2(300, 44)
+	_continue_turn_button.visible = false
+	_continue_turn_button.pressed.connect(_on_continue_turn_pressed)
+	box.add_child(_continue_turn_button)
 	_question_bar.add_child(box)
 	_question_bar.visible = false
 	_hud.add_child(_question_bar)
@@ -487,12 +529,12 @@ func _build_hangar() -> void:
 		content.add_theme_constant_override("separation", 8)
 		var preview := TextureRect.new()
 		preview.name = "HangarPlanePreview_" + plane_id
-		preview.texture = FlightWorld.plane_texture_for(plane_id)
+		preview.texture = DungeonWorld.hero_texture_for(plane_id)
 		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		preview.custom_minimum_size = Vector2(150, 82)
 		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		preview.modulate = FlightWorld.PLANE_TINTS.get(plane_id, Color.WHITE)
+		preview.modulate = DungeonWorld.hero_tint_for(plane_id)
 		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.add_child(preview)
 		var name_label := _make_label(I18n.t("hangar.plane." + plane_id), 19, GRAPHITE, true)
@@ -612,44 +654,15 @@ func _build_difficulty_screen() -> void:
 	_difficulty_summary = _make_label("", 15, BLUE_PENCIL.darkened(0.2))
 	_difficulty_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_difficulty_summary)
-	var nav := _make_setup_nav(box, I18n.t("setup.back_topics"), _show_topic_selection, I18n.t("setup.continue"), _continue_to_speed)
+	var nav := _make_setup_nav(box, I18n.t("setup.back_topics"), _show_topic_selection, I18n.t("setup.enter_dungeon"), _start_from_setup)
 	_difficulty_next_button = nav.next
 	_set_difficulty_level(_selected_level)
-
-
-func _build_speed_screen() -> void:
-	var page := _make_setup_page("SpeedScreen", I18n.t("speed.title"), I18n.t("speed.subtitle"))
-	_speed_screen = page.screen
-	var box: VBoxContainer = page.box
-	_speed_subtitle_label = box.get_child(1) as Label
-	_speed_value_label = _make_label("", 27, GRAPHITE, true)
-	box.add_child(_speed_value_label)
-	var row := HBoxContainer.new()
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 12)
-	box.add_child(row)
-	for level in range(1, 6):
-		var button := _make_button("%d\n%s" % [level, I18n.t("speed.pace." + str(level))], 18, CARD)
-		button.name = "SpeedLevel%d" % level
-		button.custom_minimum_size = Vector2(178, 92)
-		button.add_theme_font_size_override("font_size", 18)
-		button.pressed.connect(_set_speed_level.bind(level))
-		_speed_buttons[level] = button
-		row.add_child(button)
-	_speed_description = _make_label("", 17, Color(GRAPHITE, 0.8))
-	_speed_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_speed_description)
-	box.add_child(_make_label(I18n.t("speed.independent"), 15, BLUE_PENCIL.darkened(0.2)))
-	var nav := _make_setup_nav(box, I18n.t("setup.back_difficulty"), _show_difficulty_selection, I18n.t("speed.start"), _start_from_setup)
-	_speed_start_button = nav.next
-	_set_speed_level(_selected_speed)
 
 
 func _show_setup_page(target: Control, page_state: String) -> void:
 	_state = page_state
 	get_tree().paused = false
-	for screen: Control in [_title_screen, _hangar_screen, _topic_screen, _difficulty_screen, _speed_screen]:
+	for screen: Control in [_title_screen, _hangar_screen, _topic_screen, _difficulty_screen]:
 		screen.visible = screen == target
 	_over_screen.visible = false
 	_pause_screen.visible = false
@@ -659,6 +672,8 @@ func _show_setup_page(target: Control, page_state: String) -> void:
 	_pause_button.visible = false
 	_score_label.visible = false
 	_best_label.visible = false
+	_heart_label.visible = false
+	_room_label.visible = false
 	_practice_label.visible = false
 	_coin_label.visible = false
 
@@ -712,21 +727,6 @@ func _update_difficulty_summary() -> void:
 		_difficulty_next_button.disabled = false
 
 
-func _set_speed_level(level: int) -> void:
-	_selected_speed = clampi(level, 1, 5)
-	if _speed_subtitle_label != null:
-		var subtitle_key := "speed.subtitle.math" if _selected_practice_area == "math" else "speed.subtitle.learning"
-		_speed_subtitle_label.text = I18n.t(subtitle_key)
-	if _speed_value_label != null:
-		_speed_value_label.text = I18n.t("speed.selected", {
-			"level": _selected_speed,
-			"pace": I18n.t("speed.pace." + str(_selected_speed)),
-		})
-	if _speed_description != null:
-		_speed_description.text = I18n.t("speed.description." + str(_selected_speed))
-	for selected_level: int in _speed_buttons:
-		_style_choice_button(_speed_buttons[selected_level], selected_level == _selected_speed, Color(0.78, 0.86, 0.96))
-
 func _update_track_selection() -> void:
 	for track_id: String in MathQuestion.TRACK_IDS:
 		if _track_buttons.has(track_id):
@@ -758,13 +758,6 @@ func _continue_to_difficulty() -> void:
 	_show_setup_page(_difficulty_screen, "difficulty")
 
 
-func _continue_to_speed() -> void:
-	if _difficulty_next_button.disabled:
-		return
-	_set_speed_level(_selected_speed)
-	_show_setup_page(_speed_screen, "speed")
-
-
 func _show_topic_selection() -> void:
 	if _selected_practice_area != "math":
 		_show_title()
@@ -790,7 +783,7 @@ func _begin_from_title(area: String = "math") -> void:
 
 
 func _start_from_setup() -> void:
-	if _state != "speed":
+	if _state != "difficulty":
 		return
 	_start_new_run()
 
@@ -809,7 +802,7 @@ func _update_title_best() -> void:
 
 func _build_over() -> void:
 	_over_screen = _full_rect_control("GameOverScreen")
-	_over_card = _make_card(Vector2(900, 490), 350.0)
+	_over_card = _make_card(Vector2(980, 520), 350.0)
 	_over_screen.add_child(_over_card)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -821,6 +814,8 @@ func _build_over() -> void:
 	box.add_child(_make_label(I18n.t("over.score"), 20, Color(GRAPHITE, 0.8)))
 	_over_score = _make_label("0", 82, GRAPHITE, true)
 	box.add_child(_over_score)
+	_over_rooms_label = _make_label("", 19, GRAPHITE, true)
+	box.add_child(_over_rooms_label)
 	_over_coins_label = _make_label("", 19, BLUE_PENCIL.darkened(0.1), true)
 	box.add_child(_over_coins_label)
 	_over_feedback = _make_label("", 22, RED_PENCIL)
@@ -986,13 +981,16 @@ func _localized_answer_review_entries() -> Array[Dictionary]:
 func _update_answer_review() -> void:
 	var area := str(_answer_review_context.get("practice_area", _selected_practice_area))
 	var level := int(_answer_review_context.get("level", _selected_level))
-	var pace := int(_answer_review_context.get("pace", _selected_speed))
+	var rooms_cleared := int(_answer_review_context.get("rooms_cleared", 0))
+	var track_id := str(_answer_review_context.get("math_track", ""))
+	var track_suffix := " · " + I18n.t("topics.track." + track_id + ".title") if area == "math" and not track_id.is_empty() else ""
 	_answer_review_summary.text = I18n.t("answer_review.summary", {
 		"score": int(_answer_review_context.get("score", 0)),
 		"count": _answer_history.size(),
 		"area": I18n.t("practice." + area),
+		"track": track_suffix,
 		"level": I18n.t("difficulty.level." + str(level)),
-		"pace": I18n.t("speed.pace." + str(pace)),
+		"rooms": rooms_cleared,
 	})
 	for child: Node in _answer_review_list.get_children():
 		child.queue_free()
@@ -1066,15 +1064,18 @@ func _add_review_answer_column(parent: HBoxContainer, heading: String, answer: S
 func _build_answer_report_html() -> String:
 	var area := str(_answer_review_context.get("practice_area", _selected_practice_area))
 	var level := int(_answer_review_context.get("level", _selected_level))
-	var pace := int(_answer_review_context.get("pace", _selected_speed))
+	var rooms_cleared := int(_answer_review_context.get("rooms_cleared", 0))
+	var track_id := str(_answer_review_context.get("math_track", ""))
+	var track_suffix := " · " + I18n.t("topics.track." + track_id + ".title") if area == "math" and not track_id.is_empty() else ""
 	var score := int(_answer_review_context.get("score", 0))
 	var context := {
 		"summary": I18n.t("answer_review.summary", {
 			"score": score,
 			"count": _answer_history.size(),
 			"area": I18n.t("practice." + area),
+			"track": track_suffix,
 			"level": I18n.t("difficulty.level." + str(level)),
-			"pace": I18n.t("speed.pace." + str(pace)),
+			"rooms": rooms_cleared,
 		}),
 		"date": str(_answer_review_context.get("ended_at", "")),
 	}
@@ -1277,8 +1278,8 @@ func _best_score(difficulty: String = "") -> int:
 func _show_title() -> void:
 	_world.call("set_difficulty", _selected_level)
 	_world.call("set_practice_area", _selected_practice_area)
+	_world.call("set_math_track", _selected_math_track)
 	_world.call("set_selected_topics", _selected_topic_groups())
-	_world.call("set_speed_level", _selected_speed)
 	var save := _save()
 	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
 	_world.visible = true
@@ -1290,12 +1291,12 @@ func _show_title() -> void:
 	_update_wallet_labels()
 
 
-## Starts a fresh run in the "ready" pose; the first flap launches it.
+## Starts a fresh dungeon run after the learner chooses a subject and challenge.
 func _start_new_run() -> void:
 	_world.call("set_difficulty", _selected_level)
 	_world.call("set_practice_area", _selected_practice_area)
-	_world.call("set_selected_topics", _selected_topic_groups())
-	_world.call("set_speed_level", _selected_speed)
+	_world.call("set_math_track", _selected_math_track)
+	_world.call("set_selected_topics", _selected_topic_groups() if _selected_practice_area == "math" else [])
 	_coins_earned_this_run = 0
 	_answer_history.clear()
 	_answer_review_context.clear()
@@ -1305,27 +1306,27 @@ func _start_new_run() -> void:
 	_world.call("set_selected_plane", str(save.call("get_selected_plane")) if save != null else "paper")
 	_world.visible = true
 	_hud.visible = true
-	_world.call("reset_ready")
 	_title_screen.visible = false
 	_topic_screen.visible = false
 	_difficulty_screen.visible = false
-	_speed_screen.visible = false
 	_over_screen.visible = false
 	_pause_screen.visible = false
 	_answer_review_screen.visible = false
 	_question_bar.visible = true
+	for answer_button: Button in _answer_choice_buttons:
+		answer_button.visible = false
+	_continue_turn_button.visible = false
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
 			"level": _selected_level,
 			"difficulty": I18n.t("difficulty.level." + str(_selected_level)).to_upper(),
 			"area": I18n.t("practice." + _selected_practice_area).to_upper(),
 			"topic": I18n.t("topic.ready").to_upper(),
-			"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
 	})
-	_question_label.text = I18n.t("hud.tap_to_launch")
-	_question_hint_label.text = I18n.t("hud.question_wait")
+	_question_label.text = I18n.t("dungeon.explore")
+	_question_hint_label.text = I18n.t("dungeon.controls")
 	_pause_button.visible = true
 	_score_label.visible = true
-	_score_label.text = "0"
+	_score_label.text = I18n.t("hud.score", {"score": 0})
 	_score_label.scale = Vector2.ONE
 	_best_label.visible = true
 	var best := _best_score(_selected_difficulty)
@@ -1335,14 +1336,18 @@ func _start_new_run() -> void:
 		"score": best,
 	})
 	_best_label.visible = best > 0
+	_heart_label.visible = true
+	_room_label.visible = true
 	_practice_label.visible = false
 	_coin_label.visible = true
 	_update_wallet_labels()
 	_state = "playing"
+	_world.call("start_run")
+	_after_run_started()
+
+
 func _restart() -> void:
 	_start_new_run()
-	_world.call("flap")
-	_after_flap_start()
 
 
 func _lower_difficulty_and_restart() -> void:
@@ -1364,24 +1369,24 @@ func _restart_from_pause() -> void:
 	_start_new_run()
 
 
-func _after_flap_start() -> void:
+func _after_run_started() -> void:
 	var store := _store()
 	var practice := store != null and not bool(store.call("is_ranked_eligible"))
 	_practice_label.visible = practice
 
 
-func _flap_input() -> void:
+func _on_answer_button_pressed(option_index: int) -> void:
+	if _state != "playing":
+		return
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
 		audio.call("unlock_audio")
-	match _state:
-		"playing":
-			var was_ready: bool = _world.get("state") == "ready"
-			_world.call("flap")
-			if was_ready:
-				_after_flap_start()
-		"over":
-			pass
+	_world.call("submit_answer", option_index)
+
+
+func _on_continue_turn_pressed() -> void:
+	if _state == "playing":
+		_world.call("continue_after_wrong")
 
 
 func _set_paused(paused: bool) -> void:
@@ -1423,35 +1428,69 @@ func _update_sound_button() -> void:
 	_sound_button.text = I18n.t("pause.sound_off" if muted else "pause.sound_on")
 
 
-func _on_flapped() -> void:
-	var audio := get_node_or_null("/root/AudioDirector")
-	if audio != null:
-		audio.call("play_cue", "player.action", randf_range(0.96, 1.06))
+func _on_hearts_changed(hearts: int) -> void:
+	var remaining := clampi(hearts, 0, DungeonWorld.STARTING_HEARTS)
+	var icons := "♥".repeat(remaining) + "♡".repeat(DungeonWorld.STARTING_HEARTS - remaining)
+	_heart_label.text = I18n.t("dungeon.hearts", {"icons": icons, "hearts": remaining})
+
+
+func _on_room_changed(room_number: int, rooms_cleared: int, boss_room: bool) -> void:
+	var room_key := "dungeon.boss_room" if boss_room else "dungeon.room_progress"
+	_room_label.text = I18n.t(room_key, {
+		"current": room_number,
+		"total": DungeonWorld.TOTAL_ROOMS,
+		"cleared": rooms_cleared,
+	})
 
 
 func _on_question_changed(question: Dictionary) -> void:
-	var expression := str(question.get("expression", "= ?"))
-	var difficulty := str(question.get("difficulty", "medium"))
+	var phase := str(question.get("phase", "explore"))
+	for answer_button: Button in _answer_choice_buttons:
+		answer_button.visible = false
+	_continue_turn_button.visible = false
+	if phase == "ended":
+		return
+	var difficulty := str(question.get("difficulty", _selected_difficulty))
 	var level := int(question.get("difficulty_level", _selected_level))
-	var topic := str(question.get("topic", "addition"))
+	var topic := str(question.get("topic", "ready"))
 	var area := str(question.get("practice_area", _selected_practice_area))
-	_question_label.text = expression
-	var equation_size := 40
-	if expression.length() > 22:
-		equation_size = 34
-	if expression.length() > 30:
-		equation_size = 29
-	if expression.length() > 40:
-		equation_size = 25
-	_question_label.add_theme_font_size_override("font_size", equation_size)
 	_question_difficulty_label.text = I18n.t("hud.question_mode", {
 		"level": level,
 		"difficulty": I18n.t("difficulty." + difficulty).to_upper(),
 		"area": I18n.t("practice." + area).to_upper(),
 		"topic": I18n.t("topic." + topic).to_upper(),
-		"speed": I18n.t("speed.pace." + str(_selected_speed)).to_upper(),
 	})
-	_question_hint_label.text = I18n.t(str(question.get("hint_key", "hint.addition")))
+	match phase:
+		"combat":
+			var expression := str(question.get("expression", ""))
+			_question_label.text = expression
+			var expression_size := 31
+			if expression.length() > 42:
+				expression_size = 26
+			if expression.length() > 72:
+				expression_size = 22
+			_question_label.add_theme_font_size_override("font_size", expression_size)
+			_question_hint_label.text = I18n.t("dungeon.choose_answer")
+			var options: Array = question.get("answer_options", [])
+			var longest_option := 0
+			for option: Variant in options:
+				longest_option = maxi(longest_option, str(option).length())
+			var option_size := 18 if longest_option <= 32 else 15 if longest_option <= 52 else 13
+			for index in range(mini(2, options.size())):
+				var button := _answer_choice_buttons[index]
+				button.text = "%d  %s" % [index + 1, str(options[index])]
+				button.add_theme_font_size_override("font_size", option_size)
+				button.visible = true
+		"feedback":
+			var correct_answer := str(question.get("answer", ""))
+			_question_label.text = I18n.t("dungeon.incorrect_message", {"answer": correct_answer})
+			_question_label.add_theme_font_size_override("font_size", 25)
+			_question_hint_label.text = I18n.t(str(question.get("hint_key", "hint.addition")))
+			_continue_turn_button.visible = true
+		_:
+			_question_label.text = I18n.t(str(question.get("message_key", "dungeon.explore")))
+			_question_label.add_theme_font_size_override("font_size", 31)
+			_question_hint_label.text = I18n.t("dungeon.controls")
 
 
 func _on_scored(total: int) -> void:
@@ -1490,23 +1529,24 @@ func _show_correct_answer_cheer() -> void:
 	_cheer_time_left = 0.95
 
 
-func _on_crashed(total: int, _hit_ground: bool) -> void:
+func _on_run_ended(total: int, won: bool, rooms_cleared: int) -> void:
 	if _state != "playing":
 		return
 	_state = "over"
 	_over_unlock_ms = Time.get_ticks_msec() + RESTART_LOCKOUT_MS
 	_answer_history.clear()
-	var flight_history: Variant = _world.get("answer_history")
-	if flight_history is Array:
-		for entry: Variant in flight_history:
+	var dungeon_history: Variant = _world.get("answer_history")
+	if dungeon_history is Array:
+		for entry: Variant in dungeon_history:
 			if entry is Dictionary:
 				_answer_history.append(entry.duplicate(true))
 	_answer_review_context = {
-		"practice_area": _selected_practice_area,
-		"level": _selected_level,
-		"pace": _selected_speed,
-		"score": total,
-		"ended_at": Time.get_datetime_string_from_system(false, true),
+			"practice_area": _selected_practice_area,
+			"math_track": _selected_math_track if _selected_practice_area == "math" else "",
+			"level": _selected_level,
+			"score": total,
+			"rooms_cleared": rooms_cleared,
+			"ended_at": Time.get_datetime_string_from_system(false, true),
 	}
 	_over_review_button.text = I18n.t("over.review_answers", {"count": _answer_history.size()})
 	_over_review_button.disabled = false
@@ -1519,7 +1559,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 		is_best = bool(save.call("record_run", total, ranked, _selected_difficulty, _selected_practice_area))
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
-		audio.call("play_cue", "enemy.impact")
+		audio.call("play_cue", "score.reward" if won else "enemy.impact")
 	_pause_button.visible = false
 	_question_bar.visible = false
 	_cheer_label.visible = false
@@ -1527,10 +1567,15 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	_score_label.visible = false
 	_coin_label.visible = false
 	_best_label.visible = false
+	_heart_label.visible = false
+	_room_label.visible = false
 	_practice_label.visible = false
-	var wrong_answer := str(_world.get("failure_reason")) == "wrong_answer"
-	_over_title_label.text = I18n.t("over.wrong_title" if wrong_answer else "over.title").to_upper()
+	_over_title_label.text = I18n.t("over.victory_title" if won else "over.defeat_title").to_upper()
 	_over_score.text = str(total)
+	_over_rooms_label.text = I18n.t("over.rooms_cleared", {
+		"rooms": rooms_cleared,
+		"total": DungeonWorld.TOTAL_CHAMBERS,
+	})
 	_over_coins_label.text = I18n.t("over.coins_earned", {
 		"earned": _coins_earned_this_run,
 		"balance": int(save.call("get_coins")) if save != null else 0,
@@ -1541,6 +1586,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 		"difficulty": I18n.t("difficulty." + _selected_difficulty),
 		"score": best,
 	})
+	var wrong_answer := not won and str(_world.get("failure_reason")) == "wrong_answer"
 	_over_feedback.visible = wrong_answer
 	var hint_key := str(_world.get("failure_hint_key"))
 	var hint := I18n.t(hint_key) if not hint_key.is_empty() else ""
@@ -1551,7 +1597,7 @@ func _on_crashed(total: int, _hit_ground: bool) -> void:
 	}) if wrong_answer else ""
 	_over_stamp.visible = is_best
 	_over_note.visible = _last_run_practice
-	_over_easier_button.disabled = _selected_level == 1 or not _has_selected_topic_at_level(_selected_level - 1)
+	_over_easier_button.disabled = won or _selected_level == 1 or not _has_selected_topic_at_level(_selected_level - 1)
 	await get_tree().create_timer(0.7).timeout
 	if _state != "over":
 		return
@@ -1579,32 +1625,17 @@ func _on_tuning_changed(id: String, _requested: Variant, _active: Variant) -> vo
 
 # --------------------------------------------------------------------- input
 
-func _is_flap_event(event: InputEvent) -> bool:
-	if event is InputEventMouseButton:
-		var mouse := event as InputEventMouseButton
-		return mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
-	if event is InputEventKey:
-		var key := event as InputEventKey
-		return key.pressed and not key.echo and key.keycode in [KEY_SPACE, KEY_UP, KEY_ENTER, KEY_KP_ENTER]
-	if event is InputEventJoypadButton:
-		var pad := event as InputEventJoypadButton
-		return pad.pressed and pad.button_index == JOY_BUTTON_A
-	return false
-
-
 func _back_setup_step() -> void:
 	match _state:
 		"topics":
 			_show_title()
 		"difficulty":
 			_show_topic_selection()
-		"speed":
-			_show_difficulty_selection()
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not event.is_echo():
-		if _state in ["title", "topics", "difficulty", "speed"]:
+		if _state in ["title", "topics", "difficulty"]:
 			_back_setup_step()
 		else:
 			_toggle_pause()
@@ -1612,6 +1643,35 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _state == "paused":
 		return
-	if _state == "playing" and _is_flap_event(event):
-		_flap_input()
-		get_viewport().set_input_as_handled()
+	if _state != "playing" or not (event is InputEventKey):
+		return
+	var key := event as InputEventKey
+	if not key.pressed or key.echo:
+		return
+	var handled := true
+	match key.keycode:
+		KEY_UP, KEY_W:
+			_world.call("move_player", Vector2i.UP)
+		KEY_RIGHT, KEY_D:
+			_world.call("move_player", Vector2i.RIGHT)
+		KEY_DOWN, KEY_S:
+			_world.call("move_player", Vector2i.DOWN)
+		KEY_LEFT, KEY_A:
+			_world.call("move_player", Vector2i.LEFT)
+		KEY_1, KEY_KP_1:
+			_world.call("submit_answer", 0)
+		KEY_2, KEY_KP_2:
+			_world.call("submit_answer", 1)
+		KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
+			if str(_world.get("state")) == "feedback":
+				_world.call("continue_after_wrong")
+			else:
+				handled = false
+		_:
+			handled = false
+	if not handled:
+		return
+	var audio := get_node_or_null("/root/AudioDirector")
+	if audio != null:
+		audio.call("unlock_audio")
+	get_viewport().set_input_as_handled()

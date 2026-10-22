@@ -1,14 +1,244 @@
 {
   "assets": {
-    "assets/paperglide/cloud0.png": {
+    "assets/dungeon/boss_paper_dragon.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:491922860e5bb5273e321309523e26de218144fb542746da2f43134f56ee77d1",
+      "shipped": false,
+      "size": 4968877,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/boss_paper_dragon_clean.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:9157fb8844ff38adaaa163ed7a6a1723105241939a93ae54c62707a80e89be23",
+      "shipped": false,
+      "size": 4710543,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/boss_paper_dragon_runtime.png": {
       "declaredUseEvidence": [],
       "generator": {},
       "inputs": [],
       "license": {},
       "origin": "unknown",
       "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
+        "scripts/dungeon/dungeon_world.gd"
       ],
+      "regions": [],
+      "sha256": "sha256:30605ca28620d180ee93ddeff041af50da39d6e3524398db81e23d16410bcdf1",
+      "shipped": true,
+      "size": 246800,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/dungeon/enemy_ink_slime.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:61c7aae246dd7b2f9d924c3f01b9a60bd9436976466242aea63993d269a9207e",
+      "shipped": false,
+      "size": 2820901,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/enemy_ink_slime_clean.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:7774eab47606ed1afbc3d211090c32265413a2457ed38dacb0e5fb6657758ff2",
+      "shipped": false,
+      "size": 4686169,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/enemy_ink_slime_runtime.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:f3e53e71c58b0967ab486c465f15ffcb2467481733dc478d1bd0537d6521fe11",
+      "shipped": true,
+      "size": 256578,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/dungeon/enemy_pencil_bat.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:9e9db30f74688f1ad4784006e8cfff1dcd10f9fa44716f877c6b8fc4b6636440",
+      "shipped": false,
+      "size": 2730805,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/enemy_pencil_bat_clean.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:8993f9b4274bd1bfb2f2ff75874d37951d58c42924f1dc20d3cada1ddfda2527",
+      "shipped": false,
+      "size": 3025106,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/enemy_pencil_bat_runtime.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:9f31bc7650b7cb5c5acc9912addfaa93ed2f3778dc41854839c515a2bd1d0ffc",
+      "shipped": true,
+      "size": 120021,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/dungeon/hero_paper_scholar.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:dd34444534a1b18e338851f9ed46a32ca180494a17665f309db43a2ce2efaf7e",
+      "shipped": false,
+      "size": 3415729,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/hero_paper_scholar_clean.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:3f1773bb66bd322f40c8a184c9b49c726a4cb53d8d22240aa6d707f4fb2644e2",
+      "shipped": false,
+      "size": 4313257,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/dungeon/hero_paper_scholar_runtime.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "regions": [],
+      "sha256": "sha256:b9be55132c9d59a52c7b7d0af61af33d7525e823c3cf5d6ff1fcab1af2ab1d23",
+      "shipped": true,
+      "size": 205501,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [
+        "scripts/dungeon/dungeon_world.gd"
+      ],
+      "used": true,
+      "usedBy": []
+    },
+    "assets/paperglide/cloud0.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:5faea115fcf25616781a896d1714ac7413afe700d45a1148355b94e36248b79c",
       "shipped": true,
@@ -16,10 +246,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/cloud1.png": {
@@ -28,9 +256,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:988c755da8b9964b729becc649004c34aa2c6ceee94687fe784b528182e12231",
       "shipped": true,
@@ -38,10 +264,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/cloud2.png": {
@@ -50,9 +274,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:ce55dc25bac332e3c8ff754a298a97714a650e17df15b8e19fd4777cec06ba66",
       "shipped": true,
@@ -60,10 +282,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/cloud3.png": {
@@ -72,9 +292,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:b78da1c6d17293c17b047888244087205872f245989f6242e0a8d93ae0e911b6",
       "shipped": true,
@@ -82,10 +300,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/doodle0.png": {
@@ -94,9 +310,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:564195beb297a78907e9d180a364a91db6725d7d5babd82ef062935a942aa873",
       "shipped": true,
@@ -104,10 +318,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/doodle1.png": {
@@ -116,9 +328,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:3e38e247f51db1a3360b5e6b5bbfa616263629ae3512cd9cfa6d4c8d75b40e8a",
       "shipped": true,
@@ -126,10 +336,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/doodle2.png": {
@@ -138,9 +346,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:879e8142d6ee0050bd324dca2823fddcf11804bfee8ce2e5cf5a00a44d808b52",
       "shipped": true,
@@ -148,10 +354,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/doodle3.png": {
@@ -160,9 +364,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:216b8a0a6401451ec87e7794c2e802aa3413aedcba969062f011642ec91e63de",
       "shipped": true,
@@ -170,10 +372,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/doodle4.png": {
@@ -200,9 +400,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:8b851c735d9e036619c7fe182e9d02b4089c1c32905c4f69bd5d2039aaa7df8f",
       "shipped": true,
@@ -210,10 +408,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/fonts/NotoSans-Cyrillic.subset.woff2": {
@@ -250,9 +446,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:4763404b8dd1d05287076b6cdd81a53c7da9185e0a806aaba4c91bd4d15003c3",
       "shipped": true,
@@ -260,10 +454,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/pipe_body.png": {
@@ -272,9 +464,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:f27f83a130356155f1f1217c0420e10b2cf1c5f9918da77e79a6025bb30b9095",
       "shipped": true,
@@ -282,10 +472,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/pipe_cap.png": {
@@ -294,9 +482,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:c929171370c3677365e2fb36282e146d412b2063ecca82ee53b6cafbe08c72df",
       "shipped": true,
@@ -304,10 +490,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/plane.png": {
@@ -316,9 +500,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:9451bbdb7027ffa3fec749a0545c09cc8adadfbd37409c870d70ac4f804043ec",
       "shipped": true,
@@ -326,10 +508,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/ships/albatross_glider.png": {
@@ -338,9 +518,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:bbb110f6ea2ca099978b2858e25b03ca092ebc1957a69a25d797856b22f90b10",
       "shipped": true,
@@ -348,10 +526,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/ships/boomerang_kite.png": {
@@ -360,9 +536,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:dd2de206b9eb11d5d12bfde792b1875a09b42175d80d2b9fac544b85c08ffccb",
       "shipped": true,
@@ -370,10 +544,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/ships/comet_cruiser_game.png": {
@@ -400,9 +572,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:1be365a56f354d6110912c4bd0872430c14287007bf359bfc2cda8e8ffd85a44",
       "shipped": true,
@@ -410,10 +580,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/ships/double_fold.png": {
@@ -422,9 +590,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:360c93598159bed684c8098dc0fa88862341fdd968324e4b7172144cec3c29e8",
       "shipped": true,
@@ -432,10 +598,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/ships/kite_glider_game.png": {
@@ -462,9 +626,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:b6bd5ffc4b5a082800e2bbff76f4750841c2d3da555de54e1740e82ff4ebabce",
       "shipped": true,
@@ -472,10 +634,8 @@
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/paperglide/ships/sailwing_game.png": {
@@ -502,9 +662,7 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "scripts/flight/flight_world.gd"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:b4afd042b3a4ab60fed70fa4713a8db43d8af5a2045e51a170ec7ac2fb6efa47",
       "shipped": true,
@@ -512,10 +670,50 @@
       "source": {},
       "status": "present",
       "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/share/favicon-dungeon-head.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [
+        "game-sharing.json",
+        "project.godot"
+      ],
+      "regions": [],
+      "sha256": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e",
+      "shipped": true,
+      "size": 85845,
+      "source": {},
+      "status": "present",
+      "transformations": [],
       "useEvidence": [
-        "scripts/flight/flight_world.gd"
+        "game-sharing.json",
+        "project.godot"
       ],
       "used": true,
+      "usedBy": []
+    },
+    "assets/share/favicon-dungeon.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:d696547b72d10e669b7bf15fe11ac04cbe04c60f1df223036eae877f672c5a6c",
+      "shipped": false,
+      "size": 61140,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/share/favicon.png": {
@@ -524,25 +722,19 @@
       "inputs": [],
       "license": {},
       "origin": "unknown",
-      "referenceEvidence": [
-        "game-sharing.json",
-        "project.godot"
-      ],
+      "referenceEvidence": [],
       "regions": [],
       "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
-      "shipped": true,
+      "shipped": false,
       "size": 21187,
       "source": {},
       "status": "present",
       "transformations": [],
-      "useEvidence": [
-        "game-sharing.json",
-        "project.godot"
-      ],
-      "used": true,
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
-    "assets/share/og.png": {
+    "assets/share/og-dungeon-1200x630.png": {
       "declaredUseEvidence": [],
       "generator": {},
       "inputs": [],
@@ -552,9 +744,9 @@
         "game-sharing.json"
       ],
       "regions": [],
-      "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
+      "sha256": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
       "shipped": true,
-      "size": 1365943,
+      "size": 1724005,
       "source": {},
       "status": "present",
       "transformations": [],
@@ -562,6 +754,60 @@
         "game-sharing.json"
       ],
       "used": true,
+      "usedBy": []
+    },
+    "assets/share/og-dungeon-edited.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:3eb441955b4212c62f8d2f16bd97ab752ffd716660323a8a00c78fb77ad66140",
+      "shipped": false,
+      "size": 8404210,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/share/og-dungeon.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:25995159306626ee1981f441e337ecc1b596c6ee20eda6b027e1b69656e67156",
+      "shipped": false,
+      "size": 9089748,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
+      "usedBy": []
+    },
+    "assets/share/og.png": {
+      "declaredUseEvidence": [],
+      "generator": {},
+      "inputs": [],
+      "license": {},
+      "origin": "unknown",
+      "referenceEvidence": [],
+      "regions": [],
+      "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
+      "shipped": false,
+      "size": 1365943,
+      "source": {},
+      "status": "present",
+      "transformations": [],
+      "useEvidence": [],
+      "used": false,
       "usedBy": []
     },
     "assets/template/characters/runner.png": {
@@ -897,15 +1143,15 @@
       {
         "contentMatches": [],
         "path": "index.apple-touch-icon.png",
-        "sha256": "sha256:e55888ffb0d87f2a0aeed16311e51b87a2e347b7686367a2b8fccb43dcf3da95",
-        "size": 13586,
+        "sha256": "sha256:d8fea460645adc85293105dca5c94397179b6d8e0a5e7f930aa6cb7b8c80eeac",
+        "size": 47468,
         "sourcePaths": []
       },
       {
         "contentMatches": [],
         "path": "index.icon.png",
-        "sha256": "sha256:dd2ba56a0c40d20f72574e874fc48016a2f6c1f78e86900064d1cecca6b8db51",
-        "size": 21498,
+        "sha256": "sha256:0a8cb30bfc6e06e8f7a443da186354882f072d5a5c3f42bec3e8d50e53b9c46e",
+        "size": 90375,
         "sourcePaths": []
       },
       {
@@ -917,26 +1163,26 @@
       },
       {
         "contentMatches": [],
-        "path": "share/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
-        "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
-        "size": 21187,
+        "path": "share/80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e.png",
+        "sha256": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e",
+        "size": 85845,
         "sourcePaths": [
-          "assets/share/favicon.png"
+          "assets/share/favicon-dungeon-head.png"
         ]
       },
       {
         "contentMatches": [],
-        "path": "share/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
-        "sha256": "sha256:d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e",
-        "size": 1365943,
+        "path": "share/babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd.png",
+        "sha256": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
+        "size": 1724005,
         "sourcePaths": [
-          "assets/share/og.png"
+          "assets/share/og-dungeon-1200x630.png"
         ]
       }
     ],
-    "pckSha256": "sha256:14e41be5bb3c1fde048388a153e4f611e3bd1ff2e5ee58d0da09ecfd5b610407",
+    "pckSha256": "sha256:b5089fae66020611ac0a69a6fa6b9f77b0f59e6188a203927ad543f62264f311",
     "profile": "release",
-    "sourceFingerprint": "sha256:981acd6f0ee47eb620a930a126971ed90d4d18f7297c2b8129ce0a94a9d3b17e"
+    "sourceFingerprint": "sha256:a0eb5ce65cc68fa0ad7a575b3b0b3338f3c699427547daa12799daf3c401e0cd"
   },
   "procedures": {},
   "summary": {
@@ -969,9 +1215,9 @@
     },
     "files": {
       "downloaded": 0,
-      "retained": 41,
-      "shipped": 41,
-      "used": 25
+      "retained": 58,
+      "shipped": 45,
+      "used": 10
     },
     "origins": {
       "ai": {
@@ -1005,9 +1251,9 @@
         "used": 3
       },
       "unknown": {
-        "retained": 26,
-        "shipped": 26,
-        "used": 22
+        "retained": 43,
+        "shipped": 30,
+        "used": 7
       }
     },
     "packs": {

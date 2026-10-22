@@ -9,6 +9,10 @@
       "name": "Backgrounds",
       "order": 20
     },
+    "dungeon": {
+      "name": "Dungeon Characters",
+      "order": 8
+    },
     "share": {
       "name": "Share",
       "order": 30
@@ -28,6 +32,102 @@
   },
   "bundles": {},
   "assets": {
+    "assets/dungeon/boss_paper_dragon.png": {
+      "path": "/manus-storage/game/sha256/491922860e5bb5273e321309523e26de218144fb542746da2f43134f56ee77d1.png",
+      "sha256": "sha256:491922860e5bb5273e321309523e26de218144fb542746da2f43134f56ee77d1",
+      "size": 4968877,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/boss_paper_dragon_clean.png": {
+      "path": "/manus-storage/game/sha256/9157fb8844ff38adaaa163ed7a6a1723105241939a93ae54c62707a80e89be23.png",
+      "sha256": "sha256:9157fb8844ff38adaaa163ed7a6a1723105241939a93ae54c62707a80e89be23",
+      "size": 4710543,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/boss_paper_dragon_runtime.png": {
+      "path": "/manus-storage/game/sha256/30605ca28620d180ee93ddeff041af50da39d6e3524398db81e23d16410bcdf1.png",
+      "sha256": "sha256:30605ca28620d180ee93ddeff041af50da39d6e3524398db81e23d16410bcdf1",
+      "size": 246800,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": true
+    },
+    "assets/dungeon/enemy_ink_slime.png": {
+      "path": "/manus-storage/game/sha256/61c7aae246dd7b2f9d924c3f01b9a60bd9436976466242aea63993d269a9207e.png",
+      "sha256": "sha256:61c7aae246dd7b2f9d924c3f01b9a60bd9436976466242aea63993d269a9207e",
+      "size": 2820901,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/enemy_ink_slime_clean.png": {
+      "path": "/manus-storage/game/sha256/7774eab47606ed1afbc3d211090c32265413a2457ed38dacb0e5fb6657758ff2.png",
+      "sha256": "sha256:7774eab47606ed1afbc3d211090c32265413a2457ed38dacb0e5fb6657758ff2",
+      "size": 4686169,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/enemy_ink_slime_runtime.png": {
+      "path": "/manus-storage/game/sha256/f3e53e71c58b0967ab486c465f15ffcb2467481733dc478d1bd0537d6521fe11.png",
+      "sha256": "sha256:f3e53e71c58b0967ab486c465f15ffcb2467481733dc478d1bd0537d6521fe11",
+      "size": 256578,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": true
+    },
+    "assets/dungeon/enemy_pencil_bat.png": {
+      "path": "/manus-storage/game/sha256/9e9db30f74688f1ad4784006e8cfff1dcd10f9fa44716f877c6b8fc4b6636440.png",
+      "sha256": "sha256:9e9db30f74688f1ad4784006e8cfff1dcd10f9fa44716f877c6b8fc4b6636440",
+      "size": 2730805,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/enemy_pencil_bat_clean.png": {
+      "path": "/manus-storage/game/sha256/8993f9b4274bd1bfb2f2ff75874d37951d58c42924f1dc20d3cada1ddfda2527.png",
+      "sha256": "sha256:8993f9b4274bd1bfb2f2ff75874d37951d58c42924f1dc20d3cada1ddfda2527",
+      "size": 3025106,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/enemy_pencil_bat_runtime.png": {
+      "path": "/manus-storage/game/sha256/9f31bc7650b7cb5c5acc9912addfaa93ed2f3778dc41854839c515a2bd1d0ffc.png",
+      "sha256": "sha256:9f31bc7650b7cb5c5acc9912addfaa93ed2f3778dc41854839c515a2bd1d0ffc",
+      "size": 120021,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": true
+    },
+    "assets/dungeon/hero_paper_scholar.png": {
+      "path": "/manus-storage/game/sha256/dd34444534a1b18e338851f9ed46a32ca180494a17665f309db43a2ce2efaf7e.png",
+      "sha256": "sha256:dd34444534a1b18e338851f9ed46a32ca180494a17665f309db43a2ce2efaf7e",
+      "size": 3415729,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/hero_paper_scholar_clean.png": {
+      "path": "/manus-storage/game/sha256/3f1773bb66bd322f40c8a184c9b49c726a4cb53d8d22240aa6d707f4fb2644e2.png",
+      "sha256": "sha256:3f1773bb66bd322f40c8a184c9b49c726a4cb53d8d22240aa6d707f4fb2644e2",
+      "size": 4313257,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": false
+    },
+    "assets/dungeon/hero_paper_scholar_runtime.png": {
+      "path": "/manus-storage/game/sha256/b9be55132c9d59a52c7b7d0af61af33d7525e823c3cf5d6ff1fcab1af2ab1d23.png",
+      "sha256": "sha256:b9be55132c9d59a52c7b7d0af61af33d7525e823c3cf5d6ff1fcab1af2ab1d23",
+      "size": 205501,
+      "assetType": "image",
+      "groupId": "dungeon",
+      "used": true
+    },
     "assets/paperglide/cloud0.png": {
       "path": "/manus-storage/game/sha256/5faea115fcf25616781a896d1714ac7413afe700d45a1148355b94e36248b79c.png",
       "sha256": "sha256:5faea115fcf25616781a896d1714ac7413afe700d45a1148355b94e36248b79c",
@@ -220,13 +320,53 @@
       "groupId": "aircraft",
       "used": true
     },
+    "assets/share/favicon-dungeon-head.png": {
+      "path": "/manus-storage/game/sha256/80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e.png",
+      "sha256": "sha256:80434fac9a07742416680e54fdf7d56fbda27cc8dbbdef113a99abfea247cc8e",
+      "size": 85845,
+      "assetType": "image",
+      "groupId": "share",
+      "used": true
+    },
+    "assets/share/favicon-dungeon.png": {
+      "path": "/manus-storage/game/sha256/d696547b72d10e669b7bf15fe11ac04cbe04c60f1df223036eae877f672c5a6c.png",
+      "sha256": "sha256:d696547b72d10e669b7bf15fe11ac04cbe04c60f1df223036eae877f672c5a6c",
+      "size": 61140,
+      "assetType": "image",
+      "groupId": "share",
+      "used": false
+    },
     "assets/share/favicon.png": {
       "path": "/manus-storage/game/sha256/6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f.png",
       "sha256": "sha256:6b780ae985813f559b3cc7ec4d332f0c448a5a32d72d10ff6bfd2e55d373024f",
       "size": 21187,
       "assetType": "image",
       "groupId": "share",
+      "used": false
+    },
+    "assets/share/og-dungeon-1200x630.png": {
+      "path": "/manus-storage/game/sha256/babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd.png",
+      "sha256": "sha256:babbd3af68e90a6441202bee9e911e9c2d4bad16736969d20aa1f5feab98ebfd",
+      "size": 1724005,
+      "assetType": "image",
+      "groupId": "share",
       "used": true
+    },
+    "assets/share/og-dungeon-edited.png": {
+      "path": "/manus-storage/game/sha256/3eb441955b4212c62f8d2f16bd97ab752ffd716660323a8a00c78fb77ad66140.png",
+      "sha256": "sha256:3eb441955b4212c62f8d2f16bd97ab752ffd716660323a8a00c78fb77ad66140",
+      "size": 8404210,
+      "assetType": "image",
+      "groupId": "share",
+      "used": false
+    },
+    "assets/share/og-dungeon.png": {
+      "path": "/manus-storage/game/sha256/25995159306626ee1981f441e337ecc1b596c6ee20eda6b027e1b69656e67156.png",
+      "sha256": "sha256:25995159306626ee1981f441e337ecc1b596c6ee20eda6b027e1b69656e67156",
+      "size": 9089748,
+      "assetType": "image",
+      "groupId": "share",
+      "used": false
     },
     "assets/share/og.png": {
       "path": "/manus-storage/game/sha256/d3bbcb7759e4f7bd26beac6b68bab13203038e7789e6f261583c770f751ed14e.png",
@@ -234,7 +374,7 @@
       "size": 1365943,
       "assetType": "image",
       "groupId": "share",
-      "used": true
+      "used": false
     },
     "assets/template/characters/runner.png": {
       "path": "https://d1oupeiobkpcny.cloudfront.net/assets/dashboard/materials/2026/09/06/game-template/game-generic/2026.09.07-minimalist-v1/c88485773d6ff9361e036f37d8ac76fb77b8c3f7c041c3f52c8dd222adc8cc21/assets/characters/runner.png",
